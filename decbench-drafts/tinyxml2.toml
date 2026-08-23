@@ -1,0 +1,32 @@
+# Draft DecBench project config — compatibility-first C++ baseline.
+# Reference shape: projects/cpp/disabled/leveldb.toml in DecBench main.
+
+name = "tinyxml2"
+version = "11.0.0"
+
+source_remote = "https://github.com/leethomason/tinyxml2"
+remote_type = "git"
+package_dir = "tinyxml2"
+source_dir = "."
+
+post_download_cmds = []
+
+# Keep CMAKE_BUILD_TYPE empty so the project's own Release flags do not override
+# the optimization level selected by DecBench. Route DecBench's $CFLAGS into
+# the C++ compiler explicitly because the current pipeline exports CC/CFLAGS,
+# not CXX/CXXFLAGS.
+pre_make_cmds = [
+  'cmake -S . -B build -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="$CFLAGS" -Dtinyxml2_BUILD_TESTING=OFF -Dtinyxml2_SHARED_LIBS=ON',
+]
+
+# Shared library output is intentional: DecBench collects linked ELF/PE files,
+# while a static archive would be skipped.
+make_cmd = 'cmake --build build --parallel && rm -rf build/CMakeFiles/[0-9]*'
+
+labels = ["cpp", "library", "xml", "control"]
+
+[compilation]
+optimization_levels = ["O0", "O2", "O2-noinline"]
+base_flags = ["-g", "-fno-builtin", "-save-temps=obj"]
+c_compiler = "gcc"
+cpp_compiler = "g++"

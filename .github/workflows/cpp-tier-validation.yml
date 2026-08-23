@@ -268,7 +268,7 @@ jobs:
         with:
           msbuild-architecture: x64
 
-      - name: Clone stable release tag and submodules
+      - name: Clone stable release tag
         shell: pwsh
         run: |
           git clone --branch version-1.4.0 --depth 1 https://github.com/derceg/explorerplusplus.git target
@@ -276,22 +276,17 @@ jobs:
           if ($head -ne '384c2f687fd55c1e71e9fcb272f9113de009a248') {
             throw "version-1.4.0 resolved to unexpected commit: $head"
           }
-          git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/explorerplusplus | Out-Null
           "release=version-1.4.0" | Set-Content reports/explorerplusplus/metadata.txt
           "commit=$head" | Add-Content reports/explorerplusplus/metadata.txt
           "tier=medium" | Add-Content reports/explorerplusplus/metadata.txt
           "compiler=MSVC" | Add-Content reports/explorerplusplus/metadata.txt
+          "upstream_release_ci=Visual Studio 2019 + nuget restore" | Add-Content reports/explorerplusplus/metadata.txt
 
-      - name: Cache vcpkg binary packages
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\vcpkg\archives
-          key: explorerplusplus-1.4.0-vcpkg-${{ hashFiles('target/vcpkg.json', 'target/vcpkg-configuration.json') }}
-
-      - name: Bootstrap vcpkg
+      - name: Restore release-era NuGet packages
         shell: pwsh
-        run: target\Explorer++\ThirdParty\vcpkg\bootstrap-vcpkg.bat
+        run: |
+          nuget restore target\Explorer++\Explorer++.sln
 
       - name: Build
         id: build

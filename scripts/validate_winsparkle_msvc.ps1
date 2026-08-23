@@ -80,8 +80,7 @@ $ns.AddNamespace("m", "http://schemas.microsoft.com/developer/msbuild/2003")
 
 # Under StrictMode, PowerShell's XML property adapter throws when an optional XML
 # attribute is absent. MSBuild files legitimately contain PropertyGroup elements
-# without Condition/Label attributes, so use XmlElement.GetAttribute() instead of
-# property-style access such as $_.Condition or $pg.Label.
+# without Condition/Label attributes, so use XmlElement.GetAttribute().
 $propertyGroups = @($xml.SelectNodes("//m:PropertyGroup", $ns) | Where-Object {
     $condition = $_.GetAttribute("Condition")
     -not [string]::IsNullOrWhiteSpace($condition) -and $condition -match "Release\|x64"
@@ -174,9 +173,18 @@ switch ($Mode) {
         }
     }
 }
+
+# MSBuild detailed output can contain both the upstream /GL setting and the later
+# /GL- override (and can also print evaluated properties that are not effective
+# compiler switches).  Therefore raw textual presence of /GL is not a sound gate.
+# Require the explicit disable switches here, preserve all GL/LTCG lines for audit,
+# and let qualify_msvc_pdb.ps1 enforce the substantive oracle: every selected
+# project compiland must have an S_COMPILE3 record with no LTCG flag.
 if ($buildText -notmatch '(?i)/GL-') { throw "Build log does not contain explicit /GL- override" }
-if ($buildText -match '(?i)(?:^|[\s"])/GL(?=$|[\s"])') { throw "WinSparkle build unexpectedly contains active /GL" }
-if ($buildText -match '(?i)(?:^|[\s"])/LTCG(?!(?::OFF))(?=$|[:\s"])') { throw "WinSparkle link unexpectedly contains active LTCG" }
+if ($buildText -notmatch '(?i)/LTCG:OFF') { throw "Build log does not contain explicit /LTCG:OFF override" }
+$optimizationSwitchAudit = Join-Path $EvidenceRoot "optimization-switch-audit.txt"
+@(Get-Content $buildLog | Where-Object { $_ -match '(?i)/(?:GL-?|LTCG(?::OFF)?)\b' }) |
+    Set-Content -Encoding utf8 $optimizationSwitchAudit
 
 $dllPath = Join-Path $SourceRoot "x64\Release\WinSparkle.dll"
 $pdbPath = Join-Path $SourceRoot "x64\Release\WinSparkle.pdb"

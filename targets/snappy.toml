@@ -1,0 +1,32 @@
+# DecBench candidate: Google Snappy
+# Stable release pin: 1.2.2
+# Resolved upstream commit: 6af9287fbdb913f0794d0148c6aa43b58e63c8e3
+
+name = "snappy"
+version = "1.2.2"
+source_remote = "https://github.com/google/snappy"
+remote_type = "git"
+package_dir = "snappy"
+source_dir = "."
+
+post_download_cmds = []
+
+# Keep DecBench in control of optimization. Snappy's CMake project adds its
+# normal warning / RTTI / exception policy but does not add its own -O level.
+pre_make_cmds = [
+  'cmake -S . -B build -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="$CFLAGS" -DBUILD_SHARED_LIBS=ON -DSNAPPY_BUILD_TESTS=OFF -DSNAPPY_BUILD_BENCHMARKS=OFF -DSNAPPY_INSTALL=OFF',
+]
+
+# Drop CMake compiler-probe binaries so they cannot be collected as benchmark
+# targets. The shared libsnappy image remains.
+make_cmd = 'cmake --build build -j && rm -rf build/CMakeFiles/[0-9]*'
+
+labels = ["cpp", "library", "compression", "control"]
+
+[compilation]
+optimization_levels = ["O0", "O2", "O2-noinline"]
+base_flags = ["-g", "-fno-builtin", "-save-temps=obj"]
+c_compiler = "gcc"
+# DecBench currently does not wire cpp_compiler into the generic build env;
+# CMake selects g++ explicitly above.
+cpp_compiler = "g++"

@@ -64,9 +64,13 @@ function Invoke-Logged {
     }
 }
 
-# Record the native toolchain selected by VsDevCmd.
-Invoke-Logged -Exe "cl.exe" -Arguments @("/Bv") -Label "MSVC toolchain"
-Invoke-Logged -Exe "link.exe" -Arguments @("/dump", "/headers", "$env:WINDIR\System32\kernel32.dll") -Label "link.exe smoke"
+# Record the native toolchain selected by VsDevCmd.  cl /Bv without an input
+# returns a missing-source error, so compile a tiny probe while requesting the
+# full compiler-version report.
+$probeSource = Join-Path $EvidenceRoot "toolchain-probe.cpp"
+$probeObj = Join-Path $EvidenceRoot "toolchain-probe.obj"
+"int decbench_msvc_probe(void) { return 0; }" | Set-Content -Encoding ascii $probeSource
+Invoke-Logged -Exe "cl.exe" -Arguments @("/nologo", "/Bv", "/c", $probeSource, "/Fo$probeObj") -Label "MSVC toolchain"
 
 # Build the upstream Detours static library with an explicit optimization mode.
 $srcDir = Join-Path $DetoursRoot "src"

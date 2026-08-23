@@ -2,33 +2,46 @@
 
 Private CI workspace for validating candidate C++ / Windows C++ targets for a future DecBench multi-language corpus.
 
-The repository does **not** vendor third-party source trees. GitHub Actions clones exact upstream commits at runtime, builds them on a Windows runner, and records build/toolchain/function-count evidence.
+The repository does **not** vendor third-party source trees. Active candidates are pinned to published **stable release tags**. CI clones the tag, verifies the exact commit SHA it resolves to, builds it on a controlled Windows toolchain, and records build/oracle evidence.
 
-## Initial targets
+Arbitrary branch heads and development commits are not candidate corpus versions. Older commit-based runs remain historical feasibility evidence only.
 
-| Target | Pinned commit | First-pass configuration |
-|---|---|---|
-| TrafficMonitor Lite | `5efd2159af8117301a2b6a755897aaa995887678` | MSVC, x64, `Release (lite)` |
-| The Powder Toy | `b31f4462bc7d217159b83859a35405db9b640455` | Meson/MSVC, x64 `debugoptimized`, prebuilt static deps, LTO |
-| OpenLoco | `96de081155f326a7af83f925185c1a934ba536b4` | CMake, Windows x64 Release |
-| x64dbg | `17233957ea0a7e70d188187380bd74f80c2a4b93` | CMake/MSVC, x64 Release |
-| Windows Terminal | `20588130d8ef2ba40eb56bdae88e04cce7fc5b5d` | environment + component build attempt |
+## Release-pinned candidate pool
 
-The Powder Toy is included as an algorithm/physics-heavy real-world C++20 target. Its upstream Meson configuration disables RTTI by default, supports MSVC/clang-cl, and has an explicit MSVC LTO path (`/GL` + `/LTCG`). The first CI pass uses `debugoptimized` so optimized code and useful PDB information can coexist. Because the first build uses prebuilt static dependencies, later oracle generation must use PDB/source attribution to exclude vendor/library functions from the project-source ground truth.
+| Tier | Target | Stable release/tag | Resolved commit | Primary path |
+|---|---|---|---|---|
+| Small | tinyxml2 | `11.0.0` | `9148bdf719e997d1f474be6bcc7943881046dba1` | MSVC clean control |
+| Small | Microsoft Detours | `v4.0.1` | `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833` | MSVC Windows systems |
+| Small | TrafficMonitor | `V1.86` | `02a817a069bac6bf4d263b5209d9c1b07fe2f950` | MSVC/MFC x64 |
+| Small | SpaceCadetPinball | `Release_2.1.0` | `6a30ccbef12c7b7781ccf89788d77461fa20a90a` | MSVC + MinGW/DWARF/`.ii` |
+| Medium | The Powder Toy | `v100.0.399` | `9c94feba3ed5eaa75a819ac000c0d29e4ce92570` | MSVC + MinGW/DWARF/`.ii` |
+| Medium | Explorer++ | `version-1.4.0` | `384c2f687fd55c1e71e9fcb272f9113de009a248` | MSVC x64 |
+| Large | OpenLoco | `v26.07.1` | `5c95820e2c022698f89908b8aade12423b1eef21` | MSVC x64 |
+| Large | Notepad++ | `v8.9.6.1` | `41dd976310db0ba551bb8a2810b60331df3a77f5` | MSVC + MinGW/DWARF/`.ii` |
+| Stress | x64dbg | `2026.05.27` | `9c8ca1cae0b6d56cc44f31fddcb10e3b02ffbb87` | MSVC x64 |
+| Stress | Windows Terminal / OpenConsole | `v1.24.11321.0` | `b4e69c68620a822407d45bfbba6ee10feebc70a3` | release-era MSVC/OpenConsole |
+
+Rainmeter `v4.5.26.3894` is retained as a medium-tier reserve. Projects without a usable stable source release are excluded rather than silently falling back to a development commit.
+
+The canonical source of truth is [`research/release-pins.md`](research/release-pins.md).
 
 ## What CI records
 
-- exact upstream commit
-- runner / Visual Studio / MSVC / CMake/Meson versions
+- stable release/tag plus resolved upstream commit
+- runner / Visual Studio / compiler / CMake or Meson versions
 - clone size and submodule count
 - clean build duration
 - output PE size and SHA-256
-- matching PDB, when emitted
-- approximate PDB procedure-symbol count using `llvm-pdbutil` (`S_GPROC32` / `S_LPROC32`)
-- build blockers and logs through the GitHub Actions job output
+- matching PDB when emitted
+- PDB procedure-symbol evidence where applicable
+- PE/DWARF evidence and preserved `.ii` files for MinGW/GCC compatibility probes
+- build blockers and release-era environment requirements
 
-The PDB count is **not** treated as a final source-function ground truth. It is a first measurement that will later be split into source-attributable functions, compiler/linker-emitted functions, and decompiler-discovered functions.
+PDB procedure counts are **not** treated as final source-function ground truth. Compiler/linker-emitted functions, PDB/CodeView procedures, source-attributable functions, and decompiler-discovered functions remain separate measurements.
 
-## Workflow
+## Workflows
 
-`.github/workflows/windows-cpp-validation.yml` runs the main candidate matrix. `.github/workflows/powder-toy-validation.yml` runs the dedicated The Powder Toy MSVC/Meson validation pass. Both can be dispatched manually from the Actions tab.
+- `.github/workflows/release-baseline-small-cpp.yml` — tinyxml2 + Detours release baselines
+- `.github/workflows/windows-cpp-validation.yml` — TrafficMonitor, OpenLoco, x64dbg, OpenConsole release builds
+- `.github/workflows/powder-toy-validation.yml` — Powder Toy release MSVC pass
+- `.github/workflows/cpp-tier-validation.yml` — SpaceCadetPinball, Powder Toy MinGW, Explorer++, Notepad++ release-tier validation

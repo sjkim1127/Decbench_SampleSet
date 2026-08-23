@@ -50,7 +50,7 @@ Reason for selection:
 - low dependency burden;
 - complements Snappy with a more numerical workload.
 
-Runtime CI validation is still pending; the previous Actions run did not complete because the private-repository Actions allowance was exhausted.
+Runtime CI validation is still pending; the previous Actions run did not complete because the private-repository Actions allowance was exhausted. Local Docker validation is now the primary path while CI is unavailable.
 
 ### Ninja v1.13.1
 
@@ -73,7 +73,7 @@ Reason for selection:
 - substantially different workload from Snappy and double-conversion;
 - suitable intermediate-size target before larger application-style corpora.
 
-For DecBench configuration, tests should be disabled and the build type should remain unset so DecBench retains control over optimization rather than inheriting Ninja's Release IPO/LTO behavior.
+For DecBench configuration, tests are disabled and the build type remains unset so DecBench retains control over optimization rather than inheriting Ninja's Release IPO/LTO behavior.
 
 ## Selected Windows / MSVC candidates
 
@@ -160,21 +160,51 @@ Caveats:
 
 The Powder Toy was removed from the initial shortlist. Its application diversity is useful, but its dependency footprint, GUI-style inheritance, repeated method names, and optimization/build behavior make it less suitable than the selected Windows targets for this first corpus.
 
+## Repository validation files
+
+Current GCC/DWARF target configs:
+
+```text
+targets/snappy.toml
+targets/double-conversion.toml
+targets/ninja.toml
+```
+
+Experimental Windows/MSVC validation metadata:
+
+```text
+targets/windows/detours.toml
+targets/windows/directxtex.toml
+targets/windows/winsparkle.toml
+```
+
+The Windows TOMLs are not current DecBench `Project.from_toml` inputs. They record the intended MSVC toolchain, PE/PDB outputs, source ownership filters and optimization-mode mapping for the PR #36-style path.
+
+Local validation documentation:
+
+```text
+docs/local-validation.md
+docs/result-template.md
+```
+
+`docs/local-validation.md` contains the pinned DecBench Docker procedure for the GCC/DWARF track and the separate MSVC/PDB procedure for Windows. `docs/result-template.md` defines the per-target record for O0/O2/O2-noinline build status, linked images, `.ii`, DWARF/PDB, source-owned functions and short-name collision measurements.
+
 ## DecBench integration shape
 
-`targets/snappy.toml` is shaped for the current DecBench project model. It keeps DecBench in control of optimization flags, enables a shared library so the linked-image collector has a benchmark target, disables Snappy tests and benchmarks, and preserves `-g -save-temps=obj` for DWARF and `.ii` collection.
+The GCC/DWARF target TOMLs are shaped for the current DecBench project model. They keep DecBench in control of optimization flags, preserve `-g -save-temps=obj`, and avoid benchmark contamination from tests/compiler probes where possible.
 
-`targets/double-conversion.toml` is also present as the next GCC/DWARF candidate configuration.
-
-The validation workflow pins DecBench to:
+The validation path pins DecBench to:
 
 `d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f`
 
-For the GCC/DWARF track, the first integration gate remains:
+While GitHub Actions is unavailable, run the real DecBench `scripts/compile_all.py` path locally through `docker/compile.Dockerfile` as documented in `docs/local-validation.md`.
+
+For the GCC/DWARF track, the first integration gate is:
 
 - all three optimization modes are attempted;
 - at least one linked image is collected for each mode;
 - at least one preprocessed `.ii` unit is collected for each mode;
-- C++ short-name collision rates should be measured before treating a target as fully benchmark-ready.
+- DWARF ground truth is present;
+- source-owned C++ short-name collision rates are measured before treating a target as fully benchmark-ready.
 
-For the Windows/MSVC track, DecBench PR #36 already demonstrates a working `cl.exe` + Wine compile environment and PDB extraction path, but full benchmark integration remains experimental. The Windows candidates therefore remain **selected MSVC/PDB targets**, not current-pipeline validated targets.
+For the Windows/MSVC track, DecBench PR #36 already demonstrates the `cl.exe` + Wine/PDB direction, but full benchmark integration remains experimental. Validation must record exact `/Od`/`/O2`/`/Ob0` flags, PE↔PDB pairing, source/compiland ownership and short-name collision rates. The Windows candidates therefore remain **selected MSVC/PDB targets**, not current-pipeline validated targets.

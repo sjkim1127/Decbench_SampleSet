@@ -9,6 +9,7 @@ The repository does **not** vendor third-party source trees. GitHub Actions clon
 | Target | Pinned commit | First-pass configuration |
 |---|---|---|
 | TrafficMonitor Lite | `5efd2159af8117301a2b6a755897aaa995887678` | MSVC, x64, `Release (lite)` |
+| The Powder Toy | `b31f4462bc7d217159b83859a35405db9b640455` | Meson/MSVC, x64 `debugoptimized` (O2 + debug info), prebuilt static deps, LTO |
 | OpenLoco | `96de081155f326a7af83f925185c1a934ba536b4` | CMake, Windows x64 Release |
 | x64dbg | `17233957ea0a7e70d188187380bd74f80c2a4b93` | CMake/MSVC, x64 Release |
 | Windows Terminal | `20588130d8ef2ba40eb56bdae88e04cce7fc5b5d` | OpenConsole component build attempt |
@@ -57,13 +58,20 @@ The broad `x64*.dll` measurement pattern also catches copied dependency shims (`
 
 ## Pending validation
 
+- **The Powder Toy:** added as a dedicated MSVC/Meson CI target pinned to `b31f4462bc7d217159b83859a35405db9b640455`. The first pass intentionally uses Meson `debugoptimized` so optimization and useful debug information coexist, with `-Dstatic=prebuilt` for reproducibility and `-Dlto=true` to exercise the project's explicit MSVC `/GL` + `/LTCG` path. The initial binary target is `powder.exe`; source-attributable PDB filtering will be needed to exclude statically linked third-party code from later ground truth.
 - **OpenLoco:** clean Windows/VS2022 build is currently running. Upstream itself tests both VS2022 and VS2026 presets and publishes Release PDB artifacts; first uncached vcpkg population is the main CI cost.
 - **Windows Terminal / OpenConsole:** full `OpenConsole.slnx` Release build is currently running and is substantially heavier than the other candidates. If full-solution cost remains excessive, the next pass will target the `Host.EXE` / conhost project and only its required dependencies.
+
+## Why The Powder Toy is useful
+
+The Powder Toy fills a different part of the corpus than the existing Windows-heavy targets: it is a modern C++20 physics/simulation application with large update loops, numeric code, arrays and pointer-heavy state, many branch-rich particle interactions, and real application architecture rather than a synthetic microbenchmark. Upstream explicitly supports MSVC/clang-cl, disables C++ RTTI by default, and has an explicit LTO implementation for MSVC. That combination makes it particularly interesting for structure recovery and type-recovery evaluation.
+
+The first build uses prebuilt static dependencies because it is the most reproducible CI path. This does mean third-party library code can enter the PE. The benchmark oracle therefore must distinguish project-source functions from vendor/library functions using PDB/source attribution before this target is admitted to the final sample set.
 
 ## What CI records
 
 - exact upstream commit
-- runner / Visual Studio / MSVC / CMake versions
+- runner / Visual Studio / MSVC / CMake/Meson versions
 - clone size and submodule count
 - clean build duration
 - output PE size and SHA-256
@@ -79,4 +87,4 @@ The PDB count is **not** treated as a final source-function ground truth. The in
 
 ## Workflow
 
-`.github/workflows/windows-cpp-validation.yml` performs the current build-validation pass. Reports are uploaded as GitHub Actions artifacts for each target.
+`.github/workflows/windows-cpp-validation.yml` performs the main build-validation pass. `.github/workflows/powder-toy-validation.yml` performs the dedicated The Powder Toy MSVC/Meson pass. Reports are uploaded as GitHub Actions artifacts for each target.

@@ -200,9 +200,16 @@ $selectedObjects = $coreObjects + @("withdll.obj")
 
 function Test-ObjectModule {
     param(
-        [Parameter(Mandatory = $true)][string]$ModuleName,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$ModuleName,
         [Parameter(Mandatory = $true)][string[]]$ObjectNames
     )
+
+    if ([string]::IsNullOrWhiteSpace($ModuleName)) {
+        return $false
+    }
+
     $lower = $ModuleName.ToLowerInvariant()
     foreach ($objName in $ObjectNames) {
         $needle = $objName.ToLowerInvariant()

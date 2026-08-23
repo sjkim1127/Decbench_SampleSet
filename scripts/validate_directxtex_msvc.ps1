@@ -106,9 +106,17 @@ switch ($Mode) {
         }
     }
 }
-if ($buildText -match '(?i)(?:^|[\s"])/GL(?=$|[\s"])') {
-    throw "DirectXTex build unexpectedly contains active /GL"
-}
+
+# Verbose CMake/MSVC logs can mention both inherited/evaluated /GL state and the
+# explicit /GL- override. Raw textual presence of /GL is therefore diagnostic,
+# not a sufficient proof that LTCG reached the emitted project compilands.
+# Require explicit disable switches and use the linked PDB S_COMPILE3 flags as the
+# substantive gate in qualify_msvc_pdb.ps1.
+if ($buildText -notmatch '(?i)/GL-') { throw "Build log does not contain explicit /GL- override" }
+if ($buildText -notmatch '(?i)/LTCG:OFF') { throw "Build log does not contain explicit /LTCG:OFF override" }
+$optimizationSwitchAudit = Join-Path $EvidenceRoot "optimization-switch-audit.txt"
+@(Get-Content $buildLog | Where-Object { $_ -match '(?i)/(?:GL-?|LTCG(?::OFF)?)\b' }) |
+    Set-Content -Encoding utf8 $optimizationSwitchAudit
 
 $dlls = @(Get-ChildItem -Path $buildDir -Recurse -File -Filter "DirectXTex.dll")
 if ($dlls.Count -ne 1) { throw "Expected exactly one DirectXTex.dll, found $($dlls.Count)" }

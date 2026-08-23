@@ -65,6 +65,35 @@ Reason for selection:
 
 Ninja is kept separate from confirmed targets until the DecBench compile path validation is completed.
 
+### The Powder Toy v100.0.399
+
+**Status: reviewed candidate for the larger application slot.**
+
+- upstream: `The-Powder-Toy/The-Powder-Toy`
+- stable release: `v100.0.399`
+- resolved commit: `9c94feba3ed5eaa75a819ac000c0d29e4ce92570`
+- language: C++
+- build: Meson
+- expected modes: `O0`, `O2`, `O2-noinline`
+- intended role: medium-large application / simulation workload
+
+Reason for selection:
+
+- substantially larger and more application-like than the other shortlist entries;
+- simulation, rendering, UI, state-management, and numerical code provide a different recovery workload;
+- modern C++ codebase with enough structure to stress optimized decompilation beyond small libraries;
+- useful complement to Snappy, double-conversion, and Ninja for corpus diversity;
+- stable release pin is available and current.
+
+Caveat: The Powder Toy has a significantly heavier dependency and build footprint than the other candidates, so it should be validated after the smaller targets rather than used as the first integration probe.
+
+## Initial C++ target shortlist
+
+1. **Snappy 1.2.2** — small C++ library baseline
+2. **double-conversion v3.3.1** — numeric / algorithm-heavy C++ baseline
+3. **Ninja** — system / tooling executable target
+4. **The Powder Toy v100.0.399** — medium-large application / simulation target
+
 ## DecBench integration shape
 
 `targets/snappy.toml` is shaped for the current DecBench project model. It keeps DecBench in control of optimization flags, enables a shared library so the linked-image collector has a benchmark target, disables Snappy tests and benchmarks, and preserves `-g -save-temps=obj` for DWARF and `.ii` collection.

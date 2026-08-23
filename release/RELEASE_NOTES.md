@@ -1,65 +1,53 @@
-# DecBench Windows C++ Target Validation — Preview 1
+# DecBench Windows C++ Target Validation — Release-Pinned Refresh
 
-This is a research handoff release for candidate selection, not a DecBench integration release.
+This is a research handoff for candidate selection, not a DecBench integration release.
 
-## What was validated
+## Main change
 
-Three real-world Windows C++ targets have completed clean CI builds with MSVC x64:
+The candidate workspace has moved from development-commit probes to a **stable-release-only** corpus policy.
 
-- **TrafficMonitor Lite** — Win32/MFC utility; compact and practical first-tier target.
-- **OpenLoco** — larger game/simulation codebase; useful medium/large C++ application target.
-- **x64dbg** — Windows debugger/reverse-engineering codebase; useful system-level stress target.
+- Every active target has a published stable release/tag.
+- The exact SHA resolved by that tag is recorded in `research/release-pins.md`.
+- CI clones the release tag and rejects it if it does not resolve to the expected SHA.
+- Arbitrary latest commits, branch heads, prereleases, and snapshots are not final corpus pins.
+- Historical commit-based CI remains available only as feasibility evidence.
 
-Additional candidates under validation:
+## Release-pinned candidates
 
-- **The Powder Toy** — physics/simulation-heavy C++.
-- **Windows Terminal / OpenConsole** — large Windows system component; build cost is substantially higher and may be better used as a subset target.
+- tinyxml2 `11.0.0`
+- Microsoft Detours `v4.0.1`
+- TrafficMonitor `V1.86`
+- SpaceCadetPinball `Release_2.1.0`
+- The Powder Toy `v100.0.399`
+- Explorer++ `version-1.4.0`
+- OpenLoco `v26.07.1`
+- Notepad++ `v8.9.6.1`
+- x64dbg `2026.05.27`
+- Windows Terminal / OpenConsole `v1.24.11321.0`
 
-## Reproducibility evidence
+Rainmeter `v4.5.26.3894` is retained as a reserve.
 
-### TrafficMonitor Lite
-- MSVC x64 Release: **PASS**
-- `/O2 /GL` + LTCG
-- Clean CI build: ~105.6 s
-- EXE: ~1.94 MB
-- PDB: ~19.85 MB
-- Raw `PROC32`: 5,297
-- Linker: 12,670 functions compiled
+## Validation status
 
-### OpenLoco
-- MSVC x64 Release: **PASS**
-- Clean CI build: ~1,656 s
-- EXE: 9,673,216 bytes
-- PDB: 26,484,736 bytes
-- Raw `PROC32`: 10,777
+Stable-tag validation is already green for:
 
-### x64dbg
-- MSVC x64 Release: **PASS**
-- Clean CI build: ~645.5 s
-- `x64gui.dll`: ~4.44 MB
-- `x64dbg.dll`: ~2.23 MB
-- `x64bridge.dll`: ~83 KB
-- Current Release PDBs are not sufficient as a source-level oracle; `/Zi` + full PDB should be tested separately.
+- **tinyxml2 `11.0.0`** — MSVC x64 clean build.
+- **Microsoft Detours `v4.0.1`** — MSVC x64 library plus focused sample build.
+
+The other targets are being rerun from their release tags. Older build metrics are not promoted to the release-pinned corpus until the corresponding tag build succeeds.
 
 ## Fit with current DecBench
 
-Current DecBench C++ evaluation is primarily GCC/DWARF based. Source CFG ground truth is produced from `.ii` files and type ground truth comes from DWARF. Therefore there are two plausible integration paths:
+Current DecBench C++ evaluation is primarily GCC/DWARF based. The compatibility-first jobs therefore preserve `.ii` preprocessing output and DWARF for MinGW-capable projects, while MSVC/PDB builds remain a separate native-Windows feasibility path.
 
-1. **Compatibility-first** — use MinGW/GCC for Windows projects that support it, keeping PE + DWARF + `.ii` close to the existing pipeline.
-2. **Native-Windows** — retain MSVC/PE/PDB builds and add PDB/CodeView ground-truth support.
+Function counts from compiler/linker output, PDB procedure records, source-attributable functions, and decompiler-discovered functions remain separate measurements.
 
-This release intentionally does **not** choose between those directions. Its purpose is to provide validated targets and enough build evidence for that scope decision to be made by the DecBench maintainers.
+## Suggested tier order
 
-## Suggested target order
+1. Small controls/systems: tinyxml2, Detours
+2. Small application/game: TrafficMonitor, SpaceCadetPinball
+3. Medium: The Powder Toy, Explorer++
+4. Large: OpenLoco, Notepad++
+5. Stress: x64dbg, OpenConsole component subset
 
-1. TrafficMonitor Lite
-2. OpenLoco
-3. The Powder Toy
-4. x64dbg
-5. OpenConsole/component subset
-
-## Notes
-
-- Native MSVC build validation is treated as feasibility evidence, not as a proposal to redesign DecBench.
-- Function counts from compiler/linker output, PDB procedure records, and decompiler-discovered functions should remain separate measurements.
-- Before corpus integration, each target should be pinned to an exact upstream commit/tag and checked for license, dependency/vendor contamination, and project-owned function attribution.
+This refresh deliberately removes the stale OpenLoco measurements that were present in Preview 1. Fresh metrics should be published only from the release-tag validation runs.

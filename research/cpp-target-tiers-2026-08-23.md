@@ -30,7 +30,7 @@ The target-discovery phase can be considered effectively saturated after adding 
 
 ### 0. tinyxml2 — release-pinned clean control
 - Repo: https://github.com/leethomason/tinyxml2
-- Stable release: `v11.0.0`
+- Stable release/tag: `11.0.0`
 - Release-resolved commit: `9148bdf719e997d1f474be6bcc7943881046dba1`
 - Profile: compact C++ XML parser; the core library is essentially `tinyxml2.cpp` + `tinyxml2.h`, with `xmltest.cpp` available as a test executable.
 - Build system: CMake; no large dependency graph is required for the baseline.
@@ -39,7 +39,7 @@ The target-discovery phase can be considered effectively saturated after adding 
 
 ### 1. Microsoft Detours — release-pinned Windows systems baseline
 - Repo: https://github.com/microsoft/Detours
-- Stable release: `v4.0.1`
+- Stable release/tag: `v4.0.1`
 - Release-resolved commit: `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`
 - Profile: Microsoft Research Windows API instrumentation / binary-rewriting library.
 - License: MIT.
@@ -161,7 +161,7 @@ The target-discovery phase can be considered effectively saturated after adding 
 
 ## Proposed initial C++ corpus shape
 
-1. **Small clean control:** tinyxml2 `v11.0.0`
+1. **Small clean control:** tinyxml2 `11.0.0`
 2. **Small Windows systems:** Microsoft Detours `v4.0.1`
 3. **Small Windows GUI/game:** TrafficMonitor Lite + SpaceCadetPinball
 4. **Medium:** The Powder Toy + Explorer++
@@ -172,7 +172,7 @@ This is intentionally a candidate pool, not a commitment to include every projec
 
 ## Next validation pass
 
-- [ ] Validate tinyxml2 `v11.0.0` MSVC x64 and record build/binary/PDB metrics.
+- [ ] Validate tinyxml2 `11.0.0` MSVC x64 and record build/binary/PDB metrics.
 - [ ] Validate Microsoft Detours `v4.0.1` MSVC x64 and a focused sample executable/DLL.
 - [ ] Convert the remaining high-priority historical commit pins to stable release pins where practical.
 - [ ] Validate SpaceCadetPinball with MSVC and MinGW-w64, preserving DWARF + `.ii` on the GCC path.

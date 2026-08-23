@@ -1,0 +1,130 @@
+name: Create C++ target validation handoff release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/create-handoff-release.yml'
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    if: ${{ !contains(github.event.head_commit.message, '[release-result]') }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: cpp-target-validation-preview-1
+      RELEASE_TITLE: DecBench multi-lang C++ Target Validation — Preview 1
+      VALIDATION_RUN: '32610132906'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Build handoff bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p handoff/docs handoff/reports handoff/workflows
+          cp release/README.md handoff/docs/README.md
+          cp release/RELEASE_NOTES.md handoff/docs/RELEASE_NOTES.md
+          cp release/CANDIDATES.md handoff/docs/CANDIDATES.md
+          cp .github/workflows/windows-cpp-validation.yml handoff/workflows/
+          cp .github/workflows/powder-toy-validation.yml handoff/workflows/
+
+          cat > handoff/docs/PINNED_COMMITS.md <<'EOF'
+          # Pinned upstream revisions
+
+          | Target | Upstream commit |
+          | --- | --- |
+          | TrafficMonitor | `5efd2159af8117301a2b6a755897aaa995887678` |
+          | OpenLoco | `96de081155f326a7af83f925185c1a934ba536b4` |
+          | x64dbg | `17233957ea0a7e70d188187380bd74f80c2a4b93` |
+          | Windows Terminal / OpenConsole | `20588130d8ef2ba40eb56bdae88e04cce7fc5b5d` |
+          | The Powder Toy | `b31f4462bc7d217159b83859a35405db9b640455` |
+
+          These revisions are validation pins, not a claim that they are the final DecBench corpus revisions.
+          EOF
+
+          cat > handoff/docs/SCOPE.md <<'EOF'
+          # Scope
+
+          This package answers one question first: which real-world C++ targets are plausible candidates for the next multi-language DecBench corpus, especially on Windows?
+
+          It does not assume that DecBench should adopt a new MSVC/PDB architecture. Native MSVC builds and PDBs are retained as feasibility evidence. The integration choice remains open:
+
+          - compatibility-first: use the existing GCC/DWARF-oriented path where a project supports it;
+          - native-Windows: add MSVC/PDB/CodeView ground-truth support if that is useful to the project.
+          EOF
+
+          # Attach reports from the completed validation run when available.
+          for name in trafficmonitor-report openloco-report x64dbg-report windows-terminal-report; do
+            mkdir -p "handoff/reports/$name"
+            if ! gh run download "$VALIDATION_RUN" -n "$name" -D "handoff/reports/$name"; then
+              rmdir "handoff/reports/$name" 2>/dev/null || true
+              echo "$name: not available in run $VALIDATION_RUN" >> handoff/reports/UNAVAILABLE.txt
+            fi
+          done
+
+          # Also attach the newest successful Powder Toy report if one exists.
+          powder_run="$(gh run list --workflow powder-toy-validation.yml --limit 20 --json databaseId,conclusion --jq '[.[] | select(.conclusion == "success")][0].databaseId // empty')"
+          if [[ -n "$powder_run" ]]; then
+            mkdir -p handoff/reports/powder-toy-report
+            if ! gh run download "$powder_run" -n powder-toy-report -D handoff/reports/powder-toy-report; then
+              rmdir handoff/reports/powder-toy-report 2>/dev/null || true
+              echo "powder-toy-report: successful run $powder_run found, but artifact unavailable" >> handoff/reports/UNAVAILABLE.txt
+            else
+              echo "$powder_run" > handoff/reports/powder-toy-report/workflow_run_id.txt
+            fi
+          else
+            echo 'powder-toy-report: no completed successful run found at release time' >> handoff/reports/UNAVAILABLE.txt
+          fi
+
+          cat > handoff/MANIFEST.txt <<EOF
+          release_tag=$TAG
+          repository=$GITHUB_REPOSITORY
+          release_commit=$GITHUB_SHA
+          primary_validation_run=$VALIDATION_RUN
+          generated_at=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          EOF
+
+          (cd handoff && find . -type f -print0 | sort -z | xargs -0 sha256sum) > handoff/SHA256SUMS.txt
+          zip -qr decbench-windows-cpp-target-validation-preview-1.zip handoff
+
+      - name: Create or refresh prerelease
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release edit "$TAG" --title "$RELEASE_TITLE" --notes-file release/RELEASE_NOTES.md --prerelease
+          else
+            gh release create "$TAG" \
+              --target "$GITHUB_SHA" \
+              --title "$RELEASE_TITLE" \
+              --notes-file release/RELEASE_NOTES.md \
+              --prerelease
+          fi
+
+          gh release upload "$TAG" \
+            decbench-windows-cpp-target-validation-preview-1.zip \
+            release/README.md \
+            release/RELEASE_NOTES.md \
+            release/CANDIDATES.md \
+            --clobber
+
+      - name: Record release URL
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$TAG"
+          printf '%s\n' "$url" > release/RELEASE_URL.txt
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add release/RELEASE_URL.txt
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore: record handoff release URL [release-result]'
+            git push
+          fi

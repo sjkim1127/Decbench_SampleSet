@@ -56,6 +56,25 @@ No new PE collector is needed: current `GCCCompiler` already recognizes linked P
 
 These are handoff drafts, not upstream patches. They should only be moved into DecBench after the corresponding release CI result is green and the maintainers decide they want the compatibility-first path.
 
+## DecBench-native qualification lane
+
+The repository now also contains `.github/workflows/decbench-cpp-qualification.yml`. This is deliberately different from the upstream-build validation workflows: it checks whether a target behaves like a usable **DecBench corpus target**.
+
+The first lane runs the real pinned DecBench compile path for tinyxml2 and Notepad++ across `O0`, `O2`, and `O2-noinline`, three independent clean times each. It then records:
+
+- linked ELF/PE images and captured `.ii` files;
+- DWARF `DW_TAG_subprogram` and linkage-name evidence;
+- short-name collision pressure relevant to the current experimental C++ name keying;
+- project-owned functions by matching DWARF `decl_file` against captured translation units using DecBench's own binary/DWARF helpers;
+- identity survival from O0 to O2-noinline and O2;
+- pyjoern parse and non-empty parse rates over every captured `.ii`;
+- SHA-256 reproducibility across the three clean builds;
+- a non-blocking actual O2 DecBench/angr decompile/evaluate smoke for the tinyxml2 control target.
+
+The intent is to make the handoff answer a stronger question than “does this project compile?” A candidate can build successfully and still be a poor benchmark target because its source CFG cannot be parsed, its project-owned code is swamped by bundled dependencies, its debug/oracle data is incomplete, or current C++ short-name keying produces excessive collisions.
+
+`qualification/README.md` describes the promotion rule and the generated artifacts.
+
 ## What should stay separate for now
 
 Native MSVC validation in this repository is useful feasibility evidence, but it should not be mixed into the first DecBench corpus change. MSVC produces PE + PDB/CodeView, while the current type-ground-truth path is DWARF-based. If native MSVC becomes a research goal later, PDB/CodeView should be treated as a separate ground-truth backend rather than silently substituting it for the current model.
@@ -68,4 +87,4 @@ The first decision is intentionally small:
 
 > Should `multi-lang.decbench.com` start with release-pinned C++ targets that fit the existing GCC/DWARF pipeline, including Windows PE through MinGW, and leave native MSVC/PDB as a later extension?
 
-If yes, tinyxml2 + Notepad++ are the cleanest first pair: one low-noise C++ control and one real Windows C++ application.
+If yes, tinyxml2 + Notepad++ are the cleanest first pair: one low-noise C++ control and one real Windows C++ application. The qualification lane is intended to produce the evidence needed to decide whether each one should actually be promoted.

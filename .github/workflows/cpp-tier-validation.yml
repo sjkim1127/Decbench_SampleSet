@@ -1,0 +1,439 @@
+name: Tiered C++ corpus validation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cpp-tier-validation.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cpp-tier-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  spacecadet-msvc:
+    name: Small / SpaceCadetPinball / MSVC x64 Release
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/k4zmu2a/SpaceCadetPinball.git target
+          git -C target checkout cb9b7b886244a27773f66b0b19fdc2998392565e
+          New-Item -ItemType Directory -Force reports/spacecadet-msvc | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/spacecadet-msvc/metadata.txt
+          "tier=small" | Add-Content reports/spacecadet-msvc/metadata.txt
+          "compiler=MSVC" | Add-Content reports/spacecadet-msvc/metadata.txt
+
+      - name: Install SDL dependencies with vcpkg
+        shell: pwsh
+        run: |
+          $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+          if (-not $vcpkgRoot) { $vcpkgRoot = 'C:\vcpkg' }
+          & "$vcpkgRoot\vcpkg.exe" install sdl2:x64-windows sdl2-mixer:x64-windows
+          "vcpkg_root=$vcpkgRoot" | Add-Content reports/spacecadet-msvc/metadata.txt
+          "VCPKG_ROOT=$vcpkgRoot" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Configure and build
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          cmake -S target -B target/build-msvc -A x64 `
+            -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" `
+            -DCMAKE_WIN32_EXECUTABLE=ON
+          $code = $LASTEXITCODE
+          if ($code -eq 0) {
+            cmake --build target/build-msvc --config Release --parallel
+            $code = $LASTEXITCODE
+          }
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/spacecadet-msvc/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/spacecadet-msvc/metadata.txt
+          exit $code
+
+      - name: Collect PE/PDB metrics
+        if: always()
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'SpaceCadetPinball.exe' -OutDir reports/spacecadet-msvc -TargetName 'SpaceCadetPinball MSVC x64 Release'
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacecadet-msvc-report
+          path: reports/spacecadet-msvc
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  spacecadet-mingw:
+    name: Small / SpaceCadetPinball / MinGW x64 O2+DWARF
+    runs-on: windows-2022
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/k4zmu2a/SpaceCadetPinball.git target
+          git -C target checkout cb9b7b886244a27773f66b0b19fdc2998392565e
+          New-Item -ItemType Directory -Force reports/spacecadet-mingw | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/spacecadet-mingw/metadata.txt
+          "tier=small" | Add-Content reports/spacecadet-mingw/metadata.txt
+          "compiler=MinGW-w64 GCC" | Add-Content reports/spacecadet-mingw/metadata.txt
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-SDL2
+            mingw-w64-x86_64-SDL2_mixer
+
+      - name: Configure and build with DWARF and preprocessed output
+        id: build
+        continue-on-error: true
+        shell: msys2 {0}
+        run: |
+          start=$(date +%s)
+          cmake -S target -B target/build-mingw -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_WIN32_EXECUTABLE=ON \
+            -DCMAKE_CXX_FLAGS_RELEASE='-O2 -g -save-temps=obj'
+          code=$?
+          if [ $code -eq 0 ]; then
+            cmake --build target/build-mingw --parallel
+            code=$?
+          fi
+          end=$(date +%s)
+          echo "build_seconds=$((end-start))" >> reports/spacecadet-mingw/metadata.txt
+          echo "build_exit_code=$code" >> reports/spacecadet-mingw/metadata.txt
+          g++ --version | head -n 1 >> reports/spacecadet-mingw/metadata.txt
+          exit $code
+
+      - name: Collect PE/DWARF and .ii metrics
+        if: always()
+        shell: pwsh
+        run: |
+          $root = Get-Item target
+          $exe = Get-ChildItem target -Recurse -File -Filter SpaceCadetPinball.exe -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 1
+          $ii = @(Get-ChildItem target -Recurse -File -Filter *.ii -ErrorAction SilentlyContinue)
+          $ii | Select-Object FullName,Length | Export-Csv -NoTypeInformation reports/spacecadet-mingw/preprocessed-files.csv
+          "ii_count=$($ii.Count)" | Add-Content reports/spacecadet-mingw/metadata.txt
+          "ii_bytes=$(($ii | Measure-Object Length -Sum).Sum)" | Add-Content reports/spacecadet-mingw/metadata.txt
+          if ($exe) {
+            "exe=$($exe.FullName.Substring($root.FullName.Length).TrimStart('\','/'))" | Add-Content reports/spacecadet-mingw/metadata.txt
+            "exe_bytes=$($exe.Length)" | Add-Content reports/spacecadet-mingw/metadata.txt
+            "sha256=$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash)" | Add-Content reports/spacecadet-mingw/metadata.txt
+            $objdump = 'C:\msys64\mingw64\bin\objdump.exe'
+            if (Test-Path $objdump) {
+              $dwarf = & $objdump --dwarf=info $exe.FullName 2>$null
+              "dwarf_subprogram_count=$(@($dwarf | Select-String 'DW_TAG_subprogram').Count)" | Add-Content reports/spacecadet-mingw/metadata.txt
+            }
+          }
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spacecadet-mingw-report
+          path: reports/spacecadet-mingw
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  powder-toy-mingw:
+    name: Medium / The Powder Toy / MinGW x64 O2+DWARF
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/The-Powder-Toy/The-Powder-Toy.git target
+          git -C target checkout b31f4462bc7d217159b83859a35405db9b640455
+          git -C target submodule update --init --recursive
+          New-Item -ItemType Directory -Force reports/powder-toy-mingw | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/powder-toy-mingw/metadata.txt
+          "tier=medium" | Add-Content reports/powder-toy-mingw/metadata.txt
+          "compiler=MinGW-w64 GCC" | Add-Content reports/powder-toy-mingw/metadata.txt
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-python
+            mingw-w64-x86_64-python-pip
+            mingw-w64-x86_64-meson
+            mingw-w64-x86_64-ninja
+
+      - name: Configure and build
+        id: build
+        continue-on-error: true
+        shell: msys2 {0}
+        run: |
+          start=$(date +%s)
+          export CXXFLAGS='-O2 -g -save-temps=obj'
+          manifest_date=$(date +%Y-%m-%d)
+          meson setup target/build-mingw target \
+            --buildtype=release \
+            -Dstatic=prebuilt \
+            -Dlto=false \
+            -Dresolve_vcs_tag=no \
+            -Dmanifest_date=$manifest_date
+          code=$?
+          if [ $code -eq 0 ]; then
+            meson compile -C target/build-mingw
+            code=$?
+          fi
+          end=$(date +%s)
+          echo "build_seconds=$((end-start))" >> reports/powder-toy-mingw/metadata.txt
+          echo "build_exit_code=$code" >> reports/powder-toy-mingw/metadata.txt
+          g++ --version | head -n 1 >> reports/powder-toy-mingw/metadata.txt
+          exit $code
+
+      - name: Collect PE/DWARF and .ii metrics
+        if: always()
+        shell: pwsh
+        run: |
+          $root = Get-Item target
+          $exe = Get-ChildItem target/build-mingw -Recurse -File -Filter powder.exe -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 1
+          $ii = @(Get-ChildItem target/build-mingw -Recurse -File -Filter *.ii -ErrorAction SilentlyContinue)
+          $ii | Select-Object FullName,Length | Export-Csv -NoTypeInformation reports/powder-toy-mingw/preprocessed-files.csv
+          "ii_count=$($ii.Count)" | Add-Content reports/powder-toy-mingw/metadata.txt
+          "ii_bytes=$(($ii | Measure-Object Length -Sum).Sum)" | Add-Content reports/powder-toy-mingw/metadata.txt
+          if ($exe) {
+            "exe=$($exe.FullName.Substring($root.FullName.Length).TrimStart('\','/'))" | Add-Content reports/powder-toy-mingw/metadata.txt
+            "exe_bytes=$($exe.Length)" | Add-Content reports/powder-toy-mingw/metadata.txt
+            "sha256=$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash)" | Add-Content reports/powder-toy-mingw/metadata.txt
+            $objdump = 'C:\msys64\mingw64\bin\objdump.exe'
+            if (Test-Path $objdump) {
+              $dwarf = & $objdump --dwarf=info $exe.FullName 2>$null
+              "dwarf_subprogram_count=$(@($dwarf | Select-String 'DW_TAG_subprogram').Count)" | Add-Content reports/powder-toy-mingw/metadata.txt
+            }
+          }
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: powder-toy-mingw-report
+          path: reports/powder-toy-mingw
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  explorerplusplus-msvc:
+    name: Medium / Explorer++ / MSVC x64 Release
+    runs-on: windows-2022
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Clone pinned source and submodules
+        shell: pwsh
+        run: |
+          git clone --recurse-submodules https://github.com/derceg/explorerplusplus.git target
+          git -C target checkout 4d3f5320b9c307bef325fc78801d1dd7c6deb09d
+          git -C target submodule update --init --recursive
+          New-Item -ItemType Directory -Force reports/explorerplusplus | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/explorerplusplus/metadata.txt
+          "tier=medium" | Add-Content reports/explorerplusplus/metadata.txt
+          "compiler=MSVC" | Add-Content reports/explorerplusplus/metadata.txt
+
+      - name: Cache vcpkg binary packages
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\vcpkg\archives
+          key: explorerplusplus-vcpkg-${{ hashFiles('target/vcpkg.json', 'target/vcpkg-configuration.json') }}
+
+      - name: Bootstrap vcpkg
+        shell: pwsh
+        run: target\Explorer++\ThirdParty\vcpkg\bootstrap-vcpkg.bat
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          msbuild target\Explorer++\Explorer++.sln /m /p:Configuration=Release /p:Platform=x64 /p:ExplorerPlusPlusBuildVersion=0 /v:minimal
+          $code = $LASTEXITCODE
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/explorerplusplus/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/explorerplusplus/metadata.txt
+          exit $code
+
+      - name: Collect PE/PDB metrics
+        if: always()
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Explorer++.exe' -OutDir reports/explorerplusplus -TargetName 'Explorer++ MSVC x64 Release'
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: explorerplusplus-msvc-report
+          path: reports/explorerplusplus
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  notepadplusplus-msvc:
+    name: Large / Notepad++ / MSVC x64 Release
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/notepad-plus-plus/notepad-plus-plus.git target
+          git -C target checkout a6c46fd4cb0fa115ced3b3bfb1ff53fbdb8989f3
+          New-Item -ItemType Directory -Force reports/notepadplusplus-msvc | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/notepadplusplus-msvc/metadata.txt
+          "tier=large" | Add-Content reports/notepadplusplus-msvc/metadata.txt
+          "compiler=MSVC" | Add-Content reports/notepadplusplus-msvc/metadata.txt
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          msbuild target\PowerEditor\visual.net\notepadPlus.sln /m /p:configuration=Release /p:platform=x64
+          $code = $LASTEXITCODE
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/notepadplusplus-msvc/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/notepadplusplus-msvc/metadata.txt
+          exit $code
+
+      - name: Collect PE/PDB metrics
+        if: always()
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Notepad++.exe' -OutDir reports/notepadplusplus-msvc -TargetName 'Notepad++ MSVC x64 Release'
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notepadplusplus-msvc-report
+          path: reports/notepadplusplus-msvc
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  notepadplusplus-mingw:
+    name: Large / Notepad++ / MinGW x64 O2+DWARF
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/notepad-plus-plus/notepad-plus-plus.git target
+          git -C target checkout a6c46fd4cb0fa115ced3b3bfb1ff53fbdb8989f3
+          New-Item -ItemType Directory -Force reports/notepadplusplus-mingw | Out-Null
+          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/notepadplusplus-mingw/metadata.txt
+          "tier=large" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          "compiler=MinGW-w64 GCC" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: mingw-w64-x86_64-gcc mingw-w64-x86_64-make
+
+      - name: Instrument upstream release makefile for O2 + DWARF + .ii
+        shell: pwsh
+        run: |
+          $path = 'target\PowerEditor\gcc\makefile'
+          $text = Get-Content $path -Raw
+          $text = $text -replace 'CXXFLAGS \+= -O3', 'CXXFLAGS += -O2 -g -save-temps=obj'
+          $text = $text -replace 'LDFLAGS \+= -s', '# LDFLAGS += -s  # disabled by DecBench validation harness to preserve DWARF'
+          Set-Content -Path $path -Value $text -Encoding UTF8
+
+      - name: Build
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          $env:MSYSTEM = 'MINGW64'
+          $env:Path = 'C:\msys64\usr\bin;' + 'C:\msys64\mingw64\bin;' + $env:Path
+          Push-Location target
+          mingw32-make -f PowerEditor\gcc\makefile -j2
+          $code = $LASTEXITCODE
+          Pop-Location
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          g++ --version | Select-Object -First 1 | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          exit $code
+
+      - name: Collect PE/DWARF and .ii metrics
+        if: always()
+        shell: pwsh
+        run: |
+          $root = Get-Item target
+          $exe = Get-ChildItem target -Recurse -File -Filter Notepad++.exe -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 1
+          $ii = @(Get-ChildItem target -Recurse -File -Filter *.ii -ErrorAction SilentlyContinue)
+          $ii | Select-Object FullName,Length | Export-Csv -NoTypeInformation reports/notepadplusplus-mingw/preprocessed-files.csv
+          "ii_count=$($ii.Count)" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          "ii_bytes=$(($ii | Measure-Object Length -Sum).Sum)" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+          if ($exe) {
+            "exe=$($exe.FullName.Substring($root.FullName.Length).TrimStart('\','/'))" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+            "exe_bytes=$($exe.Length)" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+            "sha256=$((Get-FileHash $exe.FullName -Algorithm SHA256).Hash)" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+            $objdump = 'C:\msys64\mingw64\bin\objdump.exe'
+            if (Test-Path $objdump) {
+              $dwarf = & $objdump --dwarf=info $exe.FullName 2>$null
+              "dwarf_subprogram_count=$(@($dwarf | Select-String 'DW_TAG_subprogram').Count)" | Add-Content reports/notepadplusplus-mingw/metadata.txt
+            }
+          }
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: notepadplusplus-mingw-report
+          path: reports/notepadplusplus-mingw
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1

@@ -1,34 +1,36 @@
-# DecBench C++ Sample-Set Validation
+# DecBench C++ Target Validation
 
-Private CI workspace for validating candidate C++ / Windows C++ targets for a future DecBench multi-language corpus.
+Focused validation workspace for a future DecBench multi-language C++ corpus.
 
-The repository does **not** vendor third-party source trees. GitHub Actions clones exact upstream commits at runtime, builds them on a Windows runner, and records build/toolchain/function-count evidence.
+The current scope is intentionally narrow: **validate one candidate at a time against DecBench's existing GCC/DWARF C++ path before expanding the corpus.**
 
-## Initial targets
+## Current candidate
 
-| Target | Pinned commit | First-pass configuration |
-|---|---|---|
-| TrafficMonitor Lite | `5efd2159af8117301a2b6a755897aaa995887678` | MSVC, x64, `Release (lite)` |
-| The Powder Toy | `b31f4462bc7d217159b83859a35405db9b640455` | Meson/MSVC, x64 `debugoptimized`, prebuilt static deps, LTO |
-| OpenLoco | `96de081155f326a7af83f925185c1a934ba536b4` | CMake, Windows x64 Release |
-| x64dbg | `17233957ea0a7e70d188187380bd74f80c2a4b93` | CMake/MSVC, x64 Release |
-| Windows Terminal | `20588130d8ef2ba40eb56bdae88e04cce7fc5b5d` | environment + component build attempt |
+### Google Snappy 1.2.2
 
-The Powder Toy is included as an algorithm/physics-heavy real-world C++20 target. Its upstream Meson configuration disables RTTI by default, supports MSVC/clang-cl, and has an explicit MSVC LTO path (`/GL` + `/LTCG`). The first CI pass uses `debugoptimized` so optimized code and useful PDB information can coexist. Because the first build uses prebuilt static dependencies, later oracle generation must use PDB/source attribution to exclude vendor/library functions from the project-source ground truth.
+- upstream: `google/snappy`
+- stable release: `1.2.2`
+- resolved commit: `6af9287fbdb913f0794d0148c6aa43b58e63c8e3`
+- language: C++11
+- build: CMake + GCC
+- DecBench modes: `O0`, `O2`, `O2-noinline`
+- ground-truth path: DWARF + preprocessed `.ii`
+- output: shared `libsnappy` linked image
 
-## What CI records
+Snappy is being tried first because it is a small real C++ library with a straightforward build, no mandatory third-party runtime dependency for the core library, and a relatively limited object-oriented hierarchy compared with larger C++ applications. It is therefore a useful first probe for DecBench's experimental C++ path before moving to more collision-heavy targets.
 
-- exact upstream commit
-- runner / Visual Studio / MSVC / CMake/Meson versions
-- clone size and submodule count
-- clean build duration
-- output PE size and SHA-256
-- matching PDB, when emitted
-- approximate PDB procedure-symbol count using `llvm-pdbutil` (`S_GPROC32` / `S_LPROC32`)
-- build blockers and logs through the GitHub Actions job output
+## DecBench integration shape
 
-The PDB count is **not** treated as a final source-function ground truth. It is a first measurement that will later be split into source-attributable functions, compiler/linker-emitted functions, and decompiler-discovered functions.
+`targets/snappy.toml` is shaped for the current DecBench project model. It keeps DecBench in control of optimization flags, enables a shared library so the linked-image collector has a benchmark target, disables Snappy tests and benchmarks, and preserves `-g -save-temps=obj` for DWARF and `.ii` collection.
 
-## Workflow
+The validation workflow pins DecBench to:
 
-`.github/workflows/windows-cpp-validation.yml` runs the main candidate matrix. `.github/workflows/powder-toy-validation.yml` runs the dedicated The Powder Toy MSVC/Meson validation pass. Both can be dispatched manually from the Actions tab.
+`d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f`
+
+`.github/workflows/snappy-decbench-validation.yml` runs the real DecBench `scripts/compile_all.py` path and only checks the first integration gate:
+
+- all three optimization modes are attempted;
+- at least one linked image is collected for each mode;
+- at least one preprocessed `.ii` unit is collected for each mode.
+
+This repository is not treating a green build as final corpus qualification yet. Function-identity collision and scoring behavior can be measured after the basic DecBench compile path is confirmed.

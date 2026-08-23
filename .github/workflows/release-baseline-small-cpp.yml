@@ -1,0 +1,135 @@
+name: Release-pinned small C++ baselines
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-baseline-small-cpp.yml'
+      - 'research/cpp-target-tiers-2026-08-23.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tinyxml2-msvc:
+    name: Small control / tinyxml2 v11.0.0 / MSVC x64
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Clone release
+        shell: pwsh
+        run: |
+          git clone --branch v11.0.0 --depth 1 https://github.com/leethomason/tinyxml2.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '9148bdf719e997d1f474be6bcc7943881046dba1') {
+            throw "v11.0.0 resolved to unexpected commit: $head"
+          }
+          New-Item -ItemType Directory -Force reports/tinyxml2 | Out-Null
+          "release=v11.0.0" | Set-Content reports/tinyxml2/metadata.txt
+          "commit=$head" | Add-Content reports/tinyxml2/metadata.txt
+          "tier=small-control" | Add-Content reports/tinyxml2/metadata.txt
+          "compiler=MSVC" | Add-Content reports/tinyxml2/metadata.txt
+
+      - name: Configure and build Release
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          cmake -S target -B target/build -A x64 -Dtinyxml2_BUILD_TESTING=ON
+          $code = $LASTEXITCODE
+          if ($code -eq 0) {
+            cmake --build target/build --config Release --parallel
+            $code = $LASTEXITCODE
+          }
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/tinyxml2/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/tinyxml2/metadata.txt
+          exit $code
+
+      - name: Collect executable metrics
+        if: always()
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target/build -ExecutablePattern 'xmltest.exe' -OutDir reports/tinyxml2 -TargetName 'tinyxml2 v11.0.0 xmltest MSVC x64 Release'
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tinyxml2-v11.0.0-msvc-report
+          path: reports/tinyxml2
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1
+
+  detours-msvc:
+    name: Small systems / Detours v4.0.1 / MSVC x64
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up x64 MSVC developer command environment
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Clone release
+        shell: pwsh
+        run: |
+          git clone --branch v4.0.1 --depth 1 https://github.com/microsoft/Detours.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne 'e4bfd6b03e50de46b47abfbd1e46b384f0c5f833') {
+            throw "v4.0.1 resolved to unexpected commit: $head"
+          }
+          New-Item -ItemType Directory -Force reports/detours | Out-Null
+          "release=v4.0.1" | Set-Content reports/detours/metadata.txt
+          "commit=$head" | Add-Content reports/detours/metadata.txt
+          "tier=small-systems" | Add-Content reports/detours/metadata.txt
+          "compiler=MSVC" | Add-Content reports/detours/metadata.txt
+          cl 2>&1 | Select-Object -First 3 | Add-Content reports/detours/metadata.txt
+
+      - name: Build Detours library and simple sample
+        id: build
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          Push-Location target\src
+          nmake /nologo
+          $code = $LASTEXITCODE
+          Pop-Location
+          if ($code -eq 0) {
+            Push-Location target\samples\simple
+            nmake /nologo
+            $code = $LASTEXITCODE
+            Pop-Location
+          }
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds,3))" | Add-Content reports/detours/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/detours/metadata.txt
+          exit $code
+
+      - name: Collect PE/PDB metrics
+        if: always()
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'sleep5.exe' -OutDir reports/detours -TargetName 'Detours v4.0.1 simple/sleep5 MSVC x64'
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: detours-v4.0.1-msvc-report
+          path: reports/detours
+
+      - name: Preserve build failure status
+        if: steps.build.outcome == 'failure'
+        shell: pwsh
+        run: exit 1

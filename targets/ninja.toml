@@ -19,7 +19,10 @@ pre_make_cmds = [
 ]
 
 # Build only the real Ninja executable and discard CMake compiler-probe images.
-make_cmd = 'cmake --build build -j --target ninja && rm -rf build/CMakeFiles/[0-9]*'
+# Also remove 'build/boo', a pre-compiled bootstrap test binary that CMake places
+# alongside the ninja target. It has no DWARF and identical BuildID across all
+# optimization modes (i.e. it is NOT compiled by DecBench) — verified 2026-08-23.
+make_cmd = 'cmake --build build -j --target ninja && rm -rf build/CMakeFiles/[0-9]* && rm -f build/boo'
 
 labels = ["cpp", "executable", "system", "tooling"]
 

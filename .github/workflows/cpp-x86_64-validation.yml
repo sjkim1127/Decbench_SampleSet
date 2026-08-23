@@ -111,7 +111,97 @@ jobs:
           python3 -m venv .venv
           .venv/bin/python -m pip install --upgrade pip
           .venv/bin/python -m pip install pyelftools==0.33 cxxfilt
-          mkdir -p x86_64-evidence/collision
+          mkdir -p x86_64-evidence/collision x86_64-evidence/producer
+
+      - name: Audit x86_64 DWARF producer flags and LTO state
+        run: |
+          .venv/bin/python - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+          from elftools.elf.elffile import ELFFile
+
+          targets = ("snappy", "double-conversion", "ninja")
+          opts = ("O0", "O2", "O2-noinline")
+          expected_flags = {
+              "O0": ("-O0",),
+              "O2": ("-O2",),
+              "O2-noinline": ("-O2", "-fno-inline"),
+          }
+          lto_re = re.compile(r"(?:^|\s)-(?:flto(?:=\S+)?|fltrans(?:=\S+)?|fwpa(?:=\S+)?|fwhole-program)(?:\s|$)")
+          records = []
+
+          def is_elf(path: Path) -> bool:
+              try:
+                  with path.open("rb") as f:
+                      return f.read(4) == b"\x7fELF"
+              except OSError:
+                  return False
+
+          for target in targets:
+              for opt in opts:
+                  compiled = Path(f"decbench/results/cpp_x86_64/{opt}/{target}/compiled")
+                  images = [p for p in compiled.rglob("*") if p.is_file() and is_elf(p)]
+                  if len(images) != 1:
+                      raise SystemExit(f"{target}/{opt}: expected exactly one ELF image, got {len(images)}")
+
+                  image = images[0]
+                  with image.open("rb") as f:
+                      elf = ELFFile(f)
+                      machine = elf.header["e_machine"]
+                      if machine != "EM_X86_64":
+                          raise SystemExit(f"{target}/{opt}: expected EM_X86_64, got {machine}")
+                      if not elf.has_dwarf_info():
+                          raise SystemExit(f"{target}/{opt}: linked image has no DWARF")
+
+                      producers = set()
+                      dwarf = elf.get_dwarf_info()
+                      for cu in dwarf.iter_CUs():
+                          attr = cu.get_top_DIE().attributes.get("DW_AT_producer")
+                          if not attr:
+                              continue
+                          value = attr.value
+                          if isinstance(value, bytes):
+                              value = value.decode("utf-8", errors="replace")
+                          producers.add(str(value))
+
+                  if not producers:
+                      raise SystemExit(f"{target}/{opt}: no DW_AT_producer strings found")
+
+                  joined = "\n".join(sorted(producers))
+                  missing = [flag for flag in expected_flags[opt] if flag not in joined]
+                  if missing:
+                      raise SystemExit(
+                          f"{target}/{opt}: expected producer flags missing: {missing}; producers={sorted(producers)}"
+                      )
+                  suspects = [p for p in producers if lto_re.search(p)]
+                  if suspects:
+                      raise SystemExit(
+                          f"{target}/{opt}: LTO/IPO producer marker detected: {suspects}"
+                      )
+
+                  record = {
+                      "target": target,
+                      "optimization": opt,
+                      "image": image.name,
+                      "machine": machine,
+                      "expected_flags": list(expected_flags[opt]),
+                      "lto_markers": [],
+                      "producers": sorted(producers),
+                  }
+                  records.append(record)
+                  Path(f"x86_64-evidence/producer/{target}_{opt}.txt").write_text(
+                      "\n".join(sorted(producers)) + "\n"
+                  )
+                  print(
+                      f"PASS {target:17} {opt:11} machine={machine} "
+                      f"producer_count={len(producers)} LTO=absent"
+                  )
+
+          Path("x86_64-evidence/producer_flags.json").write_text(
+              json.dumps(records, indent=2, sort_keys=True) + "\n"
+          )
+          PY
 
       - name: Measure x86_64 short-name collisions
         run: |

@@ -1,0 +1,131 @@
+{
+  "schema": "decbench-cpp-x86_64-qualification-v1",
+  "source": {
+    "workflow_run_id": 32632337105,
+    "artifact_id": 9491409143,
+    "artifact_sha256": "60fef5ba7bb9a252e0d8155cd7b775a54679ed2ff4b92b2d6152e7e54f01ccc2",
+    "workflow_commit": "3c48841470ed64370b4541a721c12fc1df430dd3",
+    "decbench_revision": "d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f"
+  },
+  "environment": {
+    "runner": "GitHub Actions Ubuntu x86_64",
+    "compiler": "GCC/G++ 13.3.0",
+    "machine": "EM_X86_64"
+  },
+  "targets": {
+    "snappy": {
+      "O0": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 4,
+        "image": "libsnappy.so.1.2.2",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O0"],
+        "lto_markers": [],
+        "project_source_function_addresses": 157,
+        "project_collision_addresses": 83,
+        "project_collision_rate_pct": "52.87%"
+      },
+      "O2": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 4,
+        "image": "libsnappy.so.1.2.2",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2"],
+        "lto_markers": [],
+        "project_source_function_addresses": 79,
+        "project_collision_addresses": 42,
+        "project_collision_rate_pct": "53.16%"
+      },
+      "O2-noinline": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 4,
+        "image": "libsnappy.so.1.2.2",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2", "-fno-inline"],
+        "lto_markers": [],
+        "project_source_function_addresses": 152,
+        "project_collision_addresses": 79,
+        "project_collision_rate_pct": "51.97%"
+      }
+    },
+    "double-conversion": {
+      "O0": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 8,
+        "image": "libdouble-conversion.so.3.3.0",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O0"],
+        "lto_markers": [],
+        "project_source_function_addresses": 127,
+        "project_collision_addresses": 10,
+        "project_collision_rate_pct": "7.87%"
+      },
+      "O2": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 8,
+        "image": "libdouble-conversion.so.3.3.0",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2"],
+        "lto_markers": [],
+        "project_source_function_addresses": 77,
+        "project_collision_addresses": 12,
+        "project_collision_rate_pct": "15.58%"
+      },
+      "O2-noinline": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 8,
+        "image": "libdouble-conversion.so.3.3.0",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2", "-fno-inline"],
+        "lto_markers": [],
+        "project_source_function_addresses": 124,
+        "project_collision_addresses": 10,
+        "project_collision_rate_pct": "8.06%"
+      }
+    },
+    "ninja": {
+      "O0": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 33,
+        "image": "ninja",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O0"],
+        "lto_markers": [],
+        "project_source_function_addresses": 412,
+        "project_collision_addresses": 110,
+        "project_collision_rate_pct": "26.70%"
+      },
+      "O2": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 33,
+        "image": "ninja",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2"],
+        "lto_markers": [],
+        "project_source_function_addresses": 210,
+        "project_collision_addresses": 68,
+        "project_collision_rate_pct": "32.38%"
+      },
+      "O2-noinline": {
+        "build_ok": true,
+        "linked_binaries": 1,
+        "preprocessed_units": 33,
+        "image": "ninja",
+        "machine": "EM_X86_64",
+        "expected_flags": ["-O2", "-fno-inline"],
+        "lto_markers": [],
+        "project_source_function_addresses": 265,
+        "project_collision_addresses": 73,
+        "project_collision_rate_pct": "27.55%"
+      }
+    }
+  }
+}

@@ -1,5 +1,13 @@
 # DecBench C++ target validation result — Google double-conversion
 
+## Status
+
+**VALIDATED** on the GCC/DWARF track at DecBench revision
+`d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f`.
+
+This is the cleanest currently validated C++ target in this workspace under
+DecBench's existing unqualified `DW_AT_name` identity model.
+
 ## Target metadata
 
 | Field | Value |
@@ -8,166 +16,127 @@
 | Upstream | `google/double-conversion` |
 | Release/tag | `v3.3.1` |
 | Resolved commit | `ae0dbfeb9744efd216c95b30555049d75d47116a` |
-| Track | GCC/DWARF |
+| Track | GCC / DWARF / `.ii` |
 | DecBench revision | `d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f` |
 | Validation date | 2026-08-23 |
-| Host | macOS 26.5.1, arm64 (Docker container: Ubuntu 24.04 aarch64) |
-| Container / OS | `decbench-compile` Docker image, Ubuntu 24.04 |
-| Compiler | GCC/G++ 13.3.0 (aarch64) |
-| Linker | GNU ld (via GCC) |
-| Windows SDK | N/A |
-| Wine/msvc-wine | N/A |
+| Host | macOS 26.5.1 arm64 |
+| Build environment | `decbench-compile` Docker image, Ubuntu 24.04 aarch64 |
+| Compiler | GCC/G++ 13.3.0 |
+| Intended role | Numeric / floating-point / algorithmic library baseline |
 
-## Build and ground-truth summary
+## Build and ground-truth results
 
-| Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
-|---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 127 (proj) / 237 (raw) | 122 / 191 | 5 / 28 | 10 / 74 | **7.87%** (proj) / 31.22% (raw) |
-| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 77 (proj) / 89 (raw) | 71 / 78 | 6 / 8 | 12 / 19 | **15.58%** (proj) / 21.35% (raw) |
-| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 124 (proj) / 267 (raw) | 119 / 188 | 5 / 34 | 10 / 113 | **8.06%** (proj) / 42.32% (raw) |
+| Mode | Build | Linked image | `.ii` | Project addrs | Raw addrs | Project collisions | Raw collisions |
+|---|---|---|---:|---:|---:|---:|---:|
+| O0 | PASS | `libdouble-conversion.so.3.3.0` | 8 | 127 | 237 | **10 / 127 = 7.87%** | 74 / 237 = 31.22% |
+| O2 | PASS | `libdouble-conversion.so.3.3.0` | 8 | 77 | 89 | **12 / 77 = 15.58%** | 19 / 89 = 21.35% |
+| O2-noinline | PASS | `libdouble-conversion.so.3.3.0` | 8 | 124 | 267 | **10 / 124 = 8.06%** | 113 / 267 = 42.32% |
 
-> **Collision measurement methodology:** `scripts/measure_collisions.py` directly executes DecBench's
-> exact C++ oracle logic (`evalkit/resolve.py` + `utils.binfmt`):
-> - **Collision identity key**: Resolved `DW_AT_name` (following `DW_AT_specification` and `DW_AT_abstract_origin` chains).
-> - **Source-stem filtering**: `DW_AT_decl_file` basename stems are matched against the 8 compiled `.ii`
->   translation-unit stems (`bignum.cc`, `cached-powers.cc`, `diy-fp.cc`, `double-to-string.cc`, `fast-dtoa.cc`,
->   `fixed-dtoa.cc`, `string-to-double.cc`, `strtod.cc`).
-> - Header-defined multi-TU helper functions (e.g. from `utils.h`) are excluded from project translation-unit scope,
->   leaving only genuine project source functions defined in `.cc` units.
-> - Project collisions (8–16%) consist entirely of legitimate constructor and method overloads (e.g. `Double`, `Vector`, `DiyFp`, `operator[]`).
->   Full raw JSON evidence is preserved in `results/evidence/collision/`.
-
-
-Collision rate formula: `collision_addresses / source_function_addresses`
+All three modes produced one intended linked ELF image, eight preprocessed `.ii`
+translation units, and usable DWARF. The compile report records no errors.
 
 ## Optimization control
 
-### O0
+The CMake build is configured with an empty `CMAKE_BUILD_TYPE`, shared-library
+output, tests disabled, and DecBench's flags injected through
+`CMAKE_CXX_FLAGS="$CFLAGS"`.
+
 ```text
-compile: g++ -O0 -g -fno-builtin -save-temps=obj [from CFLAGS]
-         cmake -S . -B build -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="$CFLAGS"
-                -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF
-link:    cmake --build build -j && rm -rf build/CMakeFiles/[0-9]*
+O0:          -O0 -g -fno-builtin -save-temps=obj
+O2:          -O2 -g -fno-builtin -save-temps=obj
+O2-noinline: -O2 -fno-inline -g -fno-builtin -save-temps=obj
 ```
 
-### O2
+No LTO/IPO/profile flags were observed in the final compiler producer metadata.
+
+## Project source scope
+
+The project metric uses the same source-stem model as DecBench. The eight compiled
+translation units are:
+
 ```text
-compile: g++ -O2 -g -fno-builtin -save-temps=obj [from CFLAGS]
-link:    cmake --build build -j
+bignum-dtoa.cc
+bignum.cc
+cached-powers.cc
+double-to-string.cc
+fast-dtoa.cc
+fixed-dtoa.cc
+string-to-double.cc
+strtod.cc
 ```
 
-### O2-noinline
+This distinction matters substantially for double-conversion. Header-defined helper
+functions can be emitted into several translation units and therefore produce many
+raw duplicate names, but DecBench's project-source oracle intentionally retains only
+functions whose `DW_AT_decl_file` stem matches an actual compiled translation unit.
+That is why the final project collision rate is much lower than the raw rate.
+
+## Collision methodology
+
+The identity key is resolved `DW_AT_name`, following the same
+`DW_AT_specification` / C++ `DW_AT_abstract_origin` chain used by DecBench. The
+project scope is then restricted with DecBench-style `.i`/`.ii` source-stem
+matching. Demangled linkage names are diagnostic only.
+
 ```text
-compile: g++ -O2 -fno-inline -g -fno-builtin -save-temps=obj [from CFLAGS]
-link:    cmake --build build -j
+collision_rate = collision_addresses / source_function_addresses
 ```
 
-Unexpected optimization/LTO/IPO/inlining behavior:
+The committed reports preserve both project and raw measurements so the effect of
+source filtering is auditable.
+
+## Main finding
+
+double-conversion has the best current collision profile of the three validated
+GCC/DWARF targets:
+
 ```text
-None. No -flto, -fprofile, or IPO flags.
-CMAKE_BUILD_TYPE intentionally left empty. No upstream Release preset triggered.
+O0          7.87%
+O2         15.58%
+O2-noinline 8.06%
 ```
 
-## Linked images
+The remaining project collisions are genuine C++ identity cases in source-owned
+translation units: overloaded methods, constructors, const/non-const variants, and
+similar functions that share an unqualified `DW_AT_name`. They are not caused by
+the earlier short-name parser bug and are not dominated by standard-library
+instantiations.
 
-### O0
+The raw metric is intentionally higher at O0 and O2-noinline because non-inlined
+header/template bodies remain concretely emitted in DWARF. Those functions are not
+part of DecBench's project translation-unit ground-truth set.
+
+## Evidence
+
+Canonical evidence:
+
 ```text
-results/cpp_local/O0/double-conversion/compiled/libdouble-conversion.so.3.3.0
-  ELF 64-bit LSB shared object, ARM aarch64
-  BuildID: 088f77bbceda26de747b05c6a56f0c2db7b9539f
-  Size: 404424 bytes
-  DWARF: present (7 sections), not stripped
+results/evidence/compile_report.json
+results/evidence/environment.txt
+results/evidence/collision/double-conversion_O0.json
+results/evidence/collision/double-conversion_O2.json
+results/evidence/collision/double-conversion_O2-noinline.json
 ```
 
-### O2
-```text
-results/cpp_local/O2/double-conversion/compiled/libdouble-conversion.so.3.3.0
-  ELF 64-bit LSB shared object, ARM aarch64
-  BuildID: 450a6d925b75f3429e75327d603c28f25f5f2e20
-  Size: 559464 bytes (larger than O0 — optimizer may expand some specializations)
-  DWARF: present (7 sections)
-```
+Each JSON report records the exact source stems, linked image, address totals,
+collision groups, and representative diagnostic names.
 
-### O2-noinline
-```text
-results/cpp_local/O2-noinline/double-conversion/compiled/libdouble-conversion.so.3.3.0
-  ELF 64-bit LSB shared object, ARM aarch64
-  BuildID: 622d77bad265087a4d8f6679c98710a0c3206969
-  Size: 510632 bytes
-  DWARF: present (7 sections)
-```
+## Qualification decision
 
-## Source ownership filter
+double-conversion is **VALIDATED** and **recommended** for the initial C++ corpus.
+It provides:
 
-Included project-owned paths/compilands:
-```text
-bignum.cc, bignum-dtoa.cc, cached-powers.cc, double-to-string.cc,
-fast-dtoa.cc, fixed-dtoa.cc, string-to-double.cc, strtod.cc
-(8 .ii files verified per mode)
-```
+- a small dependency-light real C++ library;
+- a substantially different workload from compression/tooling targets;
+- controlled O0/O2/O2-noinline builds;
+- clean `.ii` and DWARF ground truth;
+- the lowest measured current short-name collision exposure in this target set.
 
-Excluded tests/vendor/compiler-probe/generated paths:
-```text
-BUILD_TESTING=OFF — test sources (test-bignum.cc, test-bignum-dtoa.cc,
-test-conversions.cc, test-diy-fp.cc, test-dtoa.cc, cctest.cc) excluded from build.
-CMakeFiles/[0-9]* compiler-probe directories removed by make_cmd.
-Note: test .cc files are copied into compiled/ by DecBench's source-copy step
-but NOT linked into the benchmark library (they are NOT compiled into libdouble-conversion.so).
-```
+Its 8–16% project collision rate should still be treated as a known property of
+the present DecBench C++ identity model rather than ignored.
 
-Any uncertain ownership cases:
-```text
-None. All collision groups confirmed in double_conversion:: namespace.
-```
+## Remaining caveat
 
-## Short-name collision details
-
-All collisions are from project-owned `double_conversion::` namespace, confirmed from DWARF.
-No stdlib contamination detected in any mode.
-
-| Short name | Distinct addresses | Example qualified names | Notes |
-|---|---:|---|---|
-| `Double` | 3 | `double_conversion::Double::Double(double)`, `double_conversion::Double::Double(unsigned long long)`, `double_conversion::Double::Double()` | Constructor overloads in helper class |
-| `Vector` | 3 | `double_conversion::Vector<char>::Vector(char*, int)`, `double_conversion::Vector<double>::Vector(double*, int)`, `double_conversion::Vector<char>::Vector()` | Template constructor overloads |
-| `RawBigit` | 2 | `double_conversion::Bignum::RawBigit(int)`, `double_conversion::Bignum::RawBigit(int) const` | const vs non-const overload |
-| `Single` | 2 | `double_conversion::Single::Single(float)`, `double_conversion::Single::Single(unsigned int)` | Constructor overloads |
-| `DiyFp` | 2 | `double_conversion::DiyFp::DiyFp(unsigned long, int)`, `double_conversion::DiyFp::DiyFp()` | Constructor overloads |
-| `AddUInt64` | 2 | `double_conversion::Bignum::AddUInt64(unsigned long)` (appears at 2 addresses under O2) | Possible const/non-const variant |
-
-These are legitimate C++ overloads and multi-constructor patterns — not GCC ABI artifacts.
-Under DecBench's current unqualified name model, `Double(double)` and `Double(unsigned long long)`
-are indistinguishable. This is a true identity challenge, not a measurement artifact.
-
-## Preprocessed source / oracle notes
-
-For GCC/DWARF targets:
-
-- `.ii` preservation: ✅ 8 `.cc.ii` files per mode
-- DWARF `DW_AT_specification` handling checked: ✅
-- DWARF `DW_AT_abstract_origin` handling checked: ✅
-
-## Final status
-
-Status: **VALIDATED**
-
-Decision rationale:
-```text
-All three optimization modes built successfully. One linked ELF image per mode.
-Eight .ii source units per mode. DWARF present (7 sections) in all modes.
-Collision analysis completed from measured DWARF. All collision groups are
-project-owned (double_conversion:: namespace) — no stdlib contamination.
-
-Collision rate of 15-22% is moderate and driven by constructor overloads
-and const/non-const overload pairs. This is a cleaner target than Snappy
-(no virtual destructor dual noise) and represents a genuine identity challenge
-for DecBench's unqualified name model.
-
-double-conversion is validated as a GCC/DWARF target for the corpus.
-The numeric/floating-point workload is substantially different from Snappy.
-```
-
-Remaining blockers:
-```text
-None. The 15-22% collision rate is documented and acceptable for the initial corpus,
-provided DecBench tracks this as a known qualification caveat.
-```
+The current evidence is from GCC 13.3.0 on **aarch64**. The final corpus should
+re-run the same checks on its production architecture, particularly x86-64 if that
+becomes the publication target.

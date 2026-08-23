@@ -1,0 +1,106 @@
+name: Retry small Windows C++ candidates
+
+on:
+  pull_request:
+    branches: [ci-small-base]
+
+permissions:
+  contents: read
+
+jobs:
+  trafficmonitor:
+    name: TrafficMonitor Lite / MSVC x64 Release
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Install latest Native Desktop + MFC components
+        shell: pwsh
+        run: |
+          $vswhere = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe'
+          $setup = 'C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe'
+          $vsPath = (& $vswhere -latest -prerelease -property installationPath).Trim()
+          Write-Host "VS install: $vsPath"
+          $args = @(
+            'modify',
+            '--installPath', $vsPath,
+            '--add', 'Microsoft.VisualStudio.Workload.NativeDesktop',
+            '--includeRecommended',
+            '--includeOptional',
+            '--quiet',
+            '--norestart'
+          )
+          $p = Start-Process -FilePath $setup -ArgumentList $args -Wait -PassThru
+          if ($p.ExitCode -ne 0 -and $p.ExitCode -ne 3010) { exit $p.ExitCode }
+
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/zhongyang219/TrafficMonitor.git target
+          git -C target checkout 5efd2159af8117301a2b6a755897aaa995887678
+          New-Item -ItemType Directory -Force reports/trafficmonitor | Out-Null
+
+      - name: Build with current VS toolset
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          msbuild target\TrafficMonitor_Lite.sln /m /p:Configuration="Release (lite)" /p:Platform=x64 /p:PlatformToolset=v145
+          $code = $LASTEXITCODE
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds, 3))" | Set-Content reports/trafficmonitor/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/trafficmonitor/metadata.txt
+          exit $code
+
+      - name: Collect and print metrics
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'TrafficMonitor.exe' -OutDir reports/trafficmonitor -TargetName 'TrafficMonitor Lite x64 Release'
+          Get-Content reports/trafficmonitor/pe-metrics.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: trafficmonitor-retry-report
+          path: reports/trafficmonitor
+
+  openloco:
+    name: OpenLoco / VS2026 x64 Release
+    runs-on: windows-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Clone pinned source
+        shell: pwsh
+        run: |
+          git clone https://github.com/OpenLoco/OpenLoco.git target
+          git -C target checkout 96de081155f326a7af83f925185c1a934ba536b4
+          New-Item -ItemType Directory -Force reports/openloco | Out-Null
+
+      - name: Configure and build with VS2026 generator
+        shell: pwsh
+        run: |
+          $sw = [Diagnostics.Stopwatch]::StartNew()
+          cmake -S target -B target/build-ci -G "Visual Studio 18 2026" -A x64 -DOPENLOCO_BUILD_TESTS=OFF -DOPENLOCO_USE_CCACHE=OFF -DOPENLOCO_USE_VCPKG=ON
+          $code = $LASTEXITCODE
+          if ($code -eq 0) {
+            cmake --build target/build-ci --config Release --parallel
+            $code = $LASTEXITCODE
+          }
+          $sw.Stop()
+          "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds, 3))" | Set-Content reports/openloco/metadata.txt
+          "build_exit_code=$code" | Add-Content reports/openloco/metadata.txt
+          exit $code
+
+      - name: Collect and print metrics
+        shell: pwsh
+        run: |
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'OpenLoco.exe' -OutDir reports/openloco -TargetName 'OpenLoco x64 Release'
+          Get-Content reports/openloco/pe-metrics.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: openloco-retry-report
+          path: reports/openloco

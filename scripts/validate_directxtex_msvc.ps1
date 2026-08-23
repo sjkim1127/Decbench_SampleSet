@@ -124,13 +124,15 @@ Copy-Item -Force $dll (Join-Path $binaryEvidence "DirectXTex.dll")
 Copy-Item -Force $pdb (Join-Path $binaryEvidence "DirectXTex.pdb")
 
 $qualifier = Join-Path $PSScriptRoot "qualify_msvc_pdb.ps1"
-& $qualifier \
-    -TargetName "Microsoft DirectXTex may2026" \
-    -Mode $Mode \
-    -BinaryPath $dll \
-    -PdbPath $pdb \
-    -ProjectSourceRoots @(Join-Path $SourceRoot "DirectXTex") \
-    -EvidenceRoot $EvidenceRoot
+$qualifyArgs = @{
+    TargetName = "Microsoft DirectXTex may2026"
+    Mode = $Mode
+    BinaryPath = $dll
+    PdbPath = $pdb
+    ProjectSourceRoots = @((Join-Path $SourceRoot "DirectXTex"))
+    EvidenceRoot = $EvidenceRoot
+}
+& $qualifier @qualifyArgs
 if ($LASTEXITCODE -ne 0) { throw "PDB qualification failed" }
 
 Write-Host "PASS DirectXTex $Mode native MSVC build + PDB qualification"

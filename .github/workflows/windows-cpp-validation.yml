@@ -1,10 +1,14 @@
-name: Windows C++ candidate validation
+name: Windows C++ release validation
 
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/windows-cpp-validation.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/windows-cpp-validation.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,21 +16,25 @@ permissions:
 
 jobs:
   trafficmonitor:
-    name: TrafficMonitor Lite / MSVC x64 Release
-    runs-on: windows-latest
+    name: TrafficMonitor V1.86 / MSVC x64 Release
+    runs-on: windows-2022
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/zhongyang219/TrafficMonitor.git target
-          git -C target checkout 5efd2159af8117301a2b6a755897aaa995887678
+          git clone --branch V1.86 --depth 1 https://github.com/zhongyang219/TrafficMonitor.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '02a817a069bac6bf4d263b5209d9c1b07fe2f950') {
+            throw "V1.86 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/trafficmonitor | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/trafficmonitor/metadata.txt
+          "release=V1.86" | Set-Content reports/trafficmonitor/metadata.txt
+          "commit=$head" | Add-Content reports/trafficmonitor/metadata.txt
           "submodules=$(@(git -C target submodule status --recursive).Count)" | Add-Content reports/trafficmonitor/metadata.txt
           $bytes = (Get-ChildItem target -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
           "clone_bytes=$bytes" | Add-Content reports/trafficmonitor/metadata.txt
@@ -49,13 +57,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'TrafficMonitor.exe' -OutDir reports/trafficmonitor -TargetName 'TrafficMonitor Lite x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'TrafficMonitor.exe' -OutDir reports/trafficmonitor -TargetName 'TrafficMonitor V1.86 Lite x64 Release'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trafficmonitor-report
+          name: trafficmonitor-V1.86-report
           path: reports/trafficmonitor
 
       - name: Preserve build failure status
@@ -64,21 +72,25 @@ jobs:
         run: exit 1
 
   openloco:
-    name: OpenLoco / MSVC x64 Release
-    runs-on: windows-latest
+    name: OpenLoco v26.07.1 / MSVC x64 Release
+    runs-on: windows-2022
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/OpenLoco/OpenLoco.git target
-          git -C target checkout 96de081155f326a7af83f925185c1a934ba536b4
+          git clone --branch v26.07.1 --depth 1 https://github.com/OpenLoco/OpenLoco.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '5c95820e2c022698f89908b8aade12423b1eef21') {
+            throw "v26.07.1 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/openloco | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/openloco/metadata.txt
+          "release=v26.07.1" | Set-Content reports/openloco/metadata.txt
+          "commit=$head" | Add-Content reports/openloco/metadata.txt
           "submodules=$(@(git -C target submodule status --recursive).Count)" | Add-Content reports/openloco/metadata.txt
           $bytes = (Get-ChildItem target -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
           "clone_bytes=$bytes" | Add-Content reports/openloco/metadata.txt
@@ -108,13 +120,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'OpenLoco.exe' -OutDir reports/openloco -TargetName 'OpenLoco x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'OpenLoco.exe' -OutDir reports/openloco -TargetName 'OpenLoco v26.07.1 x64 Release'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: openloco-report
+          name: openloco-v26.07.1-report
           path: reports/openloco
 
       - name: Preserve build failure status
@@ -123,22 +135,26 @@ jobs:
         run: exit 1
 
   x64dbg:
-    name: x64dbg / MSVC x64 Release
-    runs-on: windows-latest
+    name: x64dbg 2026.05.27 / MSVC x64 Release
+    runs-on: windows-2025-vs2026
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
-      - name: Clone pinned source and submodules
+      - name: Clone stable release tag and submodules
         shell: pwsh
         run: |
-          git clone https://github.com/x64dbg/x64dbg.git target
-          git -C target checkout 17233957ea0a7e70d188187380bd74f80c2a4b93
+          git clone --branch 2026.05.27 --depth 1 https://github.com/x64dbg/x64dbg.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '9c8ca1cae0b6d56cc44f31fddcb10e3b02ffbb87') {
+            throw "2026.05.27 resolved to unexpected commit: $head"
+          }
           git -C target submodule sync --recursive
           git -C target submodule update --init --recursive --depth 1
           New-Item -ItemType Directory -Force reports/x64dbg | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/x64dbg/metadata.txt
+          "release=2026.05.27" | Set-Content reports/x64dbg/metadata.txt
+          "commit=$head" | Add-Content reports/x64dbg/metadata.txt
           "submodules=$(@(git -C target submodule status --recursive).Count)" | Add-Content reports/x64dbg/metadata.txt
           $bytes = (Get-ChildItem target -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
           "clone_bytes=$bytes" | Add-Content reports/x64dbg/metadata.txt
@@ -166,13 +182,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'x64dbg.exe' -OutDir reports/x64dbg -TargetName 'x64dbg x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'x64dbg.exe' -OutDir reports/x64dbg -TargetName 'x64dbg 2026.05.27 x64 Release'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: x64dbg-report
+          name: x64dbg-2026.05.27-report
           path: reports/x64dbg
 
       - name: Preserve build failure status
@@ -181,21 +197,25 @@ jobs:
         run: exit 1
 
   windows-terminal:
-    name: Windows Terminal OpenConsole / MSVC x64 Release
-    runs-on: windows-latest
+    name: Windows Terminal v1.24.11321.0 OpenConsole / MSVC x64 Release
+    runs-on: windows-2025-vs2026
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/microsoft/terminal.git target
-          git -C target checkout 20588130d8ef2ba40eb56bdae88e04cce7fc5b5d
+          git clone --branch v1.24.11321.0 --depth 1 https://github.com/microsoft/terminal.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne 'b4e69c68620a822407d45bfbba6ee10feebc70a3') {
+            throw "v1.24.11321.0 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/windows-terminal | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/windows-terminal/metadata.txt
+          "release=v1.24.11321.0" | Set-Content reports/windows-terminal/metadata.txt
+          "commit=$head" | Add-Content reports/windows-terminal/metadata.txt
           "submodules=$(@(git -C target submodule status --recursive).Count)" | Add-Content reports/windows-terminal/metadata.txt
           $bytes = (Get-ChildItem target -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
           "clone_bytes=$bytes" | Add-Content reports/windows-terminal/metadata.txt
@@ -223,13 +243,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'OpenConsole.exe' -OutDir reports/windows-terminal -TargetName 'Windows Terminal OpenConsole x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'OpenConsole.exe' -OutDir reports/windows-terminal -TargetName 'Windows Terminal v1.24.11321.0 OpenConsole x64 Release'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: windows-terminal-report
+          name: windows-terminal-v1.24.11321.0-report
           path: reports/windows-terminal
 
       - name: Preserve build failure status

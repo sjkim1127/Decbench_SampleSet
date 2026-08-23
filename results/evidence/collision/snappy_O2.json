@@ -1,5 +1,11 @@
 {
   "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled",
+  "source_stems": [
+    "snappy-c.cc",
+    "snappy-sinksource.cc",
+    "snappy-stubs-internal.cc",
+    "snappy.cc"
+  ],
   "exclude_images": [],
   "elf_images": [
     "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2"
@@ -11,8 +17,8 @@
       "cu_stats": {
         "total": 4,
         "probe": 0,
-        "system_subprograms": 2,
-        "project_subprograms": 82
+        "non_project_subprograms": 5,
+        "project_subprograms": 79
       },
       "raw": {
         "source_function_addresses": 84,
@@ -268,12 +274,12 @@
         ]
       },
       "project": {
-        "source_function_addresses": 82,
-        "unique_short_names": 60,
+        "source_function_addresses": 79,
+        "unique_short_names": 57,
         "collision_groups": 20,
         "collision_addresses": 42,
-        "collision_rate": 0.512195,
-        "collision_rate_pct": "51.22%",
+        "collision_rate": 0.531646,
+        "collision_rate_pct": "53.16%",
         "top_collision_groups": [
           {
             "short_name": "Compress",
@@ -529,9 +535,9 @@
     "collision_rate_pct": "50.00%"
   },
   "aggregated_project": {
-    "source_function_addresses": 82,
+    "source_function_addresses": 79,
     "collision_addresses": 42,
-    "collision_rate": 0.512195,
-    "collision_rate_pct": "51.22%"
+    "collision_rate": 0.531646,
+    "collision_rate_pct": "53.16%"
   }
 }

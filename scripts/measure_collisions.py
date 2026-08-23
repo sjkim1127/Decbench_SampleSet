@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """DWARF short-name collision measurement for DecBench C++ target validation.
 
-DecBench Identity Model Alignment:
-  - Collision identity key: Resolved DW_AT_name (following DW_AT_specification and
-    DW_AT_abstract_origin chains). This gives the exact unqualified function name
-    as indexed by DecBench (e.g. 'AssignBignum', '~ManifestParser', 'Double').
-  - Diagnostic display: Demangled DW_AT_linkage_name (for human review in reports).
-  - Project Ownership: Determined via DW_AT_decl_file (reconstructing the full source
-    file path from DWARF line table) and CU language, excluding /usr/include,
-    /usr/lib, and standard library headers.
+DecBench-Exact Matching & Identity Model:
+  1. Collision Identity Key: Resolved DW_AT_name following DW_AT_specification
+     and DW_AT_abstract_origin chains across DIEs (matches DecBench binfmt.die_attr_owner).
+  2. Diagnostic Display: Demangled DW_AT_linkage_name (for human review in reports).
+  3. Source-Stem Filter: Exact DecBench evalkit/resolve.py logic:
+     - Collects *.i / *.ii translation unit stems from the compiled directory.
+     - Builds stem_index via strip_source_ext() and build_stem_index().
+     - Resolves DW_AT_decl_file for each concrete subprogram and matches its basename stem
+       against the stem_index (including -stem / _stem object-prefix fallback).
+     - Raw metrics include all concrete subprograms in non-probe CUs.
+     - Project metrics include only functions declared in project translation units.
 
 Usage:
     python3 scripts/measure_collisions.py <compiled_dir> [--output report.json]
@@ -18,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import struct
 import subprocess
 import sys
@@ -34,25 +38,43 @@ from elftools.elf.elffile import ELFFile
 from elftools.common.exceptions import ELFError
 
 
+C_SOURCE_EXTS = (".c",)
+CXX_SOURCE_EXTS = (".cc", ".cpp", ".cxx", ".c++", ".C")
+SOURCE_EXTS = (*C_SOURCE_EXTS, *CXX_SOURCE_EXTS)
+PREPROC_EXTS = (".i", ".ii")
+
 _CXX_LANGS = frozenset({0x04, 0x19, 0x1A, 0x21, 0x2A, 0x2B, 0x33})
 _SPEC_ONLY = ("DW_AT_specification",)
 _SPEC_AND_ORIGIN = ("DW_AT_specification", "DW_AT_abstract_origin")
-
-_SYSTEM_PATH_PATTERNS = (
-    "/usr/include",
-    "/usr/lib",
-    "/usr/local/include",
-    "/usr/local/lib",
-    "/include/c++/",
-    "/include/g++/",
-    "bits/",
-    "ext/",
-)
 
 _PROBE_KEYWORDS = frozenset([
     "CMakeFiles", "cmake_install", "CMakeCXXCompilerId",
     "CMakeCCompilerId", "CompilerIdCXX", "CompilerIdC", "feature_tests",
 ])
+
+
+def strip_source_ext(name: str) -> str:
+    """Drop a trailing C/C++ source extension from name (DecBench utils.langs)."""
+    stem, ext = os.path.splitext(name)
+    return stem if ext in SOURCE_EXTS else name
+
+
+def preprocessed_stems(directory: Path) -> list[str]:
+    """Collect all preprocessed translation unit stems (*.i, *.ii)."""
+    stems = []
+    for ext in PREPROC_EXTS:
+        for p in sorted(directory.glob(f"*{ext}")):
+            stems.append(p.stem)
+    return stems
+
+
+def build_stem_index(stems: list[str]) -> dict[str, str]:
+    """{strip_source_ext(stem): stem} (DecBench utils.langs)."""
+    index: dict[str, str] = {}
+    for stem in sorted(stems):
+        key = strip_source_ext(stem)
+        index[key] = stem
+    return index
 
 
 def _is_linked_elf(path: Path) -> bool:
@@ -97,7 +119,7 @@ def cu_is_cxx(cu) -> bool:
 
 
 def die_attr_owner(die, name: str):
-    """(attribute, owning DIE) for name, following specification/origin chains."""
+    """(attribute, owning DIE) following specification/origin chains (DecBench binfmt)."""
     cur = die
     refs = _SPEC_AND_ORIGIN if cu_is_cxx(die.cu) else _SPEC_ONLY
     for _ in range(5):
@@ -127,7 +149,7 @@ def die_str_attr(die, name: str) -> str | None:
 
 
 def cu_file_table(dwarfinfo, cu, cache: dict[int, list] | None = None) -> list:
-    """A CU's DW_AT_decl_file index table, memoized by CU offset."""
+    """A CU's DW_AT_decl_file index table, memoized by CU offset (DecBench binfmt)."""
     if cache is not None:
         cached = cache.get(cu.cu_offset)
         if cached is not None:
@@ -138,40 +160,22 @@ def cu_file_table(dwarfinfo, cu, cache: dict[int, list] | None = None) -> list:
         version = lp.header.get("version", cu.header.get("version", 4))
     files: list = [] if version >= 5 else [None]
     if lp is not None and lp.header and lp.header.get("file_entry"):
-        fe_list = lp.header["file_entry"]
-        dirs = lp.header.get("include_directory", [])
-        for fe in fe_list:
-            nm = fe.name.decode("utf-8", "replace") if isinstance(fe.name, bytes) else str(fe.name)
-            dir_idx = fe.get("dir_index", 0)
-            didx = dir_idx if version >= 5 else dir_idx - 1
-            if 0 <= didx < len(dirs):
-                d = dirs[didx].decode("utf-8", "replace") if isinstance(dirs[didx], bytes) else str(dirs[didx])
-                files.append(f"{d}/{nm}")
-            else:
-                files.append(nm)
+        for fe in lp["file_entry"]:
+            nm = fe.name
+            files.append(nm.decode("utf-8", "replace") if isinstance(nm, bytes) else str(nm))
     if cache is not None:
         cache[cu.cu_offset] = files
     return files
 
 
-def get_decl_file(die, dwarfinfo, file_tables: dict) -> str:
+def get_decl_file_basename(die, dwarfinfo, file_tables: dict) -> str:
     fi, fi_owner = die_attr_owner(die, "DW_AT_decl_file")
     if fi is None or fi_owner is None:
         return ""
     files = cu_file_table(dwarfinfo, fi_owner.cu, file_tables)
     if 0 <= fi.value < len(files) and files[fi.value]:
-        return files[fi.value]
+        return os.path.basename(files[fi.value])
     return ""
-
-
-def _is_system_decl(decl_file: str, cu_name: str) -> bool:
-    if decl_file:
-        if any(pat in decl_file for pat in _SYSTEM_PATH_PATTERNS):
-            return True
-    if cu_name:
-        if any(pat in cu_name for pat in _SYSTEM_PATH_PATTERNS):
-            return True
-    return False
 
 
 def _make_stats(n2a: dict[str, set[int]], a2diag: dict[int, str]) -> dict:
@@ -209,13 +213,13 @@ def _make_stats(n2a: dict[str, set[int]], a2diag: dict[int, str]) -> dict:
     }
 
 
-def measure_elf(elf_path: Path, verbose: bool = False) -> dict:
+def measure_elf(elf_path: Path, stem_index: dict[str, str], verbose: bool = False) -> dict:
     raw_n2a: dict[str, set[int]] = defaultdict(set)
     raw_a2diag: dict[int, str] = {}
     proj_n2a: dict[str, set[int]] = defaultdict(set)
     proj_a2diag: dict[int, str] = {}
 
-    cu_stats = {"total": 0, "probe": 0, "system_subprograms": 0, "project_subprograms": 0}
+    cu_stats = {"total": 0, "probe": 0, "non_project_subprograms": 0, "project_subprograms": 0}
 
     with elf_path.open("rb") as f:
         try:
@@ -263,19 +267,24 @@ def measure_elf(elf_path: Path, verbose: bool = False) -> dict:
                 raw_link = die_str_attr(die, "DW_AT_linkage_name") or die_str_attr(die, "DW_AT_MIPS_linkage_name") or ""
                 demangled = _demangle(raw_link) if raw_link else name
 
-                # 3. Resolve source declaration file via DW_AT_decl_file
-                decl_file = get_decl_file(die, dwarf, file_tables)
-                is_system = _is_system_decl(decl_file, cu_name)
+                # 3. Resolve source declaration stem matching DecBench evalkit/resolve.py
+                decl_basename = get_decl_file_basename(die, dwarf, file_tables)
+                stem = strip_source_ext(decl_basename) if decl_basename else ""
+
+                is_project = False
+                if stem and stem_index:
+                    if stem in stem_index or any(s.endswith("-" + stem) or s.endswith("_" + stem) for s in stem_index):
+                        is_project = True
 
                 raw_n2a[name].add(low_pc)
                 raw_a2diag[low_pc] = demangled
 
-                if is_system:
-                    cu_stats["system_subprograms"] += 1
-                else:
+                if is_project:
                     cu_stats["project_subprograms"] += 1
                     proj_n2a[name].add(low_pc)
                     proj_a2diag[low_pc] = demangled
+                else:
+                    cu_stats["non_project_subprograms"] += 1
 
     return {
         "path": str(elf_path),
@@ -298,7 +307,7 @@ def _agg(per_image: list[dict], key: str) -> dict:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Measure DWARF short-name collisions (DecBench identity aligned)")
+    ap = argparse.ArgumentParser(description="Measure DWARF short-name collisions (DecBench-exact source-stem matching)")
     ap.add_argument("compiled_dir")
     ap.add_argument("--output", "-o", default=None)
     ap.add_argument("--exclude-image", nargs="*", default=[], metavar="NAME")
@@ -310,6 +319,9 @@ def main() -> int:
         print(f"ERROR: {compiled} is not a directory", file=sys.stderr)
         return 1
 
+    stems = preprocessed_stems(compiled)
+    stem_index = build_stem_index(stems)
+
     exclude = set(args.exclude_image)
     elf_paths = sorted(
         p for p in compiled.iterdir()
@@ -320,6 +332,7 @@ def main() -> int:
         print(f"WARNING: No ELF images in {compiled}", file=sys.stderr)
         result = {
             "compiled_dir": str(compiled),
+            "source_stems": stems,
             "elf_image_count": 0,
             "aggregated_raw": {},
             "aggregated_project": {},
@@ -328,11 +341,12 @@ def main() -> int:
         per_image = []
         for ep in elf_paths:
             if args.verbose:
-                print(f"  [{ep.name}]", file=sys.stderr, flush=True)
-            per_image.append(measure_elf(ep, args.verbose))
+                print(f"  [{ep.name}] (stems={len(stems)})", file=sys.stderr)
+            per_image.append(measure_elf(ep, stem_index, args.verbose))
 
         result = {
             "compiled_dir": str(compiled),
+            "source_stems": stems,
             "exclude_images": list(exclude),
             "elf_images": [str(p) for p in elf_paths],
             "elf_image_count": len(elf_paths),
@@ -353,8 +367,7 @@ def main() -> int:
     parts = compiled.parts
     tag = f"{parts[-3]}/{parts[-2]}" if len(parts) >= 3 else str(compiled)
     print(
-        f"SUMMARY [{tag}]"
-        f"  ELF={result.get('elf_image_count',0)}"
+        f"SUMMARY [{tag}]  stems={len(stems)}"
         f"  raw={r.get('source_function_addresses','?')} addrs @{r.get('collision_rate_pct','?')}"
         f"  project={p.get('source_function_addresses','?')} addrs @{p.get('collision_rate_pct','?')}",
         file=sys.stderr,

@@ -22,19 +22,22 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 186 (proj) / 341 (raw) | 134 / 236 | 31 / 62 | 83 / 167 | **44.62%** (proj) / 48.97% (raw) |
-| O2 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 82 (proj) / 84 (raw) | 60 / 62 | 20 / 20 | 42 / 42 | **51.22%** (proj) / 50.00% (raw) |
-| O2-noinline | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 179 (proj) / 332 (raw) | 131 / 231 | 31 / 62 | 79 / 163 | **44.13%** (proj) / 49.10% (raw) |
+| O0 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 157 (proj) / 341 (raw) | 105 / 236 | 31 / 62 | 83 / 167 | **52.87%** (proj) / 48.97% (raw) |
+| O2 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 79 (proj) / 84 (raw) | 57 / 62 | 20 / 20 | 42 / 42 | **53.16%** (proj) / 50.00% (raw) |
+| O2-noinline | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 152 (proj) / 332 (raw) | 104 / 231 | 31 / 62 | 79 / 163 | **51.97%** (proj) / 49.10% (raw) |
 
-> **Collision measurement methodology:** `scripts/measure_collisions.py` aligns directly with DecBench's
-> C++ oracle implementation:
+> **Collision measurement methodology:** `scripts/measure_collisions.py` directly executes DecBench's
+> exact C++ oracle logic (`evalkit/resolve.py` + `utils.binfmt`):
 > - **Collision identity key**: Resolved `DW_AT_name` (following `DW_AT_specification` and `DW_AT_abstract_origin`
 >   chains across DIEs).
-> - **Diagnostic display**: Demangled `DW_AT_linkage_name` for inspection.
-> - **Project ownership**: Resolved `DW_AT_decl_file` (via line table reconstruction) excluding system/stdlib headers
->   (`/usr/include`, `/usr/lib`, `/include/c++/`, etc.).
+> - **Diagnostic display**: Demangled `DW_AT_linkage_name` for human inspection.
+> - **Source-stem filtering**: `DW_AT_decl_file` basename stems are matched against the 4 compiled `.ii`
+>   translation-unit stems via `build_stem_index(source_stems)` and `strip_source_ext()`.
 > - **raw**: all concrete subprograms in the ELF.
-> - **project**: subprograms declared in project source files. Full raw JSON evidence is preserved in `results/evidence/collision/`.
+> - **project**: subprograms whose declaration stem matches a project translation unit.
+>
+> Snappy's project collision rate (52–53%) is driven by virtual destructor duals (D1+D2 thunks) and
+> overloaded functions (e.g. `Compress`, `GetAppendBuffer`). Full raw JSON evidence is preserved in `results/evidence/collision/`.
 
 
 Collision rate formula: `collision_addresses / source_function_addresses`

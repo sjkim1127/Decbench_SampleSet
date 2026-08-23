@@ -13,9 +13,9 @@
 
 | Target | Track | O0 | O2 | O2-noinline | Linked image | Ground truth | Collision rate (proj / raw) | Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| Snappy 1.2.2 | GCC/DWARF | ✅ | ✅ | ✅ | `libsnappy.so.1.2.2` | DWARF ✅ | 45% / 49% (O0) · 51% / 50% (O2) · 44% / 49% (O2-noinline) | **VALIDATED** | Virtual destructor duals & overloads |
-| double-conversion v3.3.1 | GCC/DWARF | ✅ | ✅ | ✅ | `libdouble-conversion.so.3.3.0` | DWARF ✅ | 32% / 31% (O0) · 21% / 21% (O2) · 43% / 42% (O2-noinline) | **VALIDATED** | Clean: all project-owned constructor/overload collisions |
-| Ninja v1.13.1 | GCC/DWARF | ✅ | ✅ | ✅ | `ninja` (exe) | DWARF ✅ | 37% / 66% (O0) · 34% / 41% (O2) · 41% / 71% (O2-noinline) | **VALIDATED WITH CAVEATS** | `boo` fixed; stdlib DWARF template presence at O0; LTO check PASSED |
+| Snappy 1.2.2 | GCC/DWARF | ✅ | ✅ | ✅ | `libsnappy.so.1.2.2` | DWARF ✅ | 53% / 49% (O0) · 53% / 50% (O2) · 52% / 49% (O2-noinline) | **VALIDATED** | Virtual destructor duals & overloads |
+| double-conversion v3.3.1 | GCC/DWARF | ✅ | ✅ | ✅ | `libdouble-conversion.so.3.3.0` | DWARF ✅ | 8% / 31% (O0) · 16% / 21% (O2) · 8% / 42% (O2-noinline) | **VALIDATED** | Cleanest: 8–16% genuine constructor/method overloads |
+| Ninja v1.13.1 | GCC/DWARF | ✅ | ✅ | ✅ | `ninja` (exe) | DWARF ✅ | 27% / 66% (O0) · 30% / 41% (O2) · 27% / 71% (O2-noinline) | **VALIDATED WITH CAVEATS** | `boo` fixed; source-stem matched; LTO check PASSED |
 | Detours v4.0.1 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
 | DirectXTex may2026 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
 | WinSparkle v0.9.4 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
@@ -63,32 +63,22 @@ No `-flto`, `-fprofile`, `-fwhole-program`, or IPO flags in any mode.
 
 ## Key findings from collision measurement
 
-### 1. DecBench Identity Alignment
+### 1. Exact DecBench Source-Stem Alignment
 
-`scripts/measure_collisions.py` directly mirrors DecBench's C++ oracle (`binfmt.die_attr_owner`):
-- **Collision Key**: Resolved `DW_AT_name` across `DW_AT_specification` / `DW_AT_abstract_origin` DIE chains.
-- **Project Scope**: Resolved `DW_AT_decl_file` (via DWARF line program headers), filtering out system/stdlib headers (`/usr/include/`, `/include/c++/`, `bits/`, etc.).
+`scripts/measure_collisions.py` directly executes DecBench's ground-truth resolution pipeline (`evalkit/resolve.py` + `utils.binfmt`):
+- **Collision Identity Key**: Resolved `DW_AT_name` across `DW_AT_specification` / `DW_AT_abstract_origin` DIE chains.
+- **Source-Stem Scope**: Collects translation-unit stems from compiled `.ii` / `.i` files and matches `DW_AT_decl_file` basename stems using `build_stem_index()` and `strip_source_ext()`.
+- Excludes header-defined helpers (e.g. `utils.h`) and standard library instantiations from project scope, reflecting exact DecBench ground-truth behavior.
 
-### 2. Virtual destructor duals (all targets)
+### 2. Target Collision Profiles
 
-GCC emits two distinct destructor subprograms for virtual classes:
-- D1 = complete-object destructor
-- D2 = base-object destructor
+- **double-conversion (8%–16% project collision)**: Extremely clean numerical codebase. Zero stdlib contamination. Collisions consist only of genuine constructor/method overloads (e.g. `Double`, `Vector`, `DiyFp`, `operator[]`).
+- **Ninja (27%–30% project collision)**: Large real-world CLI tool. When inlining is disabled, stdlib template bodies account for over 85% of raw DWARF functions, but DecBench source-stem filtering cleanly isolates project functions, giving a stable 27–30% project collision rate.
+- **Snappy (52%–53% project collision)**: Small compression library where virtual destructor duals (GCC D1+D2 thunks) and overloaded APIs (`Compress`, `GetAppendBuffer`) drive collision rates.
 
-Both share the same demangled short name (`~ClassName`). Under DecBench's current unqualified C++ identity model, these appear as collisions.
+### 3. boo artifact (Ninja) — Resolved
 
-### 3. Stdlib template presence (Ninja especially)
-
-At O0 and O2-noinline, GCC emits concrete DWARF subprograms for non-inlined libstdc++ template instantiations (`std::vector<T>`, `std::_Rb_tree`, etc.). In Ninja, these account for over 80% of raw subprograms when inlining is disabled.
-Using `DW_AT_decl_file` filtering, project-owned functions are isolated, yielding a consistent ~34–41% project collision rate.
-
-### 4. Constructor & method overloads (double-conversion, Ninja)
-
-Legitimate C++ constructor and method overloads produce genuine collision groups under the unqualified name model (e.g. `double_conversion::Double::Double(double)` vs `double_conversion::Double::Double(unsigned long long)`).
-
-### 5. boo artifact (Ninja) — Resolved
-
-The Ninja CMake bootstrap originally placed `_CMakeLTOTest-CXX/bin/boo` in the build directory. **Resolved:** `targets/ninja.toml` was updated to `cmake --build build -j --target ninja && rm -rf build/CMakeFiles`. Recompilation confirmed 1 linked binary (`ninja`).
+The Ninja CMake bootstrap originally placed `_CMakeLTOTest-CXX/bin/boo` in the build directory. **Resolved:** `targets/ninja.toml` was updated to `cmake --build build -j --target ninja && rm -rf build/CMakeFiles/[0-9]* build/CMakeFiles/_*`. Recompilation confirmed 1 linked binary (`ninja`) and 33 `.ii` preprocessed source units.
 
 ---
 
@@ -96,8 +86,8 @@ The Ninja CMake bootstrap originally placed `_CMakeLTOTest-CXX/bin/boo` in the b
 
 | File | Change | Status |
 |---|---|---|
-| `targets/ninja.toml` | Added `&& rm -rf build/CMakeFiles` to `make_cmd` | Verified clean 1-binary output |
-| `scripts/measure_collisions.py` | Exact DecBench `die_attr_owner` DWARF resolution + `decl_file` filtering | Standalone & reproducible |
+| `targets/ninja.toml` | Added `&& rm -rf build/CMakeFiles/[0-9]* build/CMakeFiles/_*` to `make_cmd` | Verified clean 1-binary output & 33 .ii preserved |
+| `scripts/measure_collisions.py` | Exact DecBench `evalkit/resolve.py` source-stem matching & `die_attr_owner` resolution | Standalone & reproducible |
 | `results/evidence/` | Raw JSON outputs, `compile_report.json`, `environment.txt` | Complete & synchronized |
 
 ---
@@ -108,8 +98,8 @@ The Ninja CMake bootstrap originally placed `_CMakeLTOTest-CXX/bin/boo` in the b
 
 | Target | Recommendation | Rationale |
 |---|---|---|
-| **Snappy 1.2.2** | ✅ RECOMMEND | Validated, small, clean build, reproducible collision profile. Good baseline. |
-| **double-conversion v3.3.1** | ✅ RECOMMEND | Validated, minimal stdlib noise (21–43% collision from genuine overloads), numerical workload. |
+| **Snappy 1.2.2** | ✅ RECOMMEND | Validated, small, clean build, predictable collision profile. Good baseline. |
+| **double-conversion v3.3.1** | ✅ RECOMMEND | Validated, cleanest collision profile (8–16%), genuine overloads, numerical workload. |
 | **Ninja v1.13.1** | ✅ RECOMMEND WITH CAVEATS | Validated, no LTO contamination, valuable executable target. boo artifact fixed. |
 
 ### BLOCKED — Cannot recommend until environment is available

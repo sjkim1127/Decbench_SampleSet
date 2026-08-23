@@ -22,19 +22,22 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 702 (proj) / 4068 (raw) | 551 / 1732 | 107 / 338 | 258 / 2674 | **36.75%** (proj) / 65.73% (raw) |
-| O2 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 394 (proj) / 557 (raw) | 318 / 399 | 56 / 71 | 132 / 229 | **33.50%** (proj) / 41.11% (raw) |
-| O2-noinline | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 721 (proj) / 4444 (raw) | 537 / 1670 | 114 / 371 | 298 / 3145 | **41.33%** (proj) / 70.77% (raw) |
+| O0 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 412 (proj) / 4068 (raw) | 347 / 1732 | 45 / 338 | 110 / 2674 | **26.70%** (proj) / 65.73% (raw) |
+| O2 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 355 (proj) / 557 (raw) | 291 / 399 | 44 / 71 | 108 / 229 | **30.42%** (proj) / 41.11% (raw) |
+| O2-noinline | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 412 (proj) / 4444 (raw) | 347 / 1670 | 45 / 371 | 110 / 3145 | **26.70%** (proj) / 70.77% (raw) |
 
-> **Collision measurement methodology:** `scripts/measure_collisions.py` uses resolved `DW_AT_name`
-> as the unqualified function name identity key. `DW_AT_decl_file` filters out system/stdlib headers
-> (`/usr/include/`, etc.).
+> **Collision measurement methodology:** `scripts/measure_collisions.py` directly executes DecBench's
+> exact C++ oracle logic (`evalkit/resolve.py` + `utils.binfmt`):
+> - **Collision identity key**: Resolved `DW_AT_name` (following `DW_AT_specification` and `DW_AT_abstract_origin` chains).
+> - **Source-stem filtering**: `DW_AT_decl_file` basename stems are matched against the 33 compiled `.ii`
+>   translation-unit stems via `build_stem_index(source_stems)` and `strip_source_ext()`.
 >
 > At O0 and O2-noinline, non-inlined libstdc++ template bodies (`std::_Rb_tree`, `std::vector`, etc.)
-> make up over 80% of raw DWARF subprograms in `ninja`. `DW_AT_decl_file` filtering isolates 702 and 721
-> project addresses respectively, with project collision rates of ~36–41%.
-> At O2, standard library template bodies are mostly inlined away (leaving 394 project addresses out of 557 total),
-> resulting in a project collision rate of 33.50%. Project collisions are driven by constructor/method overloads
+> and header helpers make up over 85% of raw DWARF subprograms in `ninja`. Source-stem matching isolates the 412
+> translation-unit functions, with an exact DecBench project collision rate of **26.70%**.
+> At O2, standard library template bodies are mostly inlined away (leaving 355 project functions out of 557 total),
+> resulting in a project collision rate of **30.42%**.
+> Project collisions are driven by constructor/method overloads (e.g. `LoadDyndeps`, `Dump`, `AddTarget`, `Parse`, `Error`)
 > and virtual destructor duals (D1+D2 thunks). Full raw data is preserved in `results/evidence/collision/`.
 
 Collision rate formula: `collision_addresses / source_function_addresses`

@@ -1,5 +1,11 @@
 {
   "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2-noinline/snappy/compiled",
+  "source_stems": [
+    "snappy-c.cc",
+    "snappy-sinksource.cc",
+    "snappy-stubs-internal.cc",
+    "snappy.cc"
+  ],
   "exclude_images": [],
   "elf_images": [
     "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2"
@@ -11,8 +17,8 @@
       "cu_stats": {
         "total": 4,
         "probe": 0,
-        "system_subprograms": 153,
-        "project_subprograms": 180
+        "non_project_subprograms": 181,
+        "project_subprograms": 152
       },
       "raw": {
         "source_function_addresses": 332,
@@ -387,12 +393,12 @@
         ]
       },
       "project": {
-        "source_function_addresses": 179,
-        "unique_short_names": 131,
+        "source_function_addresses": 152,
+        "unique_short_names": 104,
         "collision_groups": 31,
         "collision_addresses": 79,
-        "collision_rate": 0.441341,
-        "collision_rate_pct": "44.13%",
+        "collision_rate": 0.519737,
+        "collision_rate_pct": "51.97%",
         "top_collision_groups": [
           {
             "short_name": "Append",
@@ -731,9 +737,9 @@
     "collision_rate_pct": "49.10%"
   },
   "aggregated_project": {
-    "source_function_addresses": 179,
+    "source_function_addresses": 152,
     "collision_addresses": 79,
-    "collision_rate": 0.441341,
-    "collision_rate_pct": "44.13%"
+    "collision_rate": 0.519737,
+    "collision_rate_pct": "51.97%"
   }
 }

@@ -1,5 +1,40 @@
 {
   "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/ninja/compiled",
+  "source_stems": [
+    "browse.cc",
+    "build.cc",
+    "build_log.cc",
+    "clean.cc",
+    "clparser.cc",
+    "debug_flags.cc",
+    "depfile_parser.cc",
+    "deps_log.cc",
+    "disk_interface.cc",
+    "dyndep.cc",
+    "dyndep_parser.cc",
+    "edit_distance.cc",
+    "elide_middle.cc",
+    "eval_env.cc",
+    "graph.cc",
+    "graphviz.cc",
+    "jobserver-posix.cc",
+    "jobserver.cc",
+    "json.cc",
+    "lexer.cc",
+    "line_printer.cc",
+    "manifest_parser.cc",
+    "metrics.cc",
+    "missing_deps.cc",
+    "ninja.cc",
+    "parser.cc",
+    "real_command_runner.cc",
+    "state.cc",
+    "status_printer.cc",
+    "string_piece_util.cc",
+    "subprocess-posix.cc",
+    "util.cc",
+    "version.cc"
+  ],
   "exclude_images": [],
   "elf_images": [
     "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/ninja/compiled/ninja"
@@ -11,8 +46,8 @@
       "cu_stats": {
         "total": 33,
         "probe": 0,
-        "system_subprograms": 200,
-        "project_subprograms": 401
+        "non_project_subprograms": 246,
+        "project_subprograms": 355
       },
       "raw": {
         "source_function_addresses": 557,
@@ -433,12 +468,12 @@
         ]
       },
       "project": {
-        "source_function_addresses": 394,
-        "unique_short_names": 318,
-        "collision_groups": 56,
-        "collision_addresses": 132,
-        "collision_rate": 0.335025,
-        "collision_rate_pct": "33.50%",
+        "source_function_addresses": 355,
+        "unique_short_names": 291,
+        "collision_groups": 44,
+        "collision_addresses": 108,
+        "collision_rate": 0.304225,
+        "collision_rate_pct": "30.42%",
         "top_collision_groups": [
           {
             "short_name": "LoadDyndeps",
@@ -617,30 +652,6 @@
             ]
           },
           {
-            "short_name": "~ManifestParser",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xf8e0",
-              "0xfb30"
-            ],
-            "example_qualified": [
-              "ManifestParser::~ManifestParser()",
-              "ManifestParser::~ManifestParser()"
-            ]
-          },
-          {
-            "short_name": "~Client",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xf450",
-              "0xf460"
-            ],
-            "example_qualified": [
-              "Jobserver::Client::~Client()",
-              "Jobserver::Client::~Client()"
-            ]
-          },
-          {
             "short_name": "Recompact",
             "distinct_addresses": 2,
             "addresses": [
@@ -689,18 +700,6 @@
             ]
           },
           {
-            "short_name": "rehash",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0x14160",
-              "0x3c9b0"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::rehash(unsigned long)",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::rehash(unsigned long)"
-            ]
-          },
-          {
             "short_name": "~DryRunCommandRunner",
             "distinct_addresses": 2,
             "addresses": [
@@ -737,39 +736,75 @@
             ]
           },
           {
-            "short_name": "TryAcquire",
+            "short_name": "CanRunMore",
             "distinct_addresses": 2,
             "addresses": [
-              "0x1ae30",
-              "0x45860"
+              "0x14630",
+              "0x395d0"
             ],
             "example_qualified": [
-              "Jobserver::Client::TryAcquire()",
-              "TryAcquire"
+              "CanRunMore",
+              "RealCommandRunner::CanRunMore() const"
             ]
           },
           {
-            "short_name": "Release",
+            "short_name": "StartCommand",
             "distinct_addresses": 2,
             "addresses": [
-              "0x1ae40",
-              "0x45974"
+              "0x161f0",
+              "0x39a50"
             ],
             "example_qualified": [
-              "Jobserver::Client::Release(Jobserver::Slot)",
-              "Release"
+              "StartCommand",
+              "RealCommandRunner::StartCommand(Edge*)"
             ]
           },
           {
-            "short_name": "GetActiveEdges",
+            "short_name": "CleanRule",
             "distinct_addresses": 2,
             "addresses": [
-              "0x1ae60",
-              "0x399a0"
+              "0x1cfe4",
+              "0x1d080"
             ],
             "example_qualified": [
-              "CommandRunner::GetActiveEdges()",
-              "RealCommandRunner::GetActiveEdges()"
+              "Cleaner::CleanRule(Rule const*)",
+              "Cleaner::CleanRule(char const*)"
+            ]
+          },
+          {
+            "short_name": "CleanTarget",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1d584",
+              "0x1d620"
+            ],
+            "example_qualified": [
+              "Cleaner::CleanTarget(Node*)",
+              "Cleaner::CleanTarget(char const*)"
+            ]
+          },
+          {
+            "short_name": "PrintHeader",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1bdd0",
+              "0x1c650"
+            ],
+            "example_qualified": [
+              "Cleaner::PrintHeader()",
+              "Cleaner::PrintHeader()"
+            ]
+          },
+          {
+            "short_name": "RemoveFile",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1c154",
+              "0x25434"
+            ],
+            "example_qualified": [
+              "Cleaner::RemoveFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)",
+              "RealDiskInterface::RemoveFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)"
             ]
           }
         ]
@@ -783,9 +818,9 @@
     "collision_rate_pct": "41.11%"
   },
   "aggregated_project": {
-    "source_function_addresses": 394,
-    "collision_addresses": 132,
-    "collision_rate": 0.335025,
-    "collision_rate_pct": "33.50%"
+    "source_function_addresses": 355,
+    "collision_addresses": 108,
+    "collision_rate": 0.304225,
+    "collision_rate_pct": "30.42%"
   }
 }

@@ -1,5 +1,15 @@
 {
   "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/double-conversion/compiled",
+  "source_stems": [
+    "bignum-dtoa.cc",
+    "bignum.cc",
+    "cached-powers.cc",
+    "double-to-string.cc",
+    "fast-dtoa.cc",
+    "fixed-dtoa.cc",
+    "string-to-double.cc",
+    "strtod.cc"
+  ],
   "exclude_images": [],
   "elf_images": [
     "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/double-conversion/compiled/libdouble-conversion.so.3.3.0"
@@ -11,8 +21,8 @@
       "cu_stats": {
         "total": 8,
         "probe": 0,
-        "system_subprograms": 0,
-        "project_subprograms": 89
+        "non_project_subprograms": 12,
+        "project_subprograms": 77
       },
       "raw": {
         "source_function_addresses": 89,
@@ -125,29 +135,13 @@
         ]
       },
       "project": {
-        "source_function_addresses": 89,
-        "unique_short_names": 78,
-        "collision_groups": 8,
-        "collision_addresses": 19,
-        "collision_rate": 0.213483,
-        "collision_rate_pct": "21.35%",
+        "source_function_addresses": 77,
+        "unique_short_names": 71,
+        "collision_groups": 6,
+        "collision_addresses": 12,
+        "collision_rate": 0.155844,
+        "collision_rate_pct": "15.58%",
         "top_collision_groups": [
-          {
-            "short_name": "operator[]",
-            "distinct_addresses": 5,
-            "addresses": [
-              "0x4560",
-              "0x5240",
-              "0x6960",
-              "0x76a0",
-              "0xbf90"
-            ],
-            "example_qualified": [
-              "double_conversion::Vector<char>::operator[](int) const",
-              "double_conversion::Vector<char>::operator[](int) const",
-              "double_conversion::Vector<char>::operator[](int) const"
-            ]
-          },
           {
             "short_name": "RawBigit",
             "distinct_addresses": 2,
@@ -170,18 +164,6 @@
             "example_qualified": [
               "double_conversion::Bignum::AddUInt64(unsigned long)",
               "double_conversion::Bignum::AddUInt64(unsigned long)"
-            ]
-          },
-          {
-            "short_name": "Normalize",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0x6930",
-              "0xbf30"
-            ],
-            "example_qualified": [
-              "double_conversion::DiyFp::Normalize()",
-              "double_conversion::DiyFp::Normalize()"
             ]
           },
           {
@@ -243,9 +225,9 @@
     "collision_rate_pct": "21.35%"
   },
   "aggregated_project": {
-    "source_function_addresses": 89,
-    "collision_addresses": 19,
-    "collision_rate": 0.213483,
-    "collision_rate_pct": "21.35%"
+    "source_function_addresses": 77,
+    "collision_addresses": 12,
+    "collision_rate": 0.155844,
+    "collision_rate_pct": "15.58%"
   }
 }

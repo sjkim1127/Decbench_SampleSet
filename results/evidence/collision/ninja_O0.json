@@ -1,5 +1,40 @@
 {
   "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled",
+  "source_stems": [
+    "browse.cc",
+    "build.cc",
+    "build_log.cc",
+    "clean.cc",
+    "clparser.cc",
+    "debug_flags.cc",
+    "depfile_parser.cc",
+    "deps_log.cc",
+    "disk_interface.cc",
+    "dyndep.cc",
+    "dyndep_parser.cc",
+    "edit_distance.cc",
+    "elide_middle.cc",
+    "eval_env.cc",
+    "graph.cc",
+    "graphviz.cc",
+    "jobserver-posix.cc",
+    "jobserver.cc",
+    "json.cc",
+    "lexer.cc",
+    "line_printer.cc",
+    "manifest_parser.cc",
+    "metrics.cc",
+    "missing_deps.cc",
+    "ninja.cc",
+    "parser.cc",
+    "real_command_runner.cc",
+    "state.cc",
+    "status_printer.cc",
+    "string_piece_util.cc",
+    "subprocess-posix.cc",
+    "util.cc",
+    "version.cc"
+  ],
   "exclude_images": [],
   "elf_images": [
     "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled/ninja"
@@ -11,8 +46,8 @@
       "cu_stats": {
         "total": 33,
         "probe": 0,
-        "system_subprograms": 6519,
-        "project_subprograms": 891
+        "non_project_subprograms": 6998,
+        "project_subprograms": 412
       },
       "raw": {
         "source_function_addresses": 4068,
@@ -1249,31 +1284,13 @@
         ]
       },
       "project": {
-        "source_function_addresses": 702,
-        "unique_short_names": 551,
-        "collision_groups": 107,
-        "collision_addresses": 258,
-        "collision_rate": 0.367521,
-        "collision_rate_pct": "36.75%",
+        "source_function_addresses": 412,
+        "unique_short_names": 347,
+        "collision_groups": 45,
+        "collision_addresses": 110,
+        "collision_rate": 0.26699,
+        "collision_rate_pct": "26.70%",
         "top_collision_groups": [
-          {
-            "short_name": "operator()",
-            "distinct_addresses": 7,
-            "addresses": [
-              "0x1fec4",
-              "0x29ec8",
-              "0x48594",
-              "0x53c6c",
-              "0x6e884",
-              "0x6e944",
-              "0xe9f4"
-            ],
-            "example_qualified": [
-              "EdgeCmp::operator()(Edge const*, Edge const*) const",
-              "std::hash<StringPiece>::operator()(StringPiece) const",
-              "EdgePriorityLess::operator()(Edge const*, Edge const*) const"
-            ]
-          },
           {
             "short_name": "LoadDyndeps",
             "distinct_addresses": 6,
@@ -1292,38 +1309,6 @@
             ]
           },
           {
-            "short_name": "operator!=",
-            "distinct_addresses": 5,
-            "addresses": [
-              "0x203b8",
-              "0x38998",
-              "0x53a04",
-              "0x6f14c",
-              "0x6f224"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator!=(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator const&) const",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator!=(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator const&) const",
-              "StringPiece::operator!=(StringPiece const&) const"
-            ]
-          },
-          {
-            "short_name": "end",
-            "distinct_addresses": 5,
-            "addresses": [
-              "0x20344",
-              "0x3897c",
-              "0x49d74",
-              "0x6f130",
-              "0x6f1b0"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::end()",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::end() const",
-              "StringPiece::end() const"
-            ]
-          },
-          {
             "short_name": "Dump",
             "distinct_addresses": 5,
             "addresses": [
@@ -1337,66 +1322,6 @@
               "Plan::Dump() const",
               "Edge::Dump(char const*) const",
               "Node::Dump(char const*) const"
-            ]
-          },
-          {
-            "short_name": "StringPiece",
-            "distinct_addresses": 4,
-            "addresses": [
-              "0x387dc",
-              "0x4058c",
-              "0x458ec",
-              "0xe318"
-            ],
-            "example_qualified": [
-              "StringPiece::StringPiece(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)",
-              "StringPiece::StringPiece(char const*)",
-              "StringPiece::StringPiece()"
-            ]
-          },
-          {
-            "short_name": "max_load_factor",
-            "distinct_addresses": 4,
-            "addresses": [
-              "0x21898",
-              "0x23070",
-              "0x7093c",
-              "0x722ac"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::max_load_factor(float)",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::max_load_factor() const",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::max_load_factor(float)"
-            ]
-          },
-          {
-            "short_name": "begin",
-            "distinct_addresses": 4,
-            "addresses": [
-              "0x20608",
-              "0x38908",
-              "0x49d5c",
-              "0x6f194"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::begin()",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::begin() const",
-              "StringPiece::begin() const"
-            ]
-          },
-          {
-            "short_name": "operator->",
-            "distinct_addresses": 4,
-            "addresses": [
-              "0x203e8",
-              "0x389f0",
-              "0x6f17c",
-              "0x6f27c"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator->() const",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator->() const",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::const_iterator::operator->() const"
             ]
           },
           {
@@ -1459,20 +1384,6 @@
             ]
           },
           {
-            "short_name": "operator++",
-            "distinct_addresses": 3,
-            "addresses": [
-              "0x20624",
-              "0x389c8",
-              "0x6f254"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator++()",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator++()",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::iterator::operator++()"
-            ]
-          },
-          {
             "short_name": "Load",
             "distinct_addresses": 3,
             "addresses": [
@@ -1498,62 +1409,6 @@
               "Plan::Reset()",
               "Cleaner::Reset()",
               "State::Reset()"
-            ]
-          },
-          {
-            "short_name": "operator=",
-            "distinct_addresses": 3,
-            "addresses": [
-              "0x29c3c",
-              "0x49e64",
-              "0x5c754"
-            ],
-            "example_qualified": [
-              "Jobserver::Slot::operator=(Jobserver::Slot&&)",
-              "EvalString::operator=(EvalString const&)",
-              "Jobserver::Config::operator=(Jobserver::Config&&)"
-            ]
-          },
-          {
-            "short_name": "Slot",
-            "distinct_addresses": 3,
-            "addresses": [
-              "0x29c08",
-              "0x6e73c",
-              "0x7f6fc"
-            ],
-            "example_qualified": [
-              "Jobserver::Slot::Slot(Jobserver::Slot&&)",
-              "Jobserver::Slot::Slot()",
-              "Jobserver::Slot::Slot(short)"
-            ]
-          },
-          {
-            "short_name": "const_iterator",
-            "distinct_addresses": 3,
-            "addresses": [
-              "0x38bdc",
-              "0x38f68",
-              "0x701a4"
-            ],
-            "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator const&)",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy> const*, unsigned int)",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy> const*, unsigned int)"
-            ]
-          },
-          {
-            "short_name": "EvalString",
-            "distinct_addresses": 3,
-            "addresses": [
-              "0x40864",
-              "0x41984",
-              "0x43710"
-            ],
-            "example_qualified": [
-              "EvalString::EvalString()",
-              "EvalString::EvalString(EvalString const&)",
-              "EvalString::EvalString(EvalString&&)"
             ]
           },
           {
@@ -1613,15 +1468,159 @@
             ]
           },
           {
-            "short_name": "clearkv",
+            "short_name": "Recompact",
             "distinct_addresses": 2,
             "addresses": [
-              "0x12828",
-              "0x20a24"
+              "0x1eb14",
+              "0x44be8"
             ],
             "example_qualified": [
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::clearkv()",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::clearkv()"
+              "BuildLog::Recompact(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, BuildLogUser const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "DepsLog::Recompact(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "OpenForWriteIfNeeded",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1e110",
+              "0x4565c"
+            ],
+            "example_qualified": [
+              "BuildLog::OpenForWriteIfNeeded()",
+              "DepsLog::OpenForWriteIfNeeded()"
+            ]
+          },
+          {
+            "short_name": "Close",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1e0cc",
+              "0x440b0"
+            ],
+            "example_qualified": [
+              "BuildLog::Close()",
+              "DepsLog::Close()"
+            ]
+          },
+          {
+            "short_name": "OpenForWrite",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1dd30",
+              "0x43a64"
+            ],
+            "example_qualified": [
+              "BuildLog::OpenForWrite(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, BuildLogUser const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "DepsLog::OpenForWrite(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "LogEntry",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x1dbec",
+              "0x1dc48"
+            ],
+            "example_qualified": [
+              "BuildLog::LogEntry::LogEntry(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>)",
+              "BuildLog::LogEntry::LogEntry(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, unsigned long, int, int, long)"
+            ]
+          },
+          {
+            "short_name": "~DryRunCommandRunner",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x28b74",
+              "0x28bb0"
+            ],
+            "example_qualified": [
+              "~DryRunCommandRunner",
+              "~DryRunCommandRunner"
+            ]
+          },
+          {
+            "short_name": "EdgeFinished",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x23f40",
+              "0x6d140"
+            ],
+            "example_qualified": [
+              "Plan::EdgeFinished(Edge*, Plan::EdgeResult, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "Pool::EdgeFinished(Edge const&)"
+            ]
+          },
+          {
+            "short_name": "WaitForCommand",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x23684",
+              "0x6af84"
+            ],
+            "example_qualified": [
+              "WaitForCommand",
+              "RealCommandRunner::WaitForCommand(CommandRunner::Result*)"
+            ]
+          },
+          {
+            "short_name": "StartCommand",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x23658",
+              "0x6ae5c"
+            ],
+            "example_qualified": [
+              "StartCommand",
+              "RealCommandRunner::StartCommand(Edge*)"
+            ]
+          },
+          {
+            "short_name": "CanRunMore",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x23644",
+              "0x6ad38"
+            ],
+            "example_qualified": [
+              "CanRunMore",
+              "RealCommandRunner::CanRunMore() const"
+            ]
+          },
+          {
+            "short_name": "CleanRule",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x38248",
+              "0x382c0"
+            ],
+            "example_qualified": [
+              "Cleaner::CleanRule(Rule const*)",
+              "Cleaner::CleanRule(char const*)"
+            ]
+          },
+          {
+            "short_name": "CleanTarget",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x37ce0",
+              "0x37d58"
+            ],
+            "example_qualified": [
+              "Cleaner::CleanTarget(Node*)",
+              "Cleaner::CleanTarget(char const*)"
+            ]
+          },
+          {
+            "short_name": "Report",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x37354",
+              "0x63c74"
+            ],
+            "example_qualified": [
+              "Cleaner::Report(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)",
+              "Metrics::Report()"
             ]
           }
         ]
@@ -1635,9 +1634,9 @@
     "collision_rate_pct": "65.73%"
   },
   "aggregated_project": {
-    "source_function_addresses": 702,
-    "collision_addresses": 258,
-    "collision_rate": 0.367521,
-    "collision_rate_pct": "36.75%"
+    "source_function_addresses": 412,
+    "collision_addresses": 110,
+    "collision_rate": 0.26699,
+    "collision_rate_pct": "26.70%"
   }
 }

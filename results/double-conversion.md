@@ -22,14 +22,20 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 233 (proj) / 237 (raw) | 187 / 191 | 28 / 28 | 74 / 74 | **31.76%** (proj) / 31.22% (raw) |
-| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 89 (proj) / 89 (raw) | 78 / 78 | 8 / 8 | 19 / 19 | **21.35%** (proj) / 21.35% (raw) |
-| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 263 (proj) / 267 (raw) | 184 / 188 | 34 / 34 | 113 / 113 | **42.97%** (proj) / 42.32% (raw) |
+| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 127 (proj) / 237 (raw) | 122 / 191 | 5 / 28 | 10 / 74 | **7.87%** (proj) / 31.22% (raw) |
+| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 77 (proj) / 89 (raw) | 71 / 78 | 6 / 8 | 12 / 19 | **15.58%** (proj) / 21.35% (raw) |
+| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 124 (proj) / 267 (raw) | 119 / 188 | 5 / 34 | 10 / 113 | **8.06%** (proj) / 42.32% (raw) |
 
-> **Collision measurement methodology:** Resolved `DW_AT_name` is used as the unqualified function
-> name identity key, with `DW_AT_decl_file` filtering out system/stdlib headers.
-> Collisions in double-conversion are driven by genuine C++ constructor overloads (e.g. `Double`, `Vector`, `DiyFp`)
-> and operator overloads (`operator[]`). Full raw JSON evidence is preserved in `results/evidence/collision/`.
+> **Collision measurement methodology:** `scripts/measure_collisions.py` directly executes DecBench's
+> exact C++ oracle logic (`evalkit/resolve.py` + `utils.binfmt`):
+> - **Collision identity key**: Resolved `DW_AT_name` (following `DW_AT_specification` and `DW_AT_abstract_origin` chains).
+> - **Source-stem filtering**: `DW_AT_decl_file` basename stems are matched against the 8 compiled `.ii`
+>   translation-unit stems (`bignum.cc`, `cached-powers.cc`, `diy-fp.cc`, `double-to-string.cc`, `fast-dtoa.cc`,
+>   `fixed-dtoa.cc`, `string-to-double.cc`, `strtod.cc`).
+> - Header-defined multi-TU helper functions (e.g. from `utils.h`) are excluded from project translation-unit scope,
+>   leaving only genuine project source functions defined in `.cc` units.
+> - Project collisions (8–16%) consist entirely of legitimate constructor and method overloads (e.g. `Double`, `Vector`, `DiyFp`, `operator[]`).
+>   Full raw JSON evidence is preserved in `results/evidence/collision/`.
 
 
 Collision rate formula: `collision_addresses / source_function_addresses`

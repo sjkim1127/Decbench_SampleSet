@@ -1,0 +1,1 @@
+Trigger isolated retry for TrafficMonitor and OpenLoco after first-pass environment failures.

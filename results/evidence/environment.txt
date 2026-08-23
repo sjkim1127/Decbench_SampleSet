@@ -28,14 +28,10 @@ Architecture note:
   on arm64 Docker (host: Apple Silicon). x86-64 results may differ in function
   count and collision rate due to different NEON/SSE codepaths and alignment.
 
-Collision measurement script:
-  scripts/measure_collisions.py (namespace-based stdlib filter)
-  --exclude-image boo  (pre-compiled bootstrap stub, no DWARF)
-  stdlib filter: demangled names starting with std::, __gnu_cxx::, __cxxabiv::,
-                 __detail::, std::__, __gnu_pbds:: are excluded from project stats.
-
-Known limitation:
-  The collision helper uses DW_AT_linkage_name (demangled) as the primary name
-  source, while DecBench's C++ oracle uses DW_AT_name via specification/origin
-  chains. Results are a close diagnostic approximation, not a byte-for-byte
-  replay of DecBench's own counter.
+Collision measurement methodology (scripts/measure_collisions.py):
+  - Directly implements DecBench binfmt.die_attr_owner resolution.
+  - Collision identity key: Resolved DW_AT_name (following DW_AT_specification
+    and DW_AT_abstract_origin chains).
+  - Diagnostic display: Demangled DW_AT_linkage_name.
+  - Project scope: DW_AT_decl_file read from DWARF line program headers,
+    excluding /usr/include, /usr/lib, /include/c++/, bits/, and ext/.

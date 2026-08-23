@@ -13,9 +13,9 @@
 
 | Target | Track | O0 | O2 | O2-noinline | Linked image | Ground truth | Collision rate (proj / raw) | Status | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| Snappy 1.2.2 | GCC/DWARF | ✅ | ✅ | ✅ | `libsnappy.so.1.2.2` | DWARF ✅ | 45% / 66% (O0) · 53% / 53% (O2) · 45% / 70% (O2-noinline) | **VALIDATED** | Virtual destructor duals drive collisions |
-| double-conversion v3.3.1 | GCC/DWARF | ✅ | ✅ | ✅ | `libdouble-conversion.so.3.3.0` | DWARF ✅ | 45% / 45% (O0) · 58% / 58% (O2) · 45% / 45% (O2-noinline) | **VALIDATED** | Clean: all project-owned constructor/overload collisions |
-| Ninja v1.13.1 | GCC/DWARF | ✅ | ✅ | ✅ | `ninja` (exe) | DWARF ✅ | 45% / 85% (O0) · 42% / 48% (O2) · 44% / 85% (O2-noinline) | **VALIDATED WITH CAVEATS** | `boo` fixed; stdlib DWARF template presence at O0; LTO check PASSED |
+| Snappy 1.2.2 | GCC/DWARF | ✅ | ✅ | ✅ | `libsnappy.so.1.2.2` | DWARF ✅ | 45% / 49% (O0) · 51% / 50% (O2) · 44% / 49% (O2-noinline) | **VALIDATED** | Virtual destructor duals & overloads |
+| double-conversion v3.3.1 | GCC/DWARF | ✅ | ✅ | ✅ | `libdouble-conversion.so.3.3.0` | DWARF ✅ | 32% / 31% (O0) · 21% / 21% (O2) · 43% / 42% (O2-noinline) | **VALIDATED** | Clean: all project-owned constructor/overload collisions |
+| Ninja v1.13.1 | GCC/DWARF | ✅ | ✅ | ✅ | `ninja` (exe) | DWARF ✅ | 37% / 66% (O0) · 34% / 41% (O2) · 41% / 71% (O2-noinline) | **VALIDATED WITH CAVEATS** | `boo` fixed; stdlib DWARF template presence at O0; LTO check PASSED |
 | Detours v4.0.1 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
 | DirectXTex may2026 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
 | WinSparkle v0.9.4 | MSVC/PDB | — | — | — | — | — | — | **BLOCKED** | No Wine/cl.exe on this host |
@@ -29,7 +29,7 @@ All three GCC/DWARF targets completed all required gates:
 | Gate | Snappy | double-conversion | Ninja |
 |---|---|---|---|
 | All 3 modes built | ✅ | ✅ | ✅ |
-| ≥1 linked ELF per mode | ✅ | ✅ | ✅ |
+| ≥1 linked ELF per mode | ✅ (1) | ✅ (1) | ✅ (1) |
 | ≥1 `.ii` per mode | ✅ (4) | ✅ (8) | ✅ (33) |
 | DWARF present | ✅ | ✅ | ✅ |
 | Collision analysis completed | ✅ | ✅ | ✅ |
@@ -63,26 +63,32 @@ No `-flto`, `-fprofile`, `-fwhole-program`, or IPO flags in any mode.
 
 ## Key findings from collision measurement
 
-### 1. Virtual destructor duals (all targets)
+### 1. DecBench Identity Alignment
+
+`scripts/measure_collisions.py` directly mirrors DecBench's C++ oracle (`binfmt.die_attr_owner`):
+- **Collision Key**: Resolved `DW_AT_name` across `DW_AT_specification` / `DW_AT_abstract_origin` DIE chains.
+- **Project Scope**: Resolved `DW_AT_decl_file` (via DWARF line program headers), filtering out system/stdlib headers (`/usr/include/`, `/include/c++/`, `bits/`, etc.).
+
+### 2. Virtual destructor duals (all targets)
 
 GCC emits two distinct destructor subprograms for virtual classes:
 - D1 = complete-object destructor
 - D2 = base-object destructor
 
-Both share the same demangled short name (`~ClassName`). Under DecBench's current unqualified C++ identity model, these appear as collisions. **This affects every C++ project with virtual classes.**
+Both share the same demangled short name (`~ClassName`). Under DecBench's current unqualified C++ identity model, these appear as collisions.
 
-### 2. Stdlib template presence (Ninja especially)
+### 3. Stdlib template presence (Ninja especially)
 
-At O0 and O2-noinline, GCC emits concrete DWARF subprograms for non-inlined libstdc++ template instantiations (`std::vector<T>`, `std::_Rb_tree`, etc.). In Ninja, these account for over 75% of raw subprograms when inlining is disabled.
-Using namespace filtering (`std::`, `__gnu_cxx::`, etc.), project-owned functions are isolated, yielding a consistent ~42–45% project collision rate across all three modes.
+At O0 and O2-noinline, GCC emits concrete DWARF subprograms for non-inlined libstdc++ template instantiations (`std::vector<T>`, `std::_Rb_tree`, etc.). In Ninja, these account for over 80% of raw subprograms when inlining is disabled.
+Using `DW_AT_decl_file` filtering, project-owned functions are isolated, yielding a consistent ~34–41% project collision rate.
 
-### 3. Constructor & method overloads (double-conversion, Ninja)
+### 4. Constructor & method overloads (double-conversion, Ninja)
 
 Legitimate C++ constructor and method overloads produce genuine collision groups under the unqualified name model (e.g. `double_conversion::Double::Double(double)` vs `double_conversion::Double::Double(unsigned long long)`).
 
-### 4. boo artifact (Ninja) — Resolved
+### 5. boo artifact (Ninja) — Resolved
 
-The Ninja build originally produced a pre-compiled CMake test binary `boo` (no DWARF, identical BuildID across modes). **Resolved:** `targets/ninja.toml` was updated with `&& rm -f build/boo` in `make_cmd` (commit `b9cf2c3`).
+The Ninja CMake bootstrap originally placed `_CMakeLTOTest-CXX/bin/boo` in the build directory. **Resolved:** `targets/ninja.toml` was updated to `cmake --build build -j --target ninja && rm -rf build/CMakeFiles`. Recompilation confirmed 1 linked binary (`ninja`).
 
 ---
 
@@ -90,9 +96,9 @@ The Ninja build originally produced a pre-compiled CMake test binary `boo` (no D
 
 | File | Change | Status |
 |---|---|---|
-| `targets/ninja.toml` | Added `&& rm -f build/boo` to `make_cmd` | Committed (`b9cf2c3`) |
-| `scripts/measure_collisions.py` | Added namespace-based stdlib filtering & reproducible JSON output | Updated |
-| `results/evidence/` | Raw JSON outputs, `compile_report.json`, `environment.txt` | Added |
+| `targets/ninja.toml` | Added `&& rm -rf build/CMakeFiles` to `make_cmd` | Verified clean 1-binary output |
+| `scripts/measure_collisions.py` | Exact DecBench `die_attr_owner` DWARF resolution + `decl_file` filtering | Standalone & reproducible |
+| `results/evidence/` | Raw JSON outputs, `compile_report.json`, `environment.txt` | Complete & synchronized |
 
 ---
 
@@ -103,7 +109,7 @@ The Ninja build originally produced a pre-compiled CMake test binary `boo` (no D
 | Target | Recommendation | Rationale |
 |---|---|---|
 | **Snappy 1.2.2** | ✅ RECOMMEND | Validated, small, clean build, reproducible collision profile. Good baseline. |
-| **double-conversion v3.3.1** | ✅ RECOMMEND | Validated, zero stdlib contamination (all project-owned), numerical workload. |
+| **double-conversion v3.3.1** | ✅ RECOMMEND | Validated, minimal stdlib noise (21–43% collision from genuine overloads), numerical workload. |
 | **Ninja v1.13.1** | ✅ RECOMMEND WITH CAVEATS | Validated, no LTO contamination, valuable executable target. boo artifact fixed. |
 
 ### BLOCKED — Cannot recommend until environment is available
@@ -119,5 +125,4 @@ The Ninja build originally produced a pre-compiled CMake test binary `boo` (no D
 ## Remaining blockers / future work
 
 1. **MSVC/Wine environment**: All three Windows targets require a working `cl.exe` environment before runtime validation can proceed.
-2. **DecBench C++ Oracle namespace filtering**: DecBench's internal ground-truth pipeline should filter out system/stdlib template instantiations to prevent inflated collision numbers at lower optimization levels.
-3. **Architecture qualification**: These results are qualified on GCC 13.3.0 `aarch64`. Final corpus creation on `x86_64` should re-verify symbol and collision counts.
+2. **Architecture qualification**: These results are qualified on GCC 13.3.0 `aarch64`. Final corpus creation on `x86_64` should re-verify symbol and collision counts.

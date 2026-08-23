@@ -22,24 +22,19 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 386 (proj) / 1665 (raw) | 266 / 460 | 52 / 212 | 172 / 1417 | **44.56%** (proj) / 85.11% (raw) |
-| O2 | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 189 (proj) / 218 (raw) | 132 / 142 | 22 / 28 | 79 / 104 | **41.80%** (proj) / 47.71% (raw) |
-| O2-noinline | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 360 (proj) / 1565 (raw) | 249 / 433 | 47 / 202 | 158 / 1334 | **43.89%** (proj) / 85.24% (raw) |
+| O0 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 702 (proj) / 4068 (raw) | 551 / 1732 | 107 / 338 | 258 / 2674 | **36.75%** (proj) / 65.73% (raw) |
+| O2 | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 394 (proj) / 557 (raw) | 318 / 399 | 56 / 71 | 132 / 229 | **33.50%** (proj) / 41.11% (raw) |
+| O2-noinline | ✅ PASS | 1 (`ninja`) | 33 | DWARF: ✅ in `ninja` | 721 (proj) / 4444 (raw) | 537 / 1670 | 114 / 371 | 298 / 3145 | **41.33%** (proj) / 70.77% (raw) |
 
-† `boo` is a pre-compiled CMake test binary (single `_Z3foov` = `foo()` symbol, BuildID identical
-across all three modes, **no DWARF**, not compiled by DecBench). It has been excluded from measurement
-via `--exclude-image boo`, and `targets/ninja.toml` has been updated with `rm -f build/boo` in `make_cmd`.
-
-> **Collision measurement methodology:** `scripts/measure_collisions.py` evaluates two sets of metrics:
-> - **raw**: all concrete DWARF subprograms in `ninja`
-> - **project**: subprograms whose fully-qualified demangled name does NOT start with a stdlib/system
->   namespace prefix (`std::`, `__gnu_cxx::`, `__cxxabiv::`, `__detail::`, `__gnu_pbds::`)
+> **Collision measurement methodology:** `scripts/measure_collisions.py` uses resolved `DW_AT_name`
+> as the unqualified function name identity key. `DW_AT_decl_file` filters out system/stdlib headers
+> (`/usr/include/`, etc.).
 >
 > At O0 and O2-noinline, non-inlined libstdc++ template bodies (`std::_Rb_tree`, `std::vector`, etc.)
-> make up over 75% of the concrete DWARF subprograms in `ninja`. Filtering stdlib out yields 386 and 360
-> project addresses respectively, with project collision rates of ~44–45%.
-> At O2, standard library template bodies are mostly inlined away (leaving 189 project addresses out of 218 total),
-> resulting in a project collision rate of 41.80%. Project collisions are driven by constructor/method overloads
+> make up over 80% of raw DWARF subprograms in `ninja`. `DW_AT_decl_file` filtering isolates 702 and 721
+> project addresses respectively, with project collision rates of ~36–41%.
+> At O2, standard library template bodies are mostly inlined away (leaving 394 project addresses out of 557 total),
+> resulting in a project collision rate of 33.50%. Project collisions are driven by constructor/method overloads
 > and virtual destructor duals (D1+D2 thunks). Full raw data is preserved in `results/evidence/collision/`.
 
 Collision rate formula: `collision_addresses / source_function_addresses`

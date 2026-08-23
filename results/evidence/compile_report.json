@@ -1,13 +1,13 @@
 [
   {
     "project": "double-conversion",
-    "opt": "O2-noinline",
+    "opt": "O0",
     "linked_binaries": 1,
     "i_files": 8,
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 5.0,
+    "seconds": 4.4,
     "ok": true
   },
   {
@@ -18,51 +18,51 @@
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 6.1,
+    "seconds": 5.3,
     "ok": true
   },
   {
     "project": "double-conversion",
-    "opt": "O0",
+    "opt": "O2-noinline",
     "linked_binaries": 1,
     "i_files": 8,
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 6.2,
+    "seconds": 5.3,
     "ok": true
   },
   {
     "project": "ninja",
     "opt": "O0",
-    "linked_binaries": 2,
+    "linked_binaries": 1,
     "i_files": 33,
-    "compile_results": 2,
-    "successes": 2,
+    "compile_results": 1,
+    "successes": 1,
     "errors": [],
-    "seconds": 5.9,
+    "seconds": 5.5,
     "ok": true
   },
   {
     "project": "ninja",
     "opt": "O2-noinline",
-    "linked_binaries": 2,
+    "linked_binaries": 1,
     "i_files": 33,
-    "compile_results": 2,
-    "successes": 2,
+    "compile_results": 1,
+    "successes": 1,
     "errors": [],
-    "seconds": 7.1,
+    "seconds": 6.4,
     "ok": true
   },
   {
     "project": "ninja",
     "opt": "O2",
-    "linked_binaries": 2,
+    "linked_binaries": 1,
     "i_files": 33,
-    "compile_results": 2,
-    "successes": 2,
+    "compile_results": 1,
+    "successes": 1,
     "errors": [],
-    "seconds": 7.3,
+    "seconds": 6.6,
     "ok": true
   },
   {
@@ -73,7 +73,7 @@
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 3.6,
+    "seconds": 3.1,
     "ok": true
   },
   {
@@ -84,7 +84,7 @@
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 3.5,
+    "seconds": 3.4,
     "ok": true
   },
   {
@@ -95,7 +95,7 @@
     "compile_results": 1,
     "successes": 1,
     "errors": [],
-    "seconds": 3.6,
+    "seconds": 3.4,
     "ok": true
   }
 ]

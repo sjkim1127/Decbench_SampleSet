@@ -1,41 +1,17 @@
 #!/usr/bin/env python3
 """DWARF short-name collision measurement for DecBench C++ target validation.
 
+DecBench Identity Model Alignment:
+  - Collision identity key: Resolved DW_AT_name (following DW_AT_specification and
+    DW_AT_abstract_origin chains). This gives the exact unqualified function name
+    as indexed by DecBench (e.g. 'AssignBignum', '~ManifestParser', 'Double').
+  - Diagnostic display: Demangled DW_AT_linkage_name (for human review in reports).
+  - Project Ownership: Determined via DW_AT_decl_file (reconstructing the full source
+    file path from DWARF line table) and CU language, excluding /usr/include,
+    /usr/lib, and standard library headers.
+
 Usage:
-    python3 scripts/measure_collisions.py <compiled_dir> [OPTIONS]
-
-Options:
-    --output FILE           Write JSON report to FILE instead of stdout
-    --exclude-image NAME    Skip ELF images by basename (repeatable)
-    --verbose               Print per-CU classification to stderr
-
-The script produces TWO collision-rate measurements per ELF image:
-
-  raw     – all concrete DWARF subprograms, excluding only cmake probe CUs.
-  project – functions whose fully-qualified demangled name does NOT start with
-             a stdlib/system namespace prefix (std::, __gnu_cxx::, __cxxabiv::,
-             __detail::, etc.).  This is the reproducible "project-owned" rate.
-
-Both sets report:
-    source_function_addresses   (distinct low_pc values)
-    unique_short_names
-    collision_groups            (short names -> >1 address)
-    collision_addresses         (addresses belonging to collision groups)
-    collision_rate              collision_addresses / source_function_addresses
-
-NOTE on DecBench identity fidelity
------------------------------------
-DecBench's C++ matching logic (at the pinned revision d9f4f8a) resolves
-DW_AT_specification / DW_AT_abstract_origin chains to obtain DW_AT_name, then
-applies its own short-name trimming. This script uses the same chain resolution
-but derives the short name from DW_AT_linkage_name (demangled) when available,
-which is usually more reliable. The resulting short names are equivalent for
-most functions but may differ for template specialisations and some corner cases
-(e.g. anonymous / unnamed functions). Treat the collision numbers as a close
-diagnostic approximation, not a byte-for-byte replay of DecBench's own counter.
-
-Dependencies:
-    pip install pyelftools   (present in decbench-compile Docker image)
+    python3 scripts/measure_collisions.py <compiled_dir> [--output report.json]
 """
 
 from __future__ import annotations
@@ -58,9 +34,26 @@ from elftools.elf.elffile import ELFFile
 from elftools.common.exceptions import ELFError
 
 
-# ---------------------------------------------------------------------------
-# ELF identification
-# ---------------------------------------------------------------------------
+_CXX_LANGS = frozenset({0x04, 0x19, 0x1A, 0x21, 0x2A, 0x2B, 0x33})
+_SPEC_ONLY = ("DW_AT_specification",)
+_SPEC_AND_ORIGIN = ("DW_AT_specification", "DW_AT_abstract_origin")
+
+_SYSTEM_PATH_PATTERNS = (
+    "/usr/include",
+    "/usr/lib",
+    "/usr/local/include",
+    "/usr/local/lib",
+    "/include/c++/",
+    "/include/g++/",
+    "bits/",
+    "ext/",
+)
+
+_PROBE_KEYWORDS = frozenset([
+    "CMakeFiles", "cmake_install", "CMakeCXXCompilerId",
+    "CMakeCCompilerId", "CompilerIdCXX", "CompilerIdC", "feature_tests",
+])
+
 
 def _is_linked_elf(path: Path) -> bool:
     try:
@@ -70,18 +63,14 @@ def _is_linked_elf(path: Path) -> bool:
                 return False
             f.seek(16)
             e_type = struct.unpack("<H", f.read(2))[0]
-            return e_type in (2, 3)
+            return e_type in (2, 3)  # ET_EXEC=2, ET_DYN=3
     except (OSError, struct.error):
         return False
 
 
-# ---------------------------------------------------------------------------
-# Demangling
-# ---------------------------------------------------------------------------
-
 def _demangle(raw: str) -> str:
-    if not raw.startswith("_Z"):
-        return raw
+    if not raw or not raw.startswith("_Z"):
+        return raw or ""
     if _HAVE_CXXFILT:
         try:
             return cxxfilt.demangle(raw)
@@ -94,162 +83,102 @@ def _demangle(raw: str) -> str:
         return raw
 
 
-# ---------------------------------------------------------------------------
-# Short-name derivation
-# ---------------------------------------------------------------------------
-
-def _strip_template_args(s: str) -> str:
-    """Remove <...> template argument lists using bracket-depth counting."""
-    out: list[str] = []
-    depth = 0
-    for ch in s:
-        if ch == '<':
-            depth += 1
-        elif ch == '>':
-            if depth > 0:
-                depth -= 1
-                continue
-            # else: stray '>', shouldn't happen after proper demangling
-        if depth == 0:
-            out.append(ch)
-    return ''.join(out)
-
-
-def _short_name(demangled: str) -> str:
-    """Derive the DecBench-style unqualified short name from a demangled string.
-
-    Strategy:
-      1. Strip the return-type prefix if present (space before a qualified name).
-      2. Strip the argument list (everything from the first top-level '(').
-      3. Remove template parameters.
-      4. Take the last '::' component.
-
-    This avoids regex-based approaches that leave artefacts like 'X>'.
-    """
-    name = demangled.strip()
-
-    # 1. Strip return type: drop leading word(s) if followed by a space and
-    #    what looks like a qualified identifier.
-    # Only strip if the token before the space looks like a type keyword.
-    sp = name.find(' ')
-    if sp != -1:
-        after = name[sp + 1:].lstrip()
-        if after and (after[0].isalpha() or after[0] in ('_', '~', ':')):
-            name = after
-
-    # 2. Strip argument list: find first '(' at angle-bracket depth 0.
-    #    We must track '<' depth because template args can contain '('.
-    depth = 0
-    cut = len(name)
-    for i, ch in enumerate(name):
-        if ch == '<':
-            depth += 1
-        elif ch == '>':
-            if depth > 0:
-                depth -= 1
-        elif ch == '(' and depth == 0:
-            cut = i
-            break
-    name = name[:cut]
-
-    # 3. Remove template parameters from what remains.
-    name = _strip_template_args(name)
-    name = name.strip()
-
-    # 4. Take the last '::' component.
-    parts = name.split("::")
-    short = parts[-1].strip()
-    return short if short else name
-
-
-# ---------------------------------------------------------------------------
-# Namespace-based stdlib classification
-# ---------------------------------------------------------------------------
-
-# Fully-qualified demangled names starting with any of these prefixes are
-# treated as stdlib/system — excluded from the "project" measurement.
-_STDLIB_PREFIXES = (
-    "std::",
-    "__gnu_cxx::",
-    "__cxxabiv",
-    "__detail::",
-    "std::__",
-    "__gnu_pbds::",
-)
-
-
-def _is_stdlib_fn(demangled: str) -> bool:
-    return any(demangled.startswith(p) for p in _STDLIB_PREFIXES)
-
-
-# ---------------------------------------------------------------------------
-# CMake probe CU filter
-# ---------------------------------------------------------------------------
-
-_PROBE_KEYWORDS = frozenset([
-    "CMakeFiles", "cmake_install", "CMakeCXXCompilerId",
-    "CMakeCCompilerId", "CompilerIdCXX", "CompilerIdC", "feature_tests",
-])
-
-
 def _is_probe_cu(cu_name: str) -> bool:
     return any(kw in cu_name for kw in _PROBE_KEYWORDS)
 
 
-# ---------------------------------------------------------------------------
-# DWARF attribute helpers
-# ---------------------------------------------------------------------------
+def cu_is_cxx(cu) -> bool:
+    """True when the compilation unit's DW_AT_language is a C++ dialect."""
+    try:
+        attr = cu.get_top_DIE().attributes.get("DW_AT_language")
+    except Exception:
+        return False
+    return attr is not None and attr.value in _CXX_LANGS
 
-def _attr_str(die, name: str) -> str:
-    attr = die.attributes.get(name)
+
+def die_attr_owner(die, name: str):
+    """(attribute, owning DIE) for name, following specification/origin chains."""
+    cur = die
+    refs = _SPEC_AND_ORIGIN if cu_is_cxx(die.cu) else _SPEC_ONLY
+    for _ in range(5):
+        attr = cur.attributes.get(name)
+        if attr is not None:
+            return attr, cur
+        nxt = None
+        for ref in refs:
+            if ref in cur.attributes:
+                try:
+                    nxt = cur.get_DIE_from_attribute(ref)
+                except Exception:
+                    nxt = None
+                break
+        if nxt is None:
+            return None, None
+        cur = nxt
+    return None, None
+
+
+def die_str_attr(die, name: str) -> str | None:
+    attr, _ = die_attr_owner(die, name)
     if attr is None:
+        return None
+    val = attr.value
+    return val.decode("utf-8", "replace") if isinstance(val, bytes) else str(val)
+
+
+def cu_file_table(dwarfinfo, cu, cache: dict[int, list] | None = None) -> list:
+    """A CU's DW_AT_decl_file index table, memoized by CU offset."""
+    if cache is not None:
+        cached = cache.get(cu.cu_offset)
+        if cached is not None:
+            return cached
+    lp = dwarfinfo.line_program_for_CU(cu)
+    version = 4
+    if lp is not None:
+        version = lp.header.get("version", cu.header.get("version", 4))
+    files: list = [] if version >= 5 else [None]
+    if lp is not None and lp.header and lp.header.get("file_entry"):
+        fe_list = lp.header["file_entry"]
+        dirs = lp.header.get("include_directory", [])
+        for fe in fe_list:
+            nm = fe.name.decode("utf-8", "replace") if isinstance(fe.name, bytes) else str(fe.name)
+            dir_idx = fe.get("dir_index", 0)
+            didx = dir_idx if version >= 5 else dir_idx - 1
+            if 0 <= didx < len(dirs):
+                d = dirs[didx].decode("utf-8", "replace") if isinstance(dirs[didx], bytes) else str(dirs[didx])
+                files.append(f"{d}/{nm}")
+            else:
+                files.append(nm)
+    if cache is not None:
+        cache[cu.cu_offset] = files
+    return files
+
+
+def get_decl_file(die, dwarfinfo, file_tables: dict) -> str:
+    fi, fi_owner = die_attr_owner(die, "DW_AT_decl_file")
+    if fi is None or fi_owner is None:
         return ""
-    v = attr.value
-    return v.decode("utf-8", errors="replace") if isinstance(v, bytes) else str(v)
-
-
-def _attr_val(die, name: str):
-    attr = die.attributes.get(name)
-    return attr.value if attr else None
-
-
-def _resolve_linkage_name(die, die_map: dict) -> str:
-    for attr in ("DW_AT_linkage_name", "DW_AT_MIPS_linkage_name"):
-        v = _attr_str(die, attr)
-        if v:
-            return v
-    for ref_attr in ("DW_AT_specification", "DW_AT_abstract_origin"):
-        ref = _attr_val(die, ref_attr)
-        if ref is not None:
-            ref_die = die_map.get(ref)
-            if ref_die is not None:
-                r = _resolve_linkage_name(ref_die, die_map)
-                if r:
-                    return r
+    files = cu_file_table(dwarfinfo, fi_owner.cu, file_tables)
+    if 0 <= fi.value < len(files) and files[fi.value]:
+        return files[fi.value]
     return ""
 
 
-def _resolve_name(die, die_map: dict) -> str:
-    v = _attr_str(die, "DW_AT_name")
-    if v:
-        return v
-    for ref_attr in ("DW_AT_specification", "DW_AT_abstract_origin"):
-        ref = _attr_val(die, ref_attr)
-        if ref is not None:
-            ref_die = die_map.get(ref)
-            if ref_die is not None:
-                r = _resolve_name(ref_die, die_map)
-                if r:
-                    return r
-    return ""
+def _is_system_decl(decl_file: str, cu_name: str) -> bool:
+    if decl_file:
+        if any(pat in decl_file for pat in _SYSTEM_PATH_PATTERNS):
+            return True
+    if cu_name:
+        if any(pat in cu_name for pat in _SYSTEM_PATH_PATTERNS):
+            return True
+    return False
 
 
-# ---------------------------------------------------------------------------
-# Statistics builder
-# ---------------------------------------------------------------------------
-
-def _make_stats(n2a: dict[str, set[int]], a2name: dict[int, str]) -> dict:
-    total = len(a2name)
+def _make_stats(n2a: dict[str, set[int]], a2diag: dict[int, str]) -> dict:
+    all_addrs: set[int] = set()
+    for s in n2a.values():
+        all_addrs.update(s)
+    total = len(all_addrs)
     unique = len(n2a)
     coll = {n: a for n, a in n2a.items() if len(a) > 1}
     coll_set: set[int] = set()
@@ -263,7 +192,7 @@ def _make_stats(n2a: dict[str, set[int]], a2name: dict[int, str]) -> dict:
                 "short_name": nm,
                 "distinct_addresses": len(addrs),
                 "addresses": sorted(hex(a) for a in addrs),
-                "example_qualified": [a2name[a] for a in sorted(addrs)[:3]],
+                "example_qualified": [a2diag[a] for a in sorted(addrs)[:3]],
             }
             for nm, addrs in coll.items()
         ],
@@ -280,19 +209,13 @@ def _make_stats(n2a: dict[str, set[int]], a2name: dict[int, str]) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Per-ELF measurement
-# ---------------------------------------------------------------------------
-
 def measure_elf(elf_path: Path, verbose: bool = False) -> dict:
-    # raw: all non-probe subprograms
     raw_n2a: dict[str, set[int]] = defaultdict(set)
-    raw_a2name: dict[int, str] = {}
-    # project: non-stdlib, non-probe subprograms
+    raw_a2diag: dict[int, str] = {}
     proj_n2a: dict[str, set[int]] = defaultdict(set)
-    proj_a2name: dict[int, str] = {}
+    proj_a2diag: dict[int, str] = {}
 
-    cu_stats = {"total": 0, "probe": 0, "stdlib_fns": 0}
+    cu_stats = {"total": 0, "probe": 0, "system_subprograms": 0, "project_subprograms": 0}
 
     with elf_path.open("rb") as f:
         try:
@@ -301,80 +224,66 @@ def measure_elf(elf_path: Path, verbose: bool = False) -> dict:
             return {"path": str(elf_path), "error": str(e)}
 
         if not elf.has_dwarf_info():
-            return {"path": str(elf_path), "error": "no DWARF",
-                    "raw": _make_stats({}, {}),
-                    "project": _make_stats({}, {})}
+            return {
+                "path": str(elf_path),
+                "error": "no DWARF info",
+                "raw": _make_stats({}, {}),
+                "project": _make_stats({}, {}),
+            }
 
         dwarf = elf.get_dwarf_info()
+        file_tables: dict[int, list] = {}
 
         for CU in dwarf.iter_CUs():
             cu_stats["total"] += 1
             top = CU.get_top_DIE()
-            cu_name = _attr_str(top, "DW_AT_name")
+            raw_cu_name = top.attributes.get("DW_AT_name")
+            cu_name = raw_cu_name.value.decode("utf-8", "replace") if raw_cu_name and isinstance(raw_cu_name.value, bytes) else str(raw_cu_name or "")
 
             if _is_probe_cu(cu_name):
                 cu_stats["probe"] += 1
                 if verbose:
-                    print(f"    [probe] {cu_name}", file=sys.stderr)
+                    print(f"    [skip probe CU] {cu_name}", file=sys.stderr)
                 continue
 
-            # Build die offset map for this CU
-            die_map: dict[int, object] = {}
             for die in CU.iter_DIEs():
-                die_map[die.offset] = die
-
-            for die in CU.iter_DIEs():
-                if die.tag != "DW_TAG_subprogram":
+                if die.tag != "DW_TAG_subprogram" or "DW_AT_low_pc" not in die.attributes:
                     continue
 
-                # Must have a concrete low_pc
-                lp_attr = die.attributes.get("DW_AT_low_pc")
-                if lp_attr is None:
-                    continue
-                low_pc = int(lp_attr.value) if lp_attr.value else 0
+                low_pc = die.attributes["DW_AT_low_pc"].value
                 if low_pc == 0:
                     continue
 
-                # Skip abstract instances
-                inl = die.attributes.get("DW_AT_inline")
-                if inl and inl.value != 0:
+                # 1. Resolve exact unqualified function name (DecBench identity key)
+                name = die_str_attr(die, "DW_AT_name")
+                if not name:
                     continue
 
-                # Resolve name
-                linkage = _resolve_linkage_name(die, die_map)
-                if linkage:
-                    demangled = _demangle(linkage)
+                # 2. Resolve linkage name for diagnostic display
+                raw_link = die_str_attr(die, "DW_AT_linkage_name") or die_str_attr(die, "DW_AT_MIPS_linkage_name") or ""
+                demangled = _demangle(raw_link) if raw_link else name
+
+                # 3. Resolve source declaration file via DW_AT_decl_file
+                decl_file = get_decl_file(die, dwarf, file_tables)
+                is_system = _is_system_decl(decl_file, cu_name)
+
+                raw_n2a[name].add(low_pc)
+                raw_a2diag[low_pc] = demangled
+
+                if is_system:
+                    cu_stats["system_subprograms"] += 1
                 else:
-                    raw_n = _resolve_name(die, die_map)
-                    if not raw_n:
-                        continue
-                    demangled = _demangle(raw_n) if raw_n.startswith("_Z") else raw_n
-
-                short = _short_name(demangled)
-                is_std = _is_stdlib_fn(demangled)
-
-                # Raw set: everything non-probe
-                raw_n2a[short].add(low_pc)
-                raw_a2name[low_pc] = demangled
-
-                # Project set: exclude stdlib
-                if is_std:
-                    cu_stats["stdlib_fns"] += 1
-                else:
-                    proj_n2a[short].add(low_pc)
-                    proj_a2name[low_pc] = demangled
+                    cu_stats["project_subprograms"] += 1
+                    proj_n2a[name].add(low_pc)
+                    proj_a2diag[low_pc] = demangled
 
     return {
         "path": str(elf_path),
         "cu_stats": cu_stats,
-        "raw": _make_stats(raw_n2a, raw_a2name),
-        "project": _make_stats(proj_n2a, proj_a2name),
+        "raw": _make_stats(raw_n2a, raw_a2diag),
+        "project": _make_stats(proj_n2a, proj_a2diag),
     }
 
-
-# ---------------------------------------------------------------------------
-# Aggregation
-# ---------------------------------------------------------------------------
 
 def _agg(per_image: list[dict], key: str) -> dict:
     addrs = sum(r.get(key, {}).get("source_function_addresses", 0) for r in per_image)
@@ -388,12 +297,8 @@ def _agg(per_image: list[dict], key: str) -> dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
-
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Measure DWARF short-name collisions")
+    ap = argparse.ArgumentParser(description="Measure DWARF short-name collisions (DecBench identity aligned)")
     ap.add_argument("compiled_dir")
     ap.add_argument("--output", "-o", default=None)
     ap.add_argument("--exclude-image", nargs="*", default=[], metavar="NAME")
@@ -413,8 +318,12 @@ def main() -> int:
 
     if not elf_paths:
         print(f"WARNING: No ELF images in {compiled}", file=sys.stderr)
-        result = {"compiled_dir": str(compiled), "elf_image_count": 0,
-                  "aggregated_raw": {}, "aggregated_project": {}}
+        result = {
+            "compiled_dir": str(compiled),
+            "elf_image_count": 0,
+            "aggregated_raw": {},
+            "aggregated_project": {},
+        }
     else:
         per_image = []
         for ep in elf_paths:
@@ -441,12 +350,8 @@ def main() -> int:
 
     r = result.get("aggregated_raw", {})
     p = result.get("aggregated_project", {})
-    # Extract target/mode from path for cleaner summary line
     parts = compiled.parts
-    try:
-        tag = f"{parts[-3]}/{parts[-2]}"
-    except IndexError:
-        tag = str(compiled)
+    tag = f"{parts[-3]}/{parts[-2]}" if len(parts) >= 3 else str(compiled)
     print(
         f"SUMMARY [{tag}]"
         f"  ELF={result.get('elf_image_count',0)}"

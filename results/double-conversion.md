@@ -22,14 +22,14 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 12 | 25 | **45.45%** (proj = raw) |
-| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 26 | 20 | 7 | 15 | **57.69%** (proj = raw) |
-| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 12 | 25 | **45.45%** (proj = raw) |
+| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 233 (proj) / 237 (raw) | 187 / 191 | 28 / 28 | 74 / 74 | **31.76%** (proj) / 31.22% (raw) |
+| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 89 (proj) / 89 (raw) | 78 / 78 | 8 / 8 | 19 / 19 | **21.35%** (proj) / 21.35% (raw) |
+| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 263 (proj) / 267 (raw) | 184 / 188 | 34 / 34 | 113 / 113 | **42.97%** (proj) / 42.32% (raw) |
 
-> **Note:** `project == raw` for all modes: double-conversion contains no stdlib template
-> instantiations in its DWARF (the library has minimal STL usage and its headers do not cause
-> observable template body emission). All collision groups are in the `double_conversion::` namespace.
-> Both rates are recorded in `results/evidence/collision/`.
+> **Collision measurement methodology:** Resolved `DW_AT_name` is used as the unqualified function
+> name identity key, with `DW_AT_decl_file` filtering out system/stdlib headers.
+> Collisions in double-conversion are driven by genuine C++ constructor overloads (e.g. `Double`, `Vector`, `DiyFp`)
+> and operator overloads (`operator[]`). Full raw JSON evidence is preserved in `results/evidence/collision/`.
 
 
 Collision rate formula: `collision_addresses / source_function_addresses`

@@ -1,28 +1,90 @@
 {
-  "compiled_dir": "results/cpp_local/O2-noinline/snappy/compiled",
-  "exclude_images": [
-    "boo"
-  ],
+  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2-noinline/snappy/compiled",
+  "exclude_images": [],
   "elf_images": [
-    "results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2"
+    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2",
+      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2",
       "cu_stats": {
         "total": 4,
         "probe": 0,
-        "stdlib_fns": 30
+        "system_subprograms": 153,
+        "project_subprograms": 180
       },
       "raw": {
-        "source_function_addresses": 63,
-        "unique_short_names": 37,
-        "collision_groups": 18,
-        "collision_addresses": 44,
-        "collision_rate": 0.698413,
-        "collision_rate_pct": "69.84%",
+        "source_function_addresses": 332,
+        "unique_short_names": 231,
+        "collision_groups": 62,
+        "collision_addresses": 163,
+        "collision_rate": 0.490964,
+        "collision_rate_pct": "49.10%",
         "top_collision_groups": [
+          {
+            "short_name": "base",
+            "distinct_addresses": 6,
+            "addresses": [
+              "0x10000",
+              "0x10060",
+              "0xcec0",
+              "0xcf10",
+              "0xe210",
+              "0xfd00"
+            ],
+            "example_qualified": [
+              "std::move_iterator<char**>::base() const",
+              "std::move_iterator<snappy::SnappySinkAllocator::Datablock*>::base() const",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::base() const"
+            ]
+          },
+          {
+            "short_name": "Append",
+            "distinct_addresses": 5,
+            "addresses": [
+              "0x10f30",
+              "0x9710",
+              "0xd100",
+              "0xd190",
+              "0xdb20"
+            ],
+            "example_qualified": [
+              "snappy::UncheckedByteArraySink::Append(char const*, unsigned long)",
+              "snappy::SnappyDecompressionValidator::Append(char const*, unsigned long, unsigned long*)",
+              "snappy::SnappyArrayWriter::Append(char const*, unsigned long, char**)"
+            ]
+          },
+          {
+            "short_name": "_M_get_Tp_allocator",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x10760",
+              "0xe120",
+              "0xe3b0",
+              "0xe4a0"
+            ],
+            "example_qualified": [
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_M_get_Tp_allocator()",
+              "std::_Vector_base<char*, std::allocator<char*>>::_M_get_Tp_allocator()",
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_M_get_Tp_allocator() const"
+            ]
+          },
+          {
+            "short_name": "begin",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xe1b0",
+              "0xe700",
+              "0xfc40",
+              "0xffa0"
+            ],
+            "example_qualified": [
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::begin()",
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::begin() const",
+              "std::vector<char*, std::allocator<char*>>::begin() const"
+            ]
+          },
           {
             "short_name": "__normal_iterator",
             "distinct_addresses": 4,
@@ -33,23 +95,129 @@
               "0xff30"
             ],
             "example_qualified": [
-              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> > >::__normal_iterator(snappy::SnappySinkAllocator::Datablock* const&)",
-              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock const*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> > >::__normal_iterator(snappy::SnappySinkAllocator::Datablock const* const&)",
-              "__gnu_cxx::__normal_iterator<char* const*, std::vector<char*, std::allocator<char*> > >::__normal_iterator(char* const* const&)"
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::__normal_iterator(snappy::SnappySinkAllocator::Datablock* const&)",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock const*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::__normal_iterator(snappy::SnappySinkAllocator::Datablock const* const&)",
+              "__gnu_cxx::__normal_iterator<char* const*, std::vector<char*, std::allocator<char*>>>::__normal_iterator(char* const* const&)"
             ]
           },
           {
-            "short_name": "pair",
-            "distinct_addresses": 3,
+            "short_name": "end",
+            "distinct_addresses": 4,
             "addresses": [
-              "0xdd90",
-              "0xddf0",
-              "0xe7e0"
+              "0xe150",
+              "0xe760",
+              "0xfca0",
+              "0xff40"
             ],
             "example_qualified": [
-              "std::pair<unsigned long, bool>::pair<unsigned long&, bool, true>(unsigned long&, bool&&)",
-              "std::pair<__Uint8x16_t, __Uint8x16_t>::pair<__Uint8x16_t&, __Uint8x16_t&, true>(__Uint8x16_t&, __Uint8x16_t&)",
-              "std::pair<unsigned char const*, long>::pair<unsigned char const*&, long&, true>(unsigned char const*&, long&)"
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::end()",
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::end() const",
+              "std::vector<char*, std::allocator<char*>>::end() const"
+            ]
+          },
+          {
+            "short_name": "CheckLength",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x9b40",
+              "0x9b90",
+              "0x9ba0",
+              "0xe420"
+            ],
+            "example_qualified": [
+              "snappy::SnappyDecompressionValidator::CheckLength() const",
+              "snappy::SnappyArrayWriter::CheckLength() const",
+              "snappy::SnappyIOVecWriter::CheckLength() const"
+            ]
+          },
+          {
+            "short_name": "SetExpectedLength",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd950",
+              "0xd990",
+              "0xdb40",
+              "0xfdd0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyIOVecWriter::SetExpectedLength(unsigned long)",
+              "snappy::SnappyDecompressionValidator::SetExpectedLength(unsigned long)",
+              "snappy::SnappyArrayWriter::SetExpectedLength(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Compress",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xb644",
+              "0xb9b0",
+              "0xbb90",
+              "0xbc44"
+            ],
+            "example_qualified": [
+              "snappy::Compress(snappy::Source*, snappy::Sink*, snappy::CompressionOptions)",
+              "snappy::Compress(snappy::Source*, snappy::Sink*)",
+              "snappy::Compress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)"
+            ]
+          },
+          {
+            "short_name": "operator*",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xcf90",
+              "0xcfe0",
+              "0xd0c0",
+              "0xd0e0"
+            ],
+            "example_qualified": [
+              "std::move_iterator<snappy::SnappySinkAllocator::Datablock*>::operator*() const",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock const*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::operator*() const",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::operator*() const"
+            ]
+          },
+          {
+            "short_name": "TryFastAppend",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd020",
+              "0xd0f0",
+              "0xd130",
+              "0xd210"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::TryFastAppend(char const*, unsigned long, unsigned long, char**)",
+              "snappy::SnappyDecompressionValidator::TryFastAppend(char const*, unsigned long, unsigned long, unsigned long*)",
+              "snappy::SnappyArrayWriter::TryFastAppend(char const*, unsigned long, unsigned long, char**)"
+            ]
+          },
+          {
+            "short_name": "GetBase",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd080",
+              "0xd1f0",
+              "0xd2a0",
+              "0xd2f0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::GetBase(long*)",
+              "snappy::SnappyArrayWriter::GetBase(long*)",
+              "snappy::SnappyIOVecWriter::GetBase(long*)"
+            ]
+          },
+          {
+            "short_name": "GetOutputPtr",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd090",
+              "0xd120",
+              "0xd200",
+              "0xd2b0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::GetOutputPtr()",
+              "snappy::SnappyDecompressionValidator::GetOutputPtr()",
+              "snappy::SnappyArrayWriter::GetOutputPtr()"
             ]
           },
           {
@@ -61,9 +229,37 @@
               "0xe670"
             ],
             "example_qualified": [
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_impl::_Vector_impl()",
-              "std::_Vector_base<char*, std::allocator<char*> >::_Vector_impl::_Vector_impl()",
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_impl::_Vector_impl(std::allocator<snappy::SnappySinkAllocator::Datablock> const&)"
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_Vector_impl::_Vector_impl()",
+              "std::_Vector_base<char*, std::allocator<char*>>::_Vector_impl::_Vector_impl()",
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_Vector_impl::_Vector_impl(std::allocator<snappy::SnappySinkAllocator::Datablock> const&)"
+            ]
+          },
+          {
+            "short_name": "SetOutputPtr",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0xd970",
+              "0xd9a0",
+              "0xe560"
+            ],
+            "example_qualified": [
+              "snappy::SnappyArrayWriter::SetOutputPtr(char*)",
+              "snappy::SnappyDecompressionValidator::SetOutputPtr(unsigned long)",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::SetOutputPtr(char*)"
+            ]
+          },
+          {
+            "short_name": "AppendFromSelf",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x110d0",
+              "0xd9b0",
+              "0xde40"
+            ],
+            "example_qualified": [
+              "snappy::SnappyDecompressionValidator::AppendFromSelf(unsigned long, unsigned long, unsigned long*)",
+              "snappy::SnappyIOVecWriter::AppendFromSelf(unsigned long, unsigned long, char**)",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::AppendFromSelf(unsigned long, unsigned long, char**)"
             ]
           },
           {
@@ -89,9 +285,9 @@
               "0xe6c0"
             ],
             "example_qualified": [
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_base()",
-              "std::_Vector_base<char*, std::allocator<char*> >::_Vector_base()",
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_base(unsigned long, std::allocator<snappy::SnappySinkAllocator::Datablock> const&)"
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_Vector_base()",
+              "std::_Vector_base<char*, std::allocator<char*>>::_Vector_base()",
+              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::_Vector_base(unsigned long, std::allocator<snappy::SnappySinkAllocator::Datablock> const&)"
             ]
           },
           {
@@ -103,179 +299,269 @@
               "0xe4e0"
             ],
             "example_qualified": [
-              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::vector()",
-              "std::vector<char*, std::allocator<char*> >::vector()",
-              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::vector(std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> > const&)"
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::vector()",
+              "std::vector<char*, std::allocator<char*>>::vector()",
+              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>::vector(std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>> const&)"
             ]
           },
           {
-            "short_name": "const*, unsigned long)",
+            "short_name": "operator[]",
             "distinct_addresses": 3,
             "addresses": [
-              "0xd590",
-              "0xd8e0",
-              "0xd920"
+              "0xd010",
+              "0xd760",
+              "0xd9f0"
             ],
             "example_qualified": [
-              "snappy::ByteArraySource::ByteArraySource(char const*, unsigned long)",
-              "snappy::SnappyIOVecReader::SnappyIOVecReader(iovec const*, unsigned long)",
-              "snappy::SnappyIOVecWriter::SnappyIOVecWriter(iovec const*, unsigned long)"
+              "std::vector<char*, std::allocator<char*>>::operator[](unsigned long)",
+              "std::array<short, 256ul>::operator[](unsigned long) const",
+              "std::array<std::array<char, 16ul>, 16ul>::operator[](unsigned long) const"
             ]
           },
           {
-            "short_name": "~UncheckedByteArraySink",
-            "distinct_addresses": 2,
+            "short_name": "allocate",
+            "distinct_addresses": 3,
             "addresses": [
-              "0x9834",
-              "0x9850"
+              "0x9aa0",
+              "0x9b24",
+              "0xcf20"
             ],
             "example_qualified": [
-              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
-              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+              "std::__new_allocator<snappy::SnappySinkAllocator::Datablock>::allocate(unsigned long, void const*)",
+              "std::__new_allocator<char>::allocate(unsigned long, void const*)",
+              "std::__new_allocator<char*>::allocate(unsigned long, void const*)"
             ]
           },
           {
-            "short_name": "~ByteArraySource",
-            "distinct_addresses": 2,
+            "short_name": "operator++",
+            "distinct_addresses": 3,
             "addresses": [
-              "0x97c4",
-              "0x97e0"
+              "0xcfa0",
+              "0xcff0",
+              "0xd0d0"
             ],
             "example_qualified": [
-              "snappy::ByteArraySource::~ByteArraySource()",
-              "snappy::ByteArraySource::~ByteArraySource()"
+              "std::move_iterator<snappy::SnappySinkAllocator::Datablock*>::operator++()",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock const*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::operator++()",
+              "__gnu_cxx::__normal_iterator<snappy::SnappySinkAllocator::Datablock*, std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock>>>::operator++()"
             ]
           },
           {
-            "short_name": "~Sink",
-            "distinct_addresses": 2,
+            "short_name": "deallocate",
+            "distinct_addresses": 3,
             "addresses": [
-              "0x9830",
-              "0x9874"
+              "0x9a94",
+              "0x9ad0",
+              "0x9b20"
             ],
             "example_qualified": [
-              "snappy::Sink::~Sink()",
-              "snappy::Sink::~Sink()"
+              "std::__new_allocator<char*>::deallocate(char**, unsigned long)",
+              "std::__new_allocator<snappy::SnappySinkAllocator::Datablock>::deallocate(snappy::SnappySinkAllocator::Datablock*, unsigned long)",
+              "std::__new_allocator<char>::deallocate(char*, unsigned long)"
             ]
           },
           {
-            "short_name": "~Source",
+            "short_name": "GetAppendBufferVariable",
             "distinct_addresses": 2,
             "addresses": [
-              "0x97c0",
-              "0x9804"
+              "0x9660",
+              "0x9700"
             ],
             "example_qualified": [
-              "snappy::Source::~Source()",
-              "snappy::Source::~Source()"
+              "snappy::Sink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)",
+              "snappy::UncheckedByteArraySink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)"
             ]
           },
           {
-            "short_name": "move_iterator",
+            "short_name": "AppendAndTakeOwnership",
             "distinct_addresses": 2,
             "addresses": [
-              "0x108e0",
-              "0xfe40"
+              "0x9670",
+              "0x9750"
             ],
             "example_qualified": [
-              "std::move_iterator<snappy::SnappySinkAllocator::Datablock*>::move_iterator(snappy::SnappySinkAllocator::Datablock*)",
-              "std::move_iterator<char**>::move_iterator(char**)"
-            ]
-          },
-          {
-            "short_name": "_Vector_impl_data",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xe080",
-              "0xe4b0"
-            ],
-            "example_qualified": [
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_impl_data::_Vector_impl_data()",
-              "std::_Vector_base<char*, std::allocator<char*> >::_Vector_impl_data::_Vector_impl_data()"
-            ]
-          },
-          {
-            "short_name": "~_Vector_base",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xe0f0",
-              "0xe510"
-            ],
-            "example_qualified": [
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::~_Vector_base()",
-              "std::_Vector_base<char*, std::allocator<char*> >::~_Vector_base()"
-            ]
-          },
-          {
-            "short_name": "~vector",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xe100",
-              "0xe520"
-            ],
-            "example_qualified": [
-              "std::vector<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::~vector()",
-              "std::vector<char*, std::allocator<char*> >::~vector()"
-            ]
-          },
-          {
-            "short_name": "const&)",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0x10200",
-              "0x10210"
-            ],
-            "example_qualified": [
-              "snappy::SnappySinkAllocator::SnappySinkAllocator(snappy::SnappySinkAllocator const&)",
-              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::SnappyScatteredWriter(snappy::SnappySinkAllocator const&)"
-            ]
-          },
-          {
-            "short_name": "~_Vector_impl",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xe0e0",
-              "0xe500"
-            ],
-            "example_qualified": [
-              "std::_Vector_base<snappy::SnappySinkAllocator::Datablock, std::allocator<snappy::SnappySinkAllocator::Datablock> >::_Vector_impl::~_Vector_impl()",
-              "std::_Vector_base<char*, std::allocator<char*> >::_Vector_impl::~_Vector_impl()"
-            ]
-          },
-          {
-            "short_name": "~SnappyIOVecReader",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0xce50",
-              "0xce70"
-            ],
-            "example_qualified": [
-              "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
-              "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+              "snappy::Sink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)",
+              "snappy::UncheckedByteArraySink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)"
             ]
           }
         ]
       },
       "project": {
-        "source_function_addresses": 33,
-        "unique_short_names": 25,
-        "collision_groups": 7,
-        "collision_addresses": 15,
-        "collision_rate": 0.454545,
-        "collision_rate_pct": "45.45%",
+        "source_function_addresses": 179,
+        "unique_short_names": 131,
+        "collision_groups": 31,
+        "collision_addresses": 79,
+        "collision_rate": 0.441341,
+        "collision_rate_pct": "44.13%",
         "top_collision_groups": [
           {
-            "short_name": "const*, unsigned long)",
-            "distinct_addresses": 3,
+            "short_name": "Append",
+            "distinct_addresses": 5,
             "addresses": [
-              "0xd590",
-              "0xd8e0",
-              "0xd920"
+              "0x10f30",
+              "0x9710",
+              "0xd100",
+              "0xd190",
+              "0xdb20"
             ],
             "example_qualified": [
-              "snappy::ByteArraySource::ByteArraySource(char const*, unsigned long)",
-              "snappy::SnappyIOVecReader::SnappyIOVecReader(iovec const*, unsigned long)",
-              "snappy::SnappyIOVecWriter::SnappyIOVecWriter(iovec const*, unsigned long)"
+              "snappy::UncheckedByteArraySink::Append(char const*, unsigned long)",
+              "snappy::SnappyDecompressionValidator::Append(char const*, unsigned long, unsigned long*)",
+              "snappy::SnappyArrayWriter::Append(char const*, unsigned long, char**)"
+            ]
+          },
+          {
+            "short_name": "CheckLength",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x9b40",
+              "0x9b90",
+              "0x9ba0",
+              "0xe420"
+            ],
+            "example_qualified": [
+              "snappy::SnappyDecompressionValidator::CheckLength() const",
+              "snappy::SnappyArrayWriter::CheckLength() const",
+              "snappy::SnappyIOVecWriter::CheckLength() const"
+            ]
+          },
+          {
+            "short_name": "SetExpectedLength",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd950",
+              "0xd990",
+              "0xdb40",
+              "0xfdd0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyIOVecWriter::SetExpectedLength(unsigned long)",
+              "snappy::SnappyDecompressionValidator::SetExpectedLength(unsigned long)",
+              "snappy::SnappyArrayWriter::SetExpectedLength(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Compress",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xb644",
+              "0xb9b0",
+              "0xbb90",
+              "0xbc44"
+            ],
+            "example_qualified": [
+              "snappy::Compress(snappy::Source*, snappy::Sink*, snappy::CompressionOptions)",
+              "snappy::Compress(snappy::Source*, snappy::Sink*)",
+              "snappy::Compress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)"
+            ]
+          },
+          {
+            "short_name": "TryFastAppend",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd020",
+              "0xd0f0",
+              "0xd130",
+              "0xd210"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::TryFastAppend(char const*, unsigned long, unsigned long, char**)",
+              "snappy::SnappyDecompressionValidator::TryFastAppend(char const*, unsigned long, unsigned long, unsigned long*)",
+              "snappy::SnappyArrayWriter::TryFastAppend(char const*, unsigned long, unsigned long, char**)"
+            ]
+          },
+          {
+            "short_name": "GetBase",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd080",
+              "0xd1f0",
+              "0xd2a0",
+              "0xd2f0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::GetBase(long*)",
+              "snappy::SnappyArrayWriter::GetBase(long*)",
+              "snappy::SnappyIOVecWriter::GetBase(long*)"
+            ]
+          },
+          {
+            "short_name": "GetOutputPtr",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0xd090",
+              "0xd120",
+              "0xd200",
+              "0xd2b0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::GetOutputPtr()",
+              "snappy::SnappyDecompressionValidator::GetOutputPtr()",
+              "snappy::SnappyArrayWriter::GetOutputPtr()"
+            ]
+          },
+          {
+            "short_name": "SetOutputPtr",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0xd970",
+              "0xd9a0",
+              "0xe560"
+            ],
+            "example_qualified": [
+              "snappy::SnappyArrayWriter::SetOutputPtr(char*)",
+              "snappy::SnappyDecompressionValidator::SetOutputPtr(unsigned long)",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::SetOutputPtr(char*)"
+            ]
+          },
+          {
+            "short_name": "AppendFromSelf",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x110d0",
+              "0xd9b0",
+              "0xde40"
+            ],
+            "example_qualified": [
+              "snappy::SnappyDecompressionValidator::AppendFromSelf(unsigned long, unsigned long, unsigned long*)",
+              "snappy::SnappyIOVecWriter::AppendFromSelf(unsigned long, unsigned long, char**)",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::AppendFromSelf(unsigned long, unsigned long, char**)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBufferVariable",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x9660",
+              "0x9700"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)",
+              "snappy::UncheckedByteArraySink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "AppendAndTakeOwnership",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x9670",
+              "0x9750"
+            ],
+            "example_qualified": [
+              "snappy::Sink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)",
+              "snappy::UncheckedByteArraySink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBuffer",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x9650",
+              "0x96f4"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBuffer(unsigned long, char*)",
+              "snappy::UncheckedByteArraySink::GetAppendBuffer(unsigned long, char*)"
             ]
           },
           {
@@ -288,6 +574,42 @@
             "example_qualified": [
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+            ]
+          },
+          {
+            "short_name": "Skip",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x96e0",
+              "0xd850"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Skip(unsigned long)",
+              "snappy::SnappyIOVecReader::Skip(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Peek",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x96d0",
+              "0xcdf0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Peek(unsigned long*)",
+              "snappy::SnappyIOVecReader::Peek(unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "Available",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x96c0",
+              "0xcde0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Available() const",
+              "snappy::SnappyIOVecReader::Available() const"
             ]
           },
           {
@@ -327,27 +649,75 @@
             ]
           },
           {
-            "short_name": "const&)",
+            "short_name": "Flush",
             "distinct_addresses": 2,
             "addresses": [
-              "0x10200",
-              "0x10210"
+              "0xe290",
+              "0xe3f0"
             ],
             "example_qualified": [
-              "snappy::SnappySinkAllocator::SnappySinkAllocator(snappy::SnappySinkAllocator const&)",
-              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::SnappyScatteredWriter(snappy::SnappySinkAllocator const&)"
+              "snappy::SnappySinkAllocator::Flush(unsigned long)",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::Flush()"
             ]
           },
           {
-            "short_name": "~SnappyIOVecReader",
+            "short_name": "Produced",
             "distinct_addresses": 2,
             "addresses": [
-              "0xce50",
-              "0xce70"
+              "0x9b50",
+              "0xe3e0"
             ],
             "example_qualified": [
-              "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
-              "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+              "snappy::SnappyArrayWriter::Produced() const",
+              "snappy::SnappyScatteredWriter<snappy::SnappySinkAllocator>::Produced() const"
+            ]
+          },
+          {
+            "short_name": "SnappySinkAllocator",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x10200",
+              "0xe0c0"
+            ],
+            "example_qualified": [
+              "snappy::SnappySinkAllocator::SnappySinkAllocator(snappy::Sink*)",
+              "snappy::SnappySinkAllocator::SnappySinkAllocator(snappy::SnappySinkAllocator const&)"
+            ]
+          },
+          {
+            "short_name": "Uncompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0xc7d0",
+              "0xcb00"
+            ],
+            "example_qualified": [
+              "snappy::Uncompress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "snappy::Uncompress(snappy::Source*, snappy::Sink*)"
+            ]
+          },
+          {
+            "short_name": "CompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0xbe30",
+              "0xbf10"
+            ],
+            "example_qualified": [
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)",
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "RawCompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0xbcd0",
+              "0xbda0"
+            ],
+            "example_qualified": [
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*, snappy::CompressionOptions)",
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*)"
             ]
           }
         ]
@@ -355,15 +725,15 @@
     }
   ],
   "aggregated_raw": {
-    "source_function_addresses": 63,
-    "collision_addresses": 44,
-    "collision_rate": 0.698413,
-    "collision_rate_pct": "69.84%"
+    "source_function_addresses": 332,
+    "collision_addresses": 163,
+    "collision_rate": 0.490964,
+    "collision_rate_pct": "49.10%"
   },
   "aggregated_project": {
-    "source_function_addresses": 33,
-    "collision_addresses": 15,
-    "collision_rate": 0.454545,
-    "collision_rate_pct": "45.45%"
+    "source_function_addresses": 179,
+    "collision_addresses": 79,
+    "collision_rate": 0.441341,
+    "collision_rate_pct": "44.13%"
   }
 }

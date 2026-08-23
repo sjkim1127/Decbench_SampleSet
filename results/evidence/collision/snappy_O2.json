@@ -1,28 +1,78 @@
 {
-  "compiled_dir": "results/cpp_local/O2/snappy/compiled",
-  "exclude_images": [
-    "boo"
-  ],
+  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled",
+  "exclude_images": [],
   "elf_images": [
-    "results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2"
+    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2",
+      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2",
       "cu_stats": {
         "total": 4,
         "probe": 0,
-        "stdlib_fns": 0
+        "system_subprograms": 2,
+        "project_subprograms": 82
       },
       "raw": {
-        "source_function_addresses": 19,
-        "unique_short_names": 14,
-        "collision_groups": 5,
-        "collision_addresses": 10,
-        "collision_rate": 0.526316,
-        "collision_rate_pct": "52.63%",
+        "source_function_addresses": 84,
+        "unique_short_names": 62,
+        "collision_groups": 20,
+        "collision_addresses": 42,
+        "collision_rate": 0.5,
+        "collision_rate_pct": "50.00%",
         "top_collision_groups": [
+          {
+            "short_name": "Compress",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x5344",
+              "0x5750",
+              "0x5940",
+              "0x5a20"
+            ],
+            "example_qualified": [
+              "snappy::Compress(snappy::Source*, snappy::Sink*, snappy::CompressionOptions)",
+              "snappy::Compress(snappy::Source*, snappy::Sink*)",
+              "snappy::Compress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBufferVariable",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3150",
+              "0x31a0"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)",
+              "snappy::UncheckedByteArraySink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "AppendAndTakeOwnership",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x31f0",
+              "0x3260"
+            ],
+            "example_qualified": [
+              "snappy::UncheckedByteArraySink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)",
+              "snappy::Sink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBuffer",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3140",
+              "0x3194"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBuffer(unsigned long, char*)",
+              "snappy::UncheckedByteArraySink::GetAppendBuffer(unsigned long, char*)"
+            ]
+          },
           {
             "short_name": "~UncheckedByteArraySink",
             "distinct_addresses": 2,
@@ -33,6 +83,42 @@
             "example_qualified": [
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+            ]
+          },
+          {
+            "short_name": "Skip",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3180",
+              "0x6840"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Skip(unsigned long)",
+              "snappy::SnappyIOVecReader::Skip(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Peek",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3170",
+              "0x67c0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Peek(unsigned long*)",
+              "snappy::SnappyIOVecReader::Peek(unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "Available",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3160",
+              "0x67b0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Available() const",
+              "snappy::SnappyIOVecReader::Available() const"
             ]
           },
           {
@@ -72,6 +158,42 @@
             ]
           },
           {
+            "short_name": "Uncompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5f84",
+              "0x63b0"
+            ],
+            "example_qualified": [
+              "snappy::Uncompress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "snappy::Uncompress(snappy::Source*, snappy::Sink*)"
+            ]
+          },
+          {
+            "short_name": "CompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5a30",
+              "0x5b30"
+            ],
+            "example_qualified": [
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)",
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "RawCompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5830",
+              "0x5930"
+            ],
+            "example_qualified": [
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*, snappy::CompressionOptions)",
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*)"
+            ]
+          },
+          {
             "short_name": "~SnappyIOVecReader",
             "distinct_addresses": 2,
             "addresses": [
@@ -81,18 +203,129 @@
             "example_qualified": [
               "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
               "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+            ]
+          },
+          {
+            "short_name": "RawCompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5760",
+              "0x5824"
+            ],
+            "example_qualified": [
+              "snappy::RawCompress(char const*, unsigned long, char*, unsigned long*, snappy::CompressionOptions)",
+              "snappy::RawCompress(char const*, unsigned long, char*, unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "RawUncompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5d70",
+              "0x5ef0"
+            ],
+            "example_qualified": [
+              "snappy::RawUncompress(snappy::Source*, char*)",
+              "snappy::RawUncompress(char const*, unsigned long, char*)"
+            ]
+          },
+          {
+            "short_name": "RawUncompressToIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5b40",
+              "0x5cd0"
+            ],
+            "example_qualified": [
+              "snappy::RawUncompressToIOVec(snappy::Source*, iovec const*, unsigned long)",
+              "snappy::RawUncompressToIOVec(char const*, unsigned long, iovec const*, unsigned long)"
+            ]
+          },
+          {
+            "short_name": "GetUncompressedLength",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3ae0",
+              "0x5230"
+            ],
+            "example_qualified": [
+              "snappy::GetUncompressedLength(char const*, unsigned long, unsigned long*)",
+              "snappy::GetUncompressedLength(snappy::Source*, unsigned int*)"
+            ]
+          },
+          {
+            "short_name": "MemCopy64",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x4ec0",
+              "0x4f74"
+            ],
+            "example_qualified": [
+              "snappy::MemCopy64(char*, void const*, unsigned long)",
+              "snappy::MemCopy64(long, void const*, unsigned long)"
             ]
           }
         ]
       },
       "project": {
-        "source_function_addresses": 19,
-        "unique_short_names": 14,
-        "collision_groups": 5,
-        "collision_addresses": 10,
-        "collision_rate": 0.526316,
-        "collision_rate_pct": "52.63%",
+        "source_function_addresses": 82,
+        "unique_short_names": 60,
+        "collision_groups": 20,
+        "collision_addresses": 42,
+        "collision_rate": 0.512195,
+        "collision_rate_pct": "51.22%",
         "top_collision_groups": [
+          {
+            "short_name": "Compress",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x5344",
+              "0x5750",
+              "0x5940",
+              "0x5a20"
+            ],
+            "example_qualified": [
+              "snappy::Compress(snappy::Source*, snappy::Sink*, snappy::CompressionOptions)",
+              "snappy::Compress(snappy::Source*, snappy::Sink*)",
+              "snappy::Compress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBufferVariable",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3150",
+              "0x31a0"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)",
+              "snappy::UncheckedByteArraySink::GetAppendBufferVariable(unsigned long, unsigned long, char*, unsigned long, unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "AppendAndTakeOwnership",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x31f0",
+              "0x3260"
+            ],
+            "example_qualified": [
+              "snappy::UncheckedByteArraySink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)",
+              "snappy::Sink::AppendAndTakeOwnership(char*, unsigned long, void (*)(void*, char const*, unsigned long), void*)"
+            ]
+          },
+          {
+            "short_name": "GetAppendBuffer",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3140",
+              "0x3194"
+            ],
+            "example_qualified": [
+              "snappy::Sink::GetAppendBuffer(unsigned long, char*)",
+              "snappy::UncheckedByteArraySink::GetAppendBuffer(unsigned long, char*)"
+            ]
+          },
           {
             "short_name": "~UncheckedByteArraySink",
             "distinct_addresses": 2,
@@ -103,6 +336,42 @@
             "example_qualified": [
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
               "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+            ]
+          },
+          {
+            "short_name": "Skip",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3180",
+              "0x6840"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Skip(unsigned long)",
+              "snappy::SnappyIOVecReader::Skip(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Peek",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3170",
+              "0x67c0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Peek(unsigned long*)",
+              "snappy::SnappyIOVecReader::Peek(unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "Available",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3160",
+              "0x67b0"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::Available() const",
+              "snappy::SnappyIOVecReader::Available() const"
             ]
           },
           {
@@ -142,6 +411,42 @@
             ]
           },
           {
+            "short_name": "Uncompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5f84",
+              "0x63b0"
+            ],
+            "example_qualified": [
+              "snappy::Uncompress(char const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "snappy::Uncompress(snappy::Source*, snappy::Sink*)"
+            ]
+          },
+          {
+            "short_name": "CompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5a30",
+              "0x5b30"
+            ],
+            "example_qualified": [
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, snappy::CompressionOptions)",
+              "snappy::CompressFromIOVec(iovec const*, unsigned long, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "RawCompressFromIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5830",
+              "0x5930"
+            ],
+            "example_qualified": [
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*, snappy::CompressionOptions)",
+              "snappy::RawCompressFromIOVec(iovec const*, unsigned long, char*, unsigned long*)"
+            ]
+          },
+          {
             "short_name": "~SnappyIOVecReader",
             "distinct_addresses": 2,
             "addresses": [
@@ -151,6 +456,66 @@
             "example_qualified": [
               "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
               "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+            ]
+          },
+          {
+            "short_name": "RawCompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5760",
+              "0x5824"
+            ],
+            "example_qualified": [
+              "snappy::RawCompress(char const*, unsigned long, char*, unsigned long*, snappy::CompressionOptions)",
+              "snappy::RawCompress(char const*, unsigned long, char*, unsigned long*)"
+            ]
+          },
+          {
+            "short_name": "RawUncompress",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5d70",
+              "0x5ef0"
+            ],
+            "example_qualified": [
+              "snappy::RawUncompress(snappy::Source*, char*)",
+              "snappy::RawUncompress(char const*, unsigned long, char*)"
+            ]
+          },
+          {
+            "short_name": "RawUncompressToIOVec",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x5b40",
+              "0x5cd0"
+            ],
+            "example_qualified": [
+              "snappy::RawUncompressToIOVec(snappy::Source*, iovec const*, unsigned long)",
+              "snappy::RawUncompressToIOVec(char const*, unsigned long, iovec const*, unsigned long)"
+            ]
+          },
+          {
+            "short_name": "GetUncompressedLength",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3ae0",
+              "0x5230"
+            ],
+            "example_qualified": [
+              "snappy::GetUncompressedLength(char const*, unsigned long, unsigned long*)",
+              "snappy::GetUncompressedLength(snappy::Source*, unsigned int*)"
+            ]
+          },
+          {
+            "short_name": "MemCopy64",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x4ec0",
+              "0x4f74"
+            ],
+            "example_qualified": [
+              "snappy::MemCopy64(char*, void const*, unsigned long)",
+              "snappy::MemCopy64(long, void const*, unsigned long)"
             ]
           }
         ]
@@ -158,15 +523,15 @@
     }
   ],
   "aggregated_raw": {
-    "source_function_addresses": 19,
-    "collision_addresses": 10,
-    "collision_rate": 0.526316,
-    "collision_rate_pct": "52.63%"
+    "source_function_addresses": 84,
+    "collision_addresses": 42,
+    "collision_rate": 0.5,
+    "collision_rate_pct": "50.00%"
   },
   "aggregated_project": {
-    "source_function_addresses": 19,
-    "collision_addresses": 10,
-    "collision_rate": 0.526316,
-    "collision_rate_pct": "52.63%"
+    "source_function_addresses": 82,
+    "collision_addresses": 42,
+    "collision_rate": 0.512195,
+    "collision_rate_pct": "51.22%"
   }
 }

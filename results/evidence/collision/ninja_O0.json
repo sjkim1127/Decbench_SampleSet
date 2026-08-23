@@ -1,120 +1,704 @@
 {
-  "compiled_dir": "results/cpp_local/O0/ninja/compiled",
-  "exclude_images": [
-    "boo"
-  ],
+  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled",
+  "exclude_images": [],
   "elf_images": [
-    "results/cpp_local/O0/ninja/compiled/ninja"
+    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled/ninja"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "results/cpp_local/O0/ninja/compiled/ninja",
+      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled/ninja",
       "cu_stats": {
         "total": 33,
         "probe": 0,
-        "stdlib_fns": 2030
+        "system_subprograms": 6519,
+        "project_subprograms": 891
       },
       "raw": {
-        "source_function_addresses": 1665,
-        "unique_short_names": 460,
-        "collision_groups": 212,
-        "collision_addresses": 1417,
-        "collision_rate": 0.851051,
-        "collision_rate_pct": "85.11%",
+        "source_function_addresses": 4068,
+        "unique_short_names": 1732,
+        "collision_groups": 338,
+        "collision_addresses": 2674,
+        "collision_rate": 0.657325,
+        "collision_rate_pct": "65.73%",
         "top_collision_groups": [
           {
-            "short_name": "pair",
-            "distinct_addresses": 83,
+            "short_name": "end",
+            "distinct_addresses": 80,
             "addresses": [
-              "0x130e8",
-              "0x1357c",
-              "0x15104",
-              "0x156f4",
-              "0x16c34",
-              "0x16cc8",
-              "0x170e0",
-              "0x19884",
-              "0x199b4",
-              "0x19ddc",
-              "0x19f0c",
-              "0x2206c",
-              "0x220c8",
-              "0x2258c",
-              "0x2cac8",
-              "0x2cc58",
-              "0x2da84",
-              "0x2de20",
-              "0x2e5f8",
-              "0x2e7d4",
-              "0x30568",
-              "0x30c80",
-              "0x32588",
-              "0x32ecc",
-              "0x33350",
-              "0x33e14",
-              "0x346c8",
-              "0x36dd0",
-              "0x36f4c",
-              "0x3e52c",
-              "0x3e87c",
-              "0x40b04",
-              "0x41924",
-              "0x41bf0",
-              "0x435b8",
-              "0x43868",
-              "0x4bae4",
-              "0x4e660",
-              "0x4eb40",
-              "0x4ee30",
-              "0x4f138",
-              "0x4fb00",
-              "0x4fb3c",
-              "0x4fb78",
-              "0x4fbb4",
-              "0x4fc0c",
-              "0x4fc64",
-              "0x56750",
-              "0x58078",
-              "0x59294",
-              "0x6386c",
-              "0x638a8",
-              "0x67108",
-              "0x67548",
-              "0x675ec",
-              "0x679cc",
-              "0x68604",
-              "0x68ce8",
-              "0x68d34",
-              "0x68f68",
-              "0x68fb4",
-              "0x6a2dc",
-              "0x6a450",
-              "0x6baec",
-              "0x6bcac",
-              "0x6cb94",
-              "0x6d028",
-              "0x6ff04",
-              "0x72654",
-              "0x72854",
-              "0x72890",
-              "0x7b05c",
-              "0x7b2dc",
-              "0x7b8d0",
-              "0x7b918",
-              "0x7bdb4",
-              "0x7c160",
-              "0x7c2bc",
-              "0x7c868",
-              "0x7d6d8",
-              "0x7e088",
-              "0x7e0f8",
-              "0x7e3dc"
+              "0x10134",
+              "0x10518",
+              "0x10b54",
+              "0x10e48",
+              "0x11018",
+              "0x111ac",
+              "0x131a8",
+              "0x133b8",
+              "0x13b3c",
+              "0x19718",
+              "0x19c70",
+              "0x20344",
+              "0x207f4",
+              "0x2ad8c",
+              "0x2b0dc",
+              "0x2b32c",
+              "0x2b438",
+              "0x2b4f0",
+              "0x2b6b8",
+              "0x2b9fc",
+              "0x2bad0",
+              "0x2d124",
+              "0x2d458",
+              "0x2d808",
+              "0x2d8e0",
+              "0x2dee0",
+              "0x2dff0",
+              "0x2e4d8",
+              "0x2e664",
+              "0x313dc",
+              "0x3897c",
+              "0x38efc",
+              "0x3bfb0",
+              "0x3c76c",
+              "0x40d78",
+              "0x40ed0",
+              "0x49d74",
+              "0x49f34",
+              "0x4a2a8",
+              "0x4a87c",
+              "0x4ad3c",
+              "0x4b344",
+              "0x4b3d4",
+              "0x4b74c",
+              "0x4b924",
+              "0x4c9dc",
+              "0x540a4",
+              "0x54850",
+              "0x55b60",
+              "0x5b9e4",
+              "0x5bc00",
+              "0x5bd58",
+              "0x5beb0",
+              "0x62700",
+              "0x64118",
+              "0x65d40",
+              "0x65de0",
+              "0x672f0",
+              "0x674a4",
+              "0x6b450",
+              "0x6b904",
+              "0x6ba28",
+              "0x6ec1c",
+              "0x6ee8c",
+              "0x6f130",
+              "0x6f1b0",
+              "0x6f718",
+              "0x6fad0",
+              "0x71868",
+              "0x74e64",
+              "0x753e4",
+              "0x75564",
+              "0x7585c",
+              "0x7aedc",
+              "0x7b270",
+              "0x7bc80",
+              "0x813dc",
+              "0x81b28",
+              "0x821b8",
+              "0xfb14"
             ],
             "example_qualified": [
-              "std::pair<std::_Rb_tree_const_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, bool>::pair<std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >&, bool&, true>(std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >&, bool&)",
-              "std::pair<std::_Rb_tree_const_iterator<Edge*>, bool>::pair<std::_Rb_tree_iterator<Edge*>&, bool&, true>(std::_Rb_tree_iterator<Edge*>&, bool&)",
-              "std::pair<std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, bool>::pair<std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, bool, true>(std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >&&, bool&&)"
+              "std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>::end()",
+              "std::vector<Node*, std::allocator<Node*>>::end()",
+              "std::vector<Edge*, std::allocator<Edge*>>::end()"
+            ]
+          },
+          {
+            "short_name": "begin",
+            "distinct_addresses": 72,
+            "addresses": [
+              "0x100cc",
+              "0x104b0",
+              "0x10aec",
+              "0x10de0",
+              "0x10ffc",
+              "0x11190",
+              "0x1313c",
+              "0x1334c",
+              "0x15f3c",
+              "0x16b98",
+              "0x17044",
+              "0x196a8",
+              "0x19c00",
+              "0x20608",
+              "0x2078c",
+              "0x2b0c0",
+              "0x2b2c4",
+              "0x2b41c",
+              "0x2b4d4",
+              "0x2b650",
+              "0x2b908",
+              "0x2b9e0",
+              "0x2bab4",
+              "0x2d3ec",
+              "0x2d79c",
+              "0x2d874",
+              "0x2dc9c",
+              "0x2de74",
+              "0x2df84",
+              "0x2e4a0",
+              "0x327b4",
+              "0x32e30",
+              "0x332b4",
+              "0x33da8",
+              "0x38908",
+              "0x3c01c",
+              "0x3c7d8",
+              "0x40d10",
+              "0x40e68",
+              "0x49d5c",
+              "0x4b69c",
+              "0x4ead4",
+              "0x4edc4",
+              "0x4f0cc",
+              "0x547e8",
+              "0x54f4c",
+              "0x55af8",
+              "0x591f8",
+              "0x62698",
+              "0x640b0",
+              "0x67aa4",
+              "0x67cf8",
+              "0x68568",
+              "0x6b434",
+              "0x6b898",
+              "0x6b9c0",
+              "0x6ec00",
+              "0x6f194",
+              "0x6f450",
+              "0x6f6ac",
+              "0x7038c",
+              "0x71774",
+              "0x7552c",
+              "0x757f4",
+              "0x75938",
+              "0x7ae74",
+              "0x7b4ec",
+              "0x7be00",
+              "0x81374",
+              "0x81af0",
+              "0x82420",
+              "0xfaac"
+            ],
+            "example_qualified": [
+              "std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>::begin()",
+              "std::vector<Node*, std::allocator<Node*>>::begin()",
+              "std::vector<Edge*, std::allocator<Edge*>>::begin()"
+            ]
+          },
+          {
+            "short_name": "_M_ptr",
+            "distinct_addresses": 57,
+            "addresses": [
+              "0x13444",
+              "0x13dd0",
+              "0x13e80",
+              "0x13ea0",
+              "0x151e8",
+              "0x15384",
+              "0x194dc",
+              "0x19560",
+              "0x195e4",
+              "0x1a12c",
+              "0x1a184",
+              "0x1a1dc",
+              "0x1a2c8",
+              "0x1a454",
+              "0x1a4c0",
+              "0x1a5b0",
+              "0x1a6b8",
+              "0x1ab34",
+              "0x1ab80",
+              "0x1bc18",
+              "0x1c81c",
+              "0x1c964",
+              "0x1d398",
+              "0x20dc0",
+              "0x20e1c",
+              "0x2e128",
+              "0x2e188",
+              "0x2e2f0",
+              "0x2e3a0",
+              "0x2ebd8",
+              "0x2f510",
+              "0x2ff28",
+              "0x30214",
+              "0x30d50",
+              "0x30d90",
+              "0x319cc",
+              "0x366b8",
+              "0x36950",
+              "0x3696c",
+              "0x3e41c",
+              "0x4b9ec",
+              "0x4d238",
+              "0x4d290",
+              "0x4f470",
+              "0x59094",
+              "0x5a3bc",
+              "0x631f0",
+              "0x69a10",
+              "0x69b18",
+              "0x69bf4",
+              "0x6bf78",
+              "0x6cf68",
+              "0x71630",
+              "0x7c6a8",
+              "0x7de4c",
+              "0x7f1b4",
+              "0x7f388"
+            ],
+            "example_qualified": [
+              "std::__uniq_ptr_impl<Rule const, std::default_delete<Rule const>>::_M_ptr() const",
+              "std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client>>::_M_ptr()",
+              "std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client>>::_M_ptr() const"
+            ]
+          },
+          {
+            "short_name": "_M_head",
+            "distinct_addresses": 54,
+            "addresses": [
+              "0x18034",
+              "0x189ec",
+              "0x192ac",
+              "0x192c8",
+              "0x192e4",
+              "0x19668",
+              "0x1a59c",
+              "0x1abb8",
+              "0x1abcc",
+              "0x1abe0",
+              "0x1abf4",
+              "0x1bb68",
+              "0x1d2a8",
+              "0x1d354",
+              "0x1d368",
+              "0x1d3d0",
+              "0x231c8",
+              "0x23220",
+              "0x234ec",
+              "0x23514",
+              "0x23528",
+              "0x2361c",
+              "0x34e28",
+              "0x34e6c",
+              "0x34ef4",
+              "0x34f2c",
+              "0x367fc",
+              "0x36810",
+              "0x36824",
+              "0x36890",
+              "0x368a4",
+              "0x368c0",
+              "0x36c58",
+              "0x36c6c",
+              "0x3ea6c",
+              "0x3eb18",
+              "0x4f3bc",
+              "0x4f658",
+              "0x4f66c",
+              "0x4f9f4",
+              "0x4fd98",
+              "0x4fddc",
+              "0x63768",
+              "0x637c0",
+              "0x637dc",
+              "0x63830",
+              "0x63968",
+              "0x63984",
+              "0x7f538",
+              "0x7f5d0",
+              "0x7f5e4",
+              "0x7f600",
+              "0x7f658",
+              "0x7f66c"
+            ],
+            "example_qualified": [
+              "std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client>>::_M_head(std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client>>&)",
+              "std::_Tuple_impl<0ul, Rule const*, std::default_delete<Rule const>>::_M_head(std::_Tuple_impl<0ul, Rule const*, std::default_delete<Rule const>> const&)",
+              "std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client>>::_M_head(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client>>&)"
+            ]
+          },
+          {
+            "short_name": "operator()",
+            "distinct_addresses": 48,
+            "addresses": [
+              "0x13e1c",
+              "0x13eec",
+              "0x14f90",
+              "0x1557c",
+              "0x16b6c",
+              "0x1ad64",
+              "0x1adc8",
+              "0x1b1ac",
+              "0x1b210",
+              "0x1bc90",
+              "0x1fec4",
+              "0x20e88",
+              "0x21b40",
+              "0x29ec8",
+              "0x2cb80",
+              "0x2e1d4",
+              "0x2e35c",
+              "0x2e6fc",
+              "0x303f0",
+              "0x30af4",
+              "0x32dd4",
+              "0x33258",
+              "0x34800",
+              "0x36188",
+              "0x3d480",
+              "0x3dad4",
+              "0x3e068",
+              "0x41798",
+              "0x48594",
+              "0x4e880",
+              "0x4ee78",
+              "0x4f180",
+              "0x53c6c",
+              "0x57f00",
+              "0x5919c",
+              "0x622dc",
+              "0x67840",
+              "0x6850c",
+              "0x6914c",
+              "0x6bbd4",
+              "0x6cf00",
+              "0x6e884",
+              "0x6e944",
+              "0x7269c",
+              "0x7d8b4",
+              "0x7f200",
+              "0xe4a8",
+              "0xe9f4"
+            ],
+            "example_qualified": [
+              "std::__detail::_Mod_range_hashing::operator()(unsigned long, unsigned long) const",
+              "EdgeCmp::operator()(Edge const*, Edge const*) const",
+              "std::default_delete<Jobserver::Client>::operator()(Jobserver::Client*) const"
+            ]
+          },
+          {
+            "short_name": "operator++",
+            "distinct_addresses": 45,
+            "addresses": [
+              "0x101e4",
+              "0x105c8",
+              "0x10aac",
+              "0x10c04",
+              "0x11064",
+              "0x111f8",
+              "0x197b0",
+              "0x19d08",
+              "0x20624",
+              "0x208a4",
+              "0x2b128",
+              "0x2b3dc",
+              "0x2b484",
+              "0x2b53c",
+              "0x2b768",
+              "0x2b848",
+              "0x2b924",
+              "0x2ba48",
+              "0x2bb1c",
+              "0x31a18",
+              "0x389c8",
+              "0x3b068",
+              "0x3c068",
+              "0x40e28",
+              "0x43828",
+              "0x4d880",
+              "0x4dcc8",
+              "0x4e278",
+              "0x4f298",
+              "0x54900",
+              "0x5d2f0",
+              "0x641c8",
+              "0x67b14",
+              "0x67d68",
+              "0x6b49c",
+              "0x6f254",
+              "0x6f4c4",
+              "0x7190c",
+              "0x71fd0",
+              "0x759d8",
+              "0x7af8c",
+              "0x7d158",
+              "0x7e26c",
+              "0x81594",
+              "0xfbc4"
+            ],
+            "example_qualified": [
+              "__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>>::operator++()",
+              "__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*>>>::operator++()",
+              "__gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*>>>::operator++()"
+            ]
+          },
+          {
+            "short_name": "size",
+            "distinct_addresses": 41,
+            "addresses": [
+              "0x11a6c",
+              "0x12e54",
+              "0x1618c",
+              "0x17aa8",
+              "0x1967c",
+              "0x19bd4",
+              "0x22da8",
+              "0x2ba98",
+              "0x2bb6c",
+              "0x2df6c",
+              "0x31e38",
+              "0x320a4",
+              "0x32c14",
+              "0x36030",
+              "0x40cd4",
+              "0x41f24",
+              "0x45a30",
+              "0x4d65c",
+              "0x4daa4",
+              "0x4e054",
+              "0x587ec",
+              "0x64834",
+              "0x65cc8",
+              "0x65ce4",
+              "0x65d00",
+              "0x6715c",
+              "0x67174",
+              "0x6718c",
+              "0x67a78",
+              "0x67ccc",
+              "0x6b4ec",
+              "0x6b514",
+              "0x6b990",
+              "0x6cda8",
+              "0x71dac",
+              "0x74fa8",
+              "0x75610",
+              "0x7590c",
+              "0x7dc9c",
+              "0x835e8",
+              "0xff3c"
+            ],
+            "example_qualified": [
+              "std::vector<Node*, std::allocator<Node*>>::size() const",
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::size() const",
+              "std::vector<Edge*, std::allocator<Edge*>>::size() const"
+            ]
+          },
+          {
+            "short_name": "operator*",
+            "distinct_addresses": 41,
+            "addresses": [
+              "0x1020c",
+              "0x105f0",
+              "0x10ad4",
+              "0x10c2c",
+              "0x11094",
+              "0x1dbb4",
+              "0x2064c",
+              "0x20738",
+              "0x208cc",
+              "0x2a2a0",
+              "0x2b404",
+              "0x2b4b4",
+              "0x2b56c",
+              "0x2b790",
+              "0x2ba78",
+              "0x2cb60",
+              "0x2e6dc",
+              "0x2ed44",
+              "0x3b090",
+              "0x3c098",
+              "0x40e50",
+              "0x43850",
+              "0x4ae28",
+              "0x4b024",
+              "0x4b44c",
+              "0x4bab8",
+              "0x54928",
+              "0x55028",
+              "0x5d318",
+              "0x5dbe0",
+              "0x641f0",
+              "0x6bbb4",
+              "0x6f880",
+              "0x76004",
+              "0x7afb4",
+              "0x7c220",
+              "0x7e294",
+              "0x8148c",
+              "0x82488",
+              "0x8302c",
+              "0xfbec"
+            ],
+            "example_qualified": [
+              "__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>>::operator*() const",
+              "__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*>>>::operator*() const",
+              "__gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*>>>::operator*() const"
+            ]
+          },
+          {
+            "short_name": "deallocate",
+            "distinct_addresses": 40,
+            "addresses": [
+              "0x16210",
+              "0x16484",
+              "0x171c4",
+              "0x17718",
+              "0x17a40",
+              "0x1931c",
+              "0x19524",
+              "0x195a8",
+              "0x1962c",
+              "0x1a148",
+              "0x1a1a0",
+              "0x1a218",
+              "0x1a2e4",
+              "0x1a470",
+              "0x1a56c",
+              "0x1a6d4",
+              "0x1b714",
+              "0x1bad8",
+              "0x1bb38",
+              "0x1d26c",
+              "0x1d414",
+              "0x22d40",
+              "0x32b98",
+              "0x34f90",
+              "0x361fc",
+              "0x36308",
+              "0x366d4",
+              "0x36840",
+              "0x369dc",
+              "0x462c8",
+              "0x47d7c",
+              "0x59418",
+              "0x64a5c",
+              "0x6cf2c",
+              "0x7653c",
+              "0x76668",
+              "0x7de94",
+              "0x830d8",
+              "0x83580",
+              "0x836c8"
+            ],
+            "example_qualified": [
+              "std::__new_allocator<Node*>::deallocate(Node**, unsigned long)",
+              "std::__new_allocator<Edge*>::deallocate(Edge**, unsigned long)",
+              "std::__new_allocator<Node const*>::deallocate(Node const**, unsigned long)"
+            ]
+          },
+          {
+            "short_name": "_M_addr",
+            "distinct_addresses": 40,
+            "addresses": [
+              "0x16d54",
+              "0x16f90",
+              "0x1ac6c",
+              "0x1ac80",
+              "0x1ac94",
+              "0x1b5a0",
+              "0x1b5b4",
+              "0x1b5c8",
+              "0x1b640",
+              "0x1b654",
+              "0x1b668",
+              "0x1b764",
+              "0x1b778",
+              "0x1baa8",
+              "0x1bb08",
+              "0x1cd00",
+              "0x1cee4",
+              "0x1d3e4",
+              "0x31e24",
+              "0x3271c",
+              "0x32be0",
+              "0x32d3c",
+              "0x33434",
+              "0x33448",
+              "0x33fa8",
+              "0x36c44",
+              "0x36d10",
+              "0x36d24",
+              "0x3e684",
+              "0x4e5ec",
+              "0x4f7ac",
+              "0x5ab30",
+              "0x6a030",
+              "0x6a044",
+              "0x6a058",
+              "0x6c708",
+              "0x6d014",
+              "0x72210",
+              "0x7d0a4",
+              "0x7df38"
+            ],
+            "example_qualified": [
+              "__gnu_cxx::__aligned_membuf<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>::_M_addr() const",
+              "__gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>>::_M_addr() const",
+              "__gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>>::_M_addr()"
+            ]
+          },
+          {
+            "short_name": "allocate",
+            "distinct_addresses": 40,
+            "addresses": [
+              "0x17ca8",
+              "0x17f3c",
+              "0x18720",
+              "0x191b4",
+              "0x1c388",
+              "0x1c4b0",
+              "0x1c768",
+              "0x1cd4c",
+              "0x1cf30",
+              "0x23330",
+              "0x34534",
+              "0x349e0",
+              "0x368d4",
+              "0x36b08",
+              "0x36c80",
+              "0x36e2c",
+              "0x36ebc",
+              "0x3e30c",
+              "0x430b4",
+              "0x43528",
+              "0x43754",
+              "0x464a8",
+              "0x47e10",
+              "0x4f7c0",
+              "0x4f878",
+              "0x4f918",
+              "0x59c04",
+              "0x5af78",
+              "0x64964",
+              "0x6a06c",
+              "0x6a164",
+              "0x6a24c",
+              "0x6cf84",
+              "0x727b4",
+              "0x765ec",
+              "0x76970",
+              "0x7dff8",
+              "0x83b04",
+              "0x83ca8",
+              "0x83da0"
+            ],
+            "example_qualified": [
+              "std::__new_allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>::allocate(unsigned long, void const*)",
+              "std::__new_allocator<Edge*>::allocate(unsigned long, void const*)",
+              "std::__new_allocator<Node*>::allocate(unsigned long, void const*)"
             ]
           },
           {
@@ -165,12 +749,300 @@
             "example_qualified": [
               "std::__new_allocator<char>::~__new_allocator()",
               "std::__new_allocator<Node*>::~__new_allocator()",
-              "std::__new_allocator<std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> > >::~__new_allocator()"
+              "std::__new_allocator<std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>>>::~__new_allocator()"
+            ]
+          },
+          {
+            "short_name": "_M_get_Tp_allocator",
+            "distinct_addresses": 35,
+            "addresses": [
+              "0x11fa8",
+              "0x12224",
+              "0x12e7c",
+              "0x13668",
+              "0x13724",
+              "0x13b28",
+              "0x13fb4",
+              "0x14284",
+              "0x168fc",
+              "0x17c94",
+              "0x191a0",
+              "0x2118c",
+              "0x2331c",
+              "0x2d3d8",
+              "0x2e510",
+              "0x34208",
+              "0x34520",
+              "0x349cc",
+              "0x41f58",
+              "0x430a0",
+              "0x45d1c",
+              "0x463a8",
+              "0x47abc",
+              "0x54f84",
+              "0x593f0",
+              "0x647a8",
+              "0x64950",
+              "0x7559c",
+              "0x76514",
+              "0x819fc",
+              "0x81b60",
+              "0x821a4",
+              "0x836a0",
+              "0x83af0",
+              "0x83c94"
+            ],
+            "example_qualified": [
+              "std::_Vector_base<Node*, std::allocator<Node*>>::_M_get_Tp_allocator()",
+              "std::_Vector_base<Edge*, std::allocator<Edge*>>::_M_get_Tp_allocator()",
+              "std::_Vector_base<Edge*, std::allocator<Edge*>>::_M_get_Tp_allocator() const"
+            ]
+          },
+          {
+            "short_name": "_S_key",
+            "distinct_addresses": 34,
+            "addresses": [
+              "0x16b00",
+              "0x16cac",
+              "0x16fd8",
+              "0x17158",
+              "0x2fc6c",
+              "0x319b0",
+              "0x3251c",
+              "0x32748",
+              "0x32820",
+              "0x32d68",
+              "0x32f44",
+              "0x331ec",
+              "0x333c8",
+              "0x33d3c",
+              "0x3d2c4",
+              "0x3db2c",
+              "0x4bd34",
+              "0x4c978",
+              "0x4d1f8",
+              "0x4d4f0",
+              "0x4dcf8",
+              "0x4e2a8",
+              "0x59130",
+              "0x5930c",
+              "0x684a0",
+              "0x6867c",
+              "0x6c5f0",
+              "0x6cb28",
+              "0x711d4",
+              "0x71708",
+              "0x717e0",
+              "0x72000",
+              "0x7c668",
+              "0x7d038"
+            ],
+            "example_qualified": [
+              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>::_S_key(std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>> const*)",
+              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>::_S_key(std::_Rb_tree_node_base const*)",
+              "std::_Rb_tree<Edge*, Edge*, std::_Identity<Edge*>, EdgeCmp, std::allocator<Edge*>>::_S_key(std::_Rb_tree_node<Edge*> const*)"
+            ]
+          },
+          {
+            "short_name": "find",
+            "distinct_addresses": 31,
+            "addresses": [
+              "0x2ad68",
+              "0x2c1f8",
+              "0x2d024",
+              "0x2e820",
+              "0x3888c",
+              "0x38ae8",
+              "0x38c78",
+              "0x3bf8c",
+              "0x3c66c",
+              "0x49f10",
+              "0x4a284",
+              "0x4a858",
+              "0x4ac48",
+              "0x4b250",
+              "0x4b830",
+              "0x5b850",
+              "0x5b968",
+              "0x5ba00",
+              "0x5bb00",
+              "0x65d1c",
+              "0x65dbc",
+              "0x671a4",
+              "0x67358",
+              "0x6b7a8",
+              "0x6bcf8",
+              "0x6ee68",
+              "0x6f9dc",
+              "0x74e40",
+              "0x75298",
+              "0x7b24c",
+              "0x7bb8c"
+            ],
+            "example_qualified": [
+              "std::map<Edge*, Plan::Want, std::less<Edge*>, std::allocator<std::pair<Edge* const, Plan::Want>>>::find(Edge* const&)",
+              "std::map<Edge const*, int, std::less<Edge const*>, std::allocator<std::pair<Edge const* const, int>>>::find(Edge const* const&)",
+              "std::_Rb_tree<Edge*, std::pair<Edge* const, Plan::Want>, std::_Select1st<std::pair<Edge* const, Plan::Want>>, std::less<Edge*>, std::allocator<std::pair<Edge* const, Plan::Want>>>::find(Edge* const&)"
+            ]
+          },
+          {
+            "short_name": "_M_valptr",
+            "distinct_addresses": 30,
+            "addresses": [
+              "0x13214",
+              "0x13424",
+              "0x17e1c",
+              "0x17e50",
+              "0x17e84",
+              "0x185b4",
+              "0x185e8",
+              "0x1861c",
+              "0x18874",
+              "0x1893c",
+              "0x18a08",
+              "0x18a90",
+              "0x2cca4",
+              "0x2d4c4",
+              "0x2d94c",
+              "0x2df4c",
+              "0x2e05c",
+              "0x2e920",
+              "0x34db4",
+              "0x36168",
+              "0x361c8",
+              "0x4b990",
+              "0x4e860",
+              "0x59b90",
+              "0x6912c",
+              "0x6b970",
+              "0x6cee0",
+              "0x703f8",
+              "0x7bcec",
+              "0x7d894"
+            ],
+            "example_qualified": [
+              "std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>::_M_valptr() const",
+              "std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>>::_M_valptr() const",
+              "std::_Rb_tree_node<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>>::_M_valptr()"
+            ]
+          },
+          {
+            "short_name": "operator->",
+            "distinct_addresses": 30,
+            "addresses": [
+              "0x11228",
+              "0x203e8",
+              "0x20964",
+              "0x2abc4",
+              "0x2acac",
+              "0x2b158",
+              "0x2bb4c",
+              "0x2beac",
+              "0x2c21c",
+              "0x2c3cc",
+              "0x389f0",
+              "0x3bf5c",
+              "0x3bffc",
+              "0x49f80",
+              "0x4a0d8",
+              "0x4a2f4",
+              "0x4a8c8",
+              "0x4a938",
+              "0x4a954",
+              "0x620ac",
+              "0x6225c",
+              "0x65d8c",
+              "0x65e2c",
+              "0x6b4cc",
+              "0x6eed8",
+              "0x6f17c",
+              "0x6f27c",
+              "0x6f4f4",
+              "0x7b2bc",
+              "0x7f09c"
+            ],
+            "example_qualified": [
+              "std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>>::operator->() const",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator->() const",
+              "std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>::operator->() const"
+            ]
+          },
+          {
+            "short_name": "base",
+            "distinct_addresses": 26,
+            "addresses": [
+              "0x11efc",
+              "0x1266c",
+              "0x12934",
+              "0x12e04",
+              "0x12e40",
+              "0x16068",
+              "0x21430",
+              "0x2d788",
+              "0x2db38",
+              "0x308a0",
+              "0x3b0a8",
+              "0x3e9e0",
+              "0x41504",
+              "0x41540",
+              "0x4e84c",
+              "0x567f4",
+              "0x57924",
+              "0x5b160",
+              "0x5d330",
+              "0x62f7c",
+              "0x64548",
+              "0x6c050",
+              "0x76044",
+              "0x7b8a8",
+              "0x81bfc",
+              "0x82fe8"
+            ],
+            "example_qualified": [
+              "__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>>::base() const",
+              "__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*>>>::base() const",
+              "__gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*>>>::base() const"
+            ]
+          },
+          {
+            "short_name": "operator!=",
+            "distinct_addresses": 25,
+            "addresses": [
+              "0x11034",
+              "0x111c8",
+              "0x19780",
+              "0x19cd8",
+              "0x203b8",
+              "0x2ada8",
+              "0x2b0f8",
+              "0x2b454",
+              "0x2b50c",
+              "0x2ba18",
+              "0x2baec",
+              "0x319e8",
+              "0x38998",
+              "0x3c038",
+              "0x49f50",
+              "0x4a314",
+              "0x53a04",
+              "0x65d5c",
+              "0x65dfc",
+              "0x6b46c",
+              "0x6f14c",
+              "0x6f224",
+              "0x6f494",
+              "0x759a8",
+              "0x7d128"
+            ],
+            "example_qualified": [
+              "std::operator!=(std::_Rb_tree_const_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>> const&, std::_Rb_tree_const_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>> const&)",
+              "std::operator!=(std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>> const&, std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>> const&)",
+              "std::__detail::operator!=(std::__detail::_Node_iterator_base<Node const*, false> const&, std::__detail::_Node_iterator_base<Node const*, false> const&)"
             ]
           },
           {
             "short_name": "_Tuple_impl",
-            "distinct_addresses": 26,
+            "distinct_addresses": 25,
             "addresses": [
               "0x11b04",
               "0x13e68",
@@ -194,86 +1066,83 @@
               "0x4fdf4",
               "0x62b10",
               "0x63210",
-              "0x63268",
-              "0x63328",
-              "0x636ec",
-              "0x63844"
+              "0x63844",
+              "0x7f42c",
+              "0x7f4fc"
             ],
             "example_qualified": [
-              "std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >::_Tuple_impl(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >&&)",
-              "std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client> >::_Tuple_impl(std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client> >&&)",
-              "std::_Tuple_impl<0ul, BuildLog::LogEntry*, std::default_delete<BuildLog::LogEntry> >::_Tuple_impl()"
+              "std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client>>::_Tuple_impl(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client>>&&)",
+              "std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client>>::_Tuple_impl(std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client>>&&)",
+              "std::_Tuple_impl<0ul, BuildLog::LogEntry*, std::default_delete<BuildLog::LogEntry>>::_Tuple_impl()"
             ]
           },
           {
-            "short_name": "__normal_iterator",
-            "distinct_addresses": 25,
-            "addresses": [
-              "0x10a38",
-              "0x11ed4",
-              "0x12644",
-              "0x1290c",
-              "0x12e18",
-              "0x12f14",
-              "0x15de0",
-              "0x21408",
-              "0x2d760",
-              "0x2db10",
-              "0x414dc",
-              "0x41518",
-              "0x48a8c",
-              "0x48ab4",
-              "0x4cf78",
-              "0x567cc",
-              "0x578fc",
-              "0x62f54",
-              "0x64520",
-              "0x6c028",
-              "0x7601c",
-              "0x7b880",
-              "0x814cc",
-              "0x81bd4",
-              "0x82dc8"
-            ],
-            "example_qualified": [
-              "__gnu_cxx::__normal_iterator<Node* const*, std::vector<Node*, std::allocator<Node*> > >::__normal_iterator<Node**, void>(__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*> > > const&)",
-              "__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >::__normal_iterator(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >* const&)",
-              "__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*> > >::__normal_iterator(Node** const&)"
-            ]
-          },
-          {
-            "short_name": "vector",
+            "short_name": "_M_begin",
             "distinct_addresses": 24,
             "addresses": [
-              "0x10c44",
-              "0x149c4",
-              "0x2022c",
-              "0x2a1f4",
-              "0x40844",
-              "0x408b0",
-              "0x40a68",
-              "0x41cb8",
-              "0x436e8",
-              "0x4777c",
-              "0x6f294",
-              "0x7b184",
-              "0x7c358",
-              "0x7c998",
-              "0x7e350",
-              "0x810ec",
-              "0x81178",
-              "0xe5e8",
-              "0xe87c",
-              "0xec84",
-              "0xf270",
-              "0xf3f0",
-              "0xf794",
-              "0xf7d4"
+              "0x12048",
+              "0x120dc",
+              "0x12170",
+              "0x12738",
+              "0x127e0",
+              "0x128f0",
+              "0x12fb4",
+              "0x13298",
+              "0x13708",
+              "0x152a8",
+              "0x15c34",
+              "0x15cec",
+              "0x1cb50",
+              "0x2c850",
+              "0x2d744",
+              "0x2dc80",
+              "0x2e298",
+              "0x2ebbc",
+              "0x30dac",
+              "0x38fb0",
+              "0x4d0e4",
+              "0x6b87c",
+              "0x6f578",
+              "0x7c0ac"
             ],
             "example_qualified": [
-              "std::vector<Node*, std::allocator<Node*> >::vector()",
-              "std::vector<Edge*, std::allocator<Edge*> >::vector()",
-              "std::vector<DepsLog::Deps*, std::allocator<DepsLog::Deps*> >::vector()"
+              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, EvalString>>>::_M_begin()",
+              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>>>::_M_begin()",
+              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>>, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>>, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const, std::unique_ptr<Rule const, std::default_delete<Rule const>>>>>::_M_begin()"
+            ]
+          },
+          {
+            "short_name": "operator==",
+            "distinct_addresses": 23,
+            "addresses": [
+              "0x16c04",
+              "0x170b0",
+              "0x1f5e4",
+              "0x2ae10",
+              "0x2e680",
+              "0x2ed14",
+              "0x32e9c",
+              "0x33320",
+              "0x38d78",
+              "0x3bfcc",
+              "0x4a2c4",
+              "0x4a898",
+              "0x4adcc",
+              "0x4b3f0",
+              "0x54ff8",
+              "0x59264",
+              "0x685d4",
+              "0x6bb58",
+              "0x6eea8",
+              "0x71838",
+              "0x74e80",
+              "0x7b28c",
+              "0x82ffc"
+            ],
+            "example_qualified": [
+              "std::operator==(std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>> const&, std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>> const&)",
+              "std::operator==(std::_Rb_tree_iterator<Edge*> const&, std::_Rb_tree_iterator<Edge*> const&)",
+              "StringPiece::operator==(StringPiece const&) const"
             ]
           },
           {
@@ -305,9 +1174,43 @@
               "0xf7b4"
             ],
             "example_qualified": [
-              "std::_Vector_base<Node*, std::allocator<Node*> >::_Vector_base()",
-              "std::_Vector_base<Edge*, std::allocator<Edge*> >::_Vector_base()",
-              "std::_Vector_base<DepsLog::Deps*, std::allocator<DepsLog::Deps*> >::_Vector_base()"
+              "std::_Vector_base<Node*, std::allocator<Node*>>::_Vector_base()",
+              "std::_Vector_base<Edge*, std::allocator<Edge*>>::_Vector_base()",
+              "std::_Vector_base<DepsLog::Deps*, std::allocator<DepsLog::Deps*>>::_Vector_base()"
+            ]
+          },
+          {
+            "short_name": "vector",
+            "distinct_addresses": 23,
+            "addresses": [
+              "0x10c44",
+              "0x149c4",
+              "0x2022c",
+              "0x2a1f4",
+              "0x40844",
+              "0x408b0",
+              "0x40a68",
+              "0x41cb8",
+              "0x436e8",
+              "0x4777c",
+              "0x6f294",
+              "0x7c358",
+              "0x7c998",
+              "0x7e350",
+              "0x810ec",
+              "0x81178",
+              "0xe5e8",
+              "0xe87c",
+              "0xec84",
+              "0xf270",
+              "0xf3f0",
+              "0xf794",
+              "0xf7d4"
+            ],
+            "example_qualified": [
+              "std::vector<Node*, std::allocator<Node*>>::vector()",
+              "std::vector<Edge*, std::allocator<Edge*>>::vector()",
+              "std::vector<DepsLog::Deps*, std::allocator<DepsLog::Deps*>>::vector()"
             ]
           },
           {
@@ -338,786 +1241,207 @@
               "0xfd84"
             ],
             "example_qualified": [
-              "std::_Vector_base<Node*, std::allocator<Node*> >::_Vector_impl::_Vector_impl()",
-              "std::_Vector_base<Edge*, std::allocator<Edge*> >::_Vector_impl::_Vector_impl()",
-              "std::_Vector_base<DepsLog::Deps*, std::allocator<DepsLog::Deps*> >::_Vector_impl::_Vector_impl()"
-            ]
-          },
-          {
-            "short_name": "_M_ptr",
-            "distinct_addresses": 21,
-            "addresses": [
-              "0x13444",
-              "0x13dd0",
-              "0x13e80",
-              "0x13ea0",
-              "0x151e8",
-              "0x15384",
-              "0x194dc",
-              "0x19560",
-              "0x195e4",
-              "0x1a12c",
-              "0x1a184",
-              "0x1a1dc",
-              "0x1a2c8",
-              "0x1a454",
-              "0x1a4c0",
-              "0x1a6b8",
-              "0x1ab34",
-              "0x1ab80",
-              "0x1bc18",
-              "0x1c81c",
-              "0x1d398"
-            ],
-            "example_qualified": [
-              "std::__uniq_ptr_impl<Rule const, std::default_delete<Rule const> >::_M_ptr() const",
-              "std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client> >::_M_ptr()",
-              "std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client> >::_M_ptr() const"
-            ]
-          },
-          {
-            "short_name": "const",
-            "distinct_addresses": 20,
-            "addresses": [
-              "0x13e1c",
-              "0x13eec",
-              "0x18a08",
-              "0x1a5b0",
-              "0x1b210",
-              "0x1b764",
-              "0x1c964",
-              "0x1cee4",
-              "0x7b508",
-              "0xe35c",
-              "0xe504",
-              "0xe6ec",
-              "0xe89c",
-              "0xe8b0",
-              "0xe8c8",
-              "0xe8e0",
-              "0xe8f8",
-              "0xe910",
-              "0xeaac",
-              "0xecf0"
-            ],
-            "example_qualified": [
-              "StringPiece::AsString[abi:cxx11]() const",
-              "std::__detail::_Prime_rehash_policy::_M_state() const",
-              "Rule::name[abi:cxx11]() const"
-            ]
-          },
-          {
-            "short_name": "forward",
-            "distinct_addresses": 20,
-            "addresses": [
-              "0x11e44",
-              "0x124e4",
-              "0x14248",
-              "0x14434",
-              "0x14a74",
-              "0x15174",
-              "0x15188",
-              "0x15764",
-              "0x15a20",
-              "0x15dcc",
-              "0x16564",
-              "0x16d40",
-              "0x171b0",
-              "0x188c0",
-              "0x188d4",
-              "0x18a28",
-              "0x1ad98",
-              "0x1af74",
-              "0x1b1e0",
-              "0x1b3bc"
-            ],
-            "example_qualified": [
-              "bool&& std::forward<bool>(std::remove_reference<bool>::type&)",
-              "std::default_delete<Jobserver::Client>&& std::forward<std::default_delete<Jobserver::Client> >(std::remove_reference<std::default_delete<Jobserver::Client> >::type&)",
-              "std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const& std::forward<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>(std::remove_reference<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>::type&)"
-            ]
-          },
-          {
-            "short_name": "_Head_base",
-            "distinct_addresses": 20,
-            "addresses": [
-              "0x23204",
-              "0x23500",
-              "0x335a0",
-              "0x335dc",
-              "0x34e44",
-              "0x34e58",
-              "0x34ed8",
-              "0x3687c",
-              "0x3de9c",
-              "0x4d55c",
-              "0x4f3a0",
-              "0x4f644",
-              "0x4fe14",
-              "0x4fe30",
-              "0x63230",
-              "0x6348c",
-              "0x634bc",
-              "0x6371c",
-              "0x63784",
-              "0x7f7ec"
-            ],
-            "example_qualified": [
-              "std::_Head_base<0ul, BuildLog::LogEntry*, false>::_Head_base()",
-              "std::_Head_base<1ul, std::default_delete<BuildLog::LogEntry>, true>::_Head_base()",
-              "std::_Head_base<0ul, Jobserver::Client*, false>::_Head_base()"
-            ]
-          },
-          {
-            "short_name": "operator",
-            "distinct_addresses": 18,
-            "addresses": [
-              "0x14f90",
-              "0x16578",
-              "0x16640",
-              "0x16b6c",
-              "0x16d04",
-              "0x17174",
-              "0x18050",
-              "0x182f8",
-              "0x18894",
-              "0x18e94",
-              "0x1a898",
-              "0x1aaec",
-              "0x1ad64",
-              "0x1adc8",
-              "0x1af88",
-              "0x1b3d0",
-              "0x1bc90",
-              "0x1cc08"
-            ],
-            "example_qualified": [
-              "std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::operator()(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&) const",
-              "Node const* const& std::__detail::_ConvertToValueType<std::__detail::_Identity, Node const*>::operator()<Node const* const&>(Node const* const&) const",
-              "Edge* const& std::__detail::_ConvertToValueType<std::__detail::_Identity, Edge*>::operator()<Edge* const&>(Edge* const&) const"
-            ]
-          },
-          {
-            "short_name": "__uniq_ptr_impl",
-            "distinct_addresses": 18,
-            "addresses": [
-              "0x11b64",
-              "0x2041c",
-              "0x20de0",
-              "0x22cf8",
-              "0x2bc28",
-              "0x2bc48",
-              "0x2bc90",
-              "0x2bcb0",
-              "0x2bdd8",
-              "0x2e2b4",
-              "0x4a8e8",
-              "0x4b9b0",
-              "0x4fcf4",
-              "0x4fd14",
-              "0x60cec",
-              "0x60d0c",
-              "0x60f18",
-              "0x624c4"
-            ],
-            "example_qualified": [
-              "std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client> >::__uniq_ptr_impl(std::__uniq_ptr_impl<Jobserver::Client, std::default_delete<Jobserver::Client> >&&)",
-              "std::__uniq_ptr_data<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>, true, true>::__uniq_ptr_impl(BuildLog::LogEntry*)",
-              "std::__uniq_ptr_impl<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> >::__uniq_ptr_impl(BuildLog::LogEntry*)"
-            ]
-          },
-          {
-            "short_name": "deallocate",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x171c4",
-              "0x17718",
-              "0x17a40",
-              "0x19524",
-              "0x195a8",
-              "0x1962c",
-              "0x1a148",
-              "0x1a1a0",
-              "0x1a218",
-              "0x1a2e4",
-              "0x1a470",
-              "0x1a6d4",
-              "0x1b714",
-              "0x1bad8",
-              "0x1bb38",
-              "0x1d26c",
-              "0x1d414"
-            ],
-            "example_qualified": [
-              "std::__new_allocator<Node const*>::deallocate(Node const**, unsigned long)",
-              "std::__new_allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::deallocate(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, unsigned long)",
-              "std::__new_allocator<char const*>::deallocate(char const**, unsigned long)"
-            ]
-          },
-          {
-            "short_name": "_Vector_impl_data",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x11f10",
-              "0x1218c",
-              "0x12680",
-              "0x135d0",
-              "0x137b4",
-              "0x13a90",
-              "0x13da4",
-              "0x210f4",
-              "0x2d340",
-              "0x40f80",
-              "0x41158",
-              "0x41568",
-              "0x439b0",
-              "0x47cbc",
-              "0x7e4cc",
-              "0x81964",
-              "0x8210c"
-            ],
-            "example_qualified": [
-              "std::_Vector_base<Node*, std::allocator<Node*> >::_Vector_impl_data::_Vector_impl_data()",
-              "std::_Vector_base<Edge*, std::allocator<Edge*> >::_Vector_impl_data::_Vector_impl_data()",
-              "std::_Vector_base<DepsLog::Deps*, std::allocator<DepsLog::Deps*> >::_Vector_impl_data::_Vector_impl_data()"
-            ]
-          },
-          {
-            "short_name": "~_Rb_tree",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x102a0",
-              "0x10318",
-              "0x1047c",
-              "0x10f3c",
-              "0x110e0",
-              "0x11418",
-              "0x2a878",
-              "0x2b290",
-              "0x2b8d4",
-              "0x2bda4",
-              "0x2c510",
-              "0x6b400",
-              "0x6eb40",
-              "0x7b688",
-              "0xfce8",
-              "0xfd1c",
-              "0xfd50"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> > >::~_Rb_tree()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >::~_Rb_tree()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > > >::~_Rb_tree()"
-            ]
-          },
-          {
-            "short_name": "_Rb_tree_impl",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x1025c",
-              "0x102d4",
-              "0x10ef8",
-              "0x113d4",
-              "0x2a834",
-              "0x2b24c",
-              "0x2b890",
-              "0x2bd60",
-              "0x2c4cc",
-              "0x40950",
-              "0x40994",
-              "0x49ecc",
-              "0x60ca8",
-              "0x65bb8",
-              "0x6b3bc",
-              "0x6ecec",
-              "0x7b644"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree<Node*, Node*, std::_Identity<Node*>, std::less<Node*>, std::allocator<Node*> >::_Rb_tree_impl<std::less<Node*>, true>::_Rb_tree_impl()",
-              "std::_Rb_tree<Edge*, Edge*, std::_Identity<Edge*>, EdgeCmp, std::allocator<Edge*> >::_Rb_tree_impl<EdgeCmp, true>::_Rb_tree_impl()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_Rb_tree_impl<std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, true>::_Rb_tree_impl()"
-            ]
-          },
-          {
-            "short_name": "~_Rb_tree_impl",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x10450",
-              "0x110b4",
-              "0x2a0bc",
-              "0x2a214",
-              "0x2a310",
-              "0x2a558",
-              "0x2a6b8",
-              "0x6b140",
-              "0x6e8f8",
-              "0x7ad5c",
-              "0xe6a0",
-              "0xe700",
-              "0xe74c",
-              "0xee08",
-              "0xee94",
-              "0xf0a8",
-              "0xf290"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString>, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> > >::_Rb_tree_impl<std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, true>::~_Rb_tree_impl()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >::_Rb_tree_impl<std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, true>::~_Rb_tree_impl()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > >, std::_Select1st<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > > >::_Rb_tree_impl<std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, true>::~_Rb_tree_impl()"
-            ]
-          },
-          {
-            "short_name": "_Rb_tree",
-            "distinct_addresses": 17,
-            "addresses": [
-              "0x2a0e8",
-              "0x2a240",
-              "0x2a33c",
-              "0x2a584",
-              "0x2a6e4",
-              "0x40628",
-              "0x40668",
-              "0x49d98",
-              "0x60bcc",
-              "0x65964",
-              "0x6b16c",
-              "0x6ea30",
-              "0x7ad88",
-              "0xee34",
-              "0xeec0",
-              "0xf0d4",
-              "0xf2bc"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree<Node*, Node*, std::_Identity<Node*>, std::less<Node*>, std::allocator<Node*> >::_Rb_tree()",
-              "std::_Rb_tree<Edge*, Edge*, std::_Identity<Edge*>, EdgeCmp, std::allocator<Edge*> >::_Rb_tree()",
-              "std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_Rb_tree()"
-            ]
-          },
-          {
-            "short_name": "_M_addr",
-            "distinct_addresses": 16,
-            "addresses": [
-              "0x16d54",
-              "0x16f90",
-              "0x1ac6c",
-              "0x1ac80",
-              "0x1ac94",
-              "0x1b5a0",
-              "0x1b5b4",
-              "0x1b5c8",
-              "0x1b640",
-              "0x1b654",
-              "0x1b668",
-              "0x1b778",
-              "0x1baa8",
-              "0x1bb08",
-              "0x1cd00",
-              "0x1d3e4"
-            ],
-            "example_qualified": [
-              "__gnu_cxx::__aligned_membuf<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::_M_addr() const",
-              "__gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > >::_M_addr() const",
-              "__gnu_cxx::__aligned_membuf<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, EvalString> >::_M_addr()"
-            ]
-          },
-          {
-            "short_name": "_M_head",
-            "distinct_addresses": 16,
-            "addresses": [
-              "0x18034",
-              "0x189ec",
-              "0x192ac",
-              "0x192c8",
-              "0x192e4",
-              "0x19668",
-              "0x1a59c",
-              "0x1abb8",
-              "0x1abcc",
-              "0x1abe0",
-              "0x1abf4",
-              "0x1bb68",
-              "0x1d2a8",
-              "0x1d354",
-              "0x1d368",
-              "0x1d3d0"
-            ],
-            "example_qualified": [
-              "std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client> >::_M_head(std::_Tuple_impl<1ul, std::default_delete<Jobserver::Client> >&)",
-              "std::_Tuple_impl<0ul, Rule const*, std::default_delete<Rule const> >::_M_head(std::_Tuple_impl<0ul, Rule const*, std::default_delete<Rule const> > const&)",
-              "std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >::_M_head(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >&)"
-            ]
-          },
-          {
-            "short_name": "_Rb_tree_const_iterator",
-            "distinct_addresses": 16,
-            "addresses": [
-              "0x1519c",
-              "0x151c4",
-              "0x15360",
-              "0x2cbf0",
-              "0x2e76c",
-              "0x2ff04",
-              "0x30d6c",
-              "0x4ae70",
-              "0x4b044",
-              "0x4b46c",
-              "0x4d214",
-              "0x580fc",
-              "0x67a50",
-              "0x6bc44",
-              "0x6f46c",
-              "0x7c254"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree_const_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::_Rb_tree_const_iterator(std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&)",
-              "std::_Rb_tree_const_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::_Rb_tree_const_iterator(std::_Rb_tree_node_base const*)",
-              "std::_Rb_tree_const_iterator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, std::unique_ptr<Rule const, std::default_delete<Rule const> > > >::_Rb_tree_const_iterator(std::_Rb_tree_node_base const*)"
-            ]
-          },
-          {
-            "short_name": "tuple",
-            "distinct_addresses": 16,
-            "addresses": [
-              "0x11b3c",
-              "0x21b88",
-              "0x22cd0",
-              "0x2e148",
-              "0x2e168",
-              "0x30f84",
-              "0x3cec4",
-              "0x3e39c",
-              "0x4ae48",
-              "0x4d254",
-              "0x4f850",
-              "0x4fd78",
-              "0x6228c",
-              "0x62b54",
-              "0x62c54",
-              "0x637f0"
-            ],
-            "example_qualified": [
-              "std::tuple<Jobserver::Client*, std::default_delete<Jobserver::Client> >::tuple(std::tuple<Jobserver::Client*, std::default_delete<Jobserver::Client> >&&)",
-              "std::tuple<BuildLog::LogEntry*, std::default_delete<BuildLog::LogEntry> >::tuple<true, true>()",
-              "std::tuple<BuildLog::LogEntry*, std::default_delete<BuildLog::LogEntry> >::tuple(std::tuple<BuildLog::LogEntry*, std::default_delete<BuildLog::LogEntry> >&&)"
-            ]
-          },
-          {
-            "short_name": "_Rb_tree_iterator",
-            "distinct_addresses": 15,
-            "addresses": [
-              "0x15150",
-              "0x15740",
-              "0x2f4ec",
-              "0x305b4",
-              "0x30ccc",
-              "0x31888",
-              "0x3d2e0",
-              "0x4bd50",
-              "0x4c858",
-              "0x4cf54",
-              "0x580c4",
-              "0x67a18",
-              "0x6bf54",
-              "0x710b4",
-              "0x7c684"
-            ],
-            "example_qualified": [
-              "std::_Rb_tree_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >::_Rb_tree_iterator(std::_Rb_tree_node_base*)",
-              "std::_Rb_tree_iterator<Edge*>::_Rb_tree_iterator(std::_Rb_tree_node_base*)",
-              "std::_Rb_tree_iterator<std::pair<Edge* const, Plan::Want> >::_Rb_tree_iterator(std::_Rb_tree_node_base*)"
-            ]
-          },
-          {
-            "short_name": "begin",
-            "distinct_addresses": 14,
-            "addresses": [
-              "0x100cc",
-              "0x104b0",
-              "0x10aec",
-              "0x10de0",
-              "0x10ffc",
-              "0x11190",
-              "0x1313c",
-              "0x1334c",
-              "0x15f3c",
-              "0x16b98",
-              "0x17044",
-              "0x196a8",
-              "0x19c00",
-              "0xfaac"
-            ],
-            "example_qualified": [
-              "std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::begin()",
-              "std::vector<Node*, std::allocator<Node*> >::begin()",
-              "std::vector<Edge*, std::allocator<Edge*> >::begin()"
+              "std::_Vector_base<Node*, std::allocator<Node*>>::_Vector_impl::_Vector_impl()",
+              "std::_Vector_base<Edge*, std::allocator<Edge*>>::_Vector_impl::_Vector_impl()",
+              "std::_Vector_base<DepsLog::Deps*, std::allocator<DepsLog::Deps*>>::_Vector_impl::_Vector_impl()"
             ]
           }
         ]
       },
       "project": {
-        "source_function_addresses": 386,
-        "unique_short_names": 266,
-        "collision_groups": 52,
-        "collision_addresses": 172,
-        "collision_rate": 0.445596,
-        "collision_rate_pct": "44.56%",
+        "source_function_addresses": 702,
+        "unique_short_names": 551,
+        "collision_groups": 107,
+        "collision_addresses": 258,
+        "collision_rate": 0.367521,
+        "collision_rate_pct": "36.75%",
         "top_collision_groups": [
           {
-            "short_name": "_Destroy",
-            "distinct_addresses": 10,
-            "addresses": [
-              "0x1425c",
-              "0x1440c",
-              "0x157a0",
-              "0x15844",
-              "0x15da4",
-              "0x16144",
-              "0x16258",
-              "0x18ab0",
-              "0x19398",
-              "0x194bc"
-            ],
-            "example_qualified": [
-              "void std::_Destroy<Node**>(Node**, Node**)",
-              "void std::_Destroy<Edge**>(Edge**, Edge**)",
-              "void std::_Destroy<Node const**>(Node const**, Node const**)"
-            ]
-          },
-          {
-            "short_name": "const",
-            "distinct_addresses": 10,
-            "addresses": [
-              "0xe35c",
-              "0xe6ec",
-              "0xe89c",
-              "0xe8b0",
-              "0xe8c8",
-              "0xe8e0",
-              "0xe8f8",
-              "0xe910",
-              "0xeaac",
-              "0xecf0"
-            ],
-            "example_qualified": [
-              "StringPiece::AsString[abi:cxx11]() const",
-              "Rule::name[abi:cxx11]() const",
-              "Node::path[abi:cxx11]() const"
-            ]
-          },
-          {
-            "short_name": "operator",
-            "distinct_addresses": 9,
-            "addresses": [
-              "0x16578",
-              "0x16640",
-              "0x18050",
-              "0x182f8",
-              "0x18894",
-              "0x18e94",
-              "0x1a898",
-              "0x1aaec",
-              "0x1cc08"
-            ],
-            "example_qualified": [
-              "Node const* const& std::__detail::_ConvertToValueType<std::__detail::_Identity, Node const*>::operator()<Node const* const&>(Node const* const&) const",
-              "Edge* const& std::__detail::_ConvertToValueType<std::__detail::_Identity, Edge*>::operator()<Edge* const&>(Edge* const&) const",
-              "Node const* const& std::__detail::_Identity::operator()<Node const* const&>(Node const* const&) const"
-            ]
-          },
-          {
-            "short_name": "allocator > const&)",
-            "distinct_addresses": 9,
-            "addresses": [
-              "0x48414",
-              "0x487ec",
-              "0x49dd8",
-              "0x5cf44",
-              "0x5d1c8",
-              "0x78e18",
-              "0x78fd4",
-              "0x7e650",
-              "0xe318"
-            ],
-            "example_qualified": [
-              "StringPiece::StringPiece(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)",
-              "AnsiColorSequenceIterator::AnsiColorSequenceIterator(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)",
-              "VisibleInputCharsIterator::VisibleInputCharsIterator(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)"
-            ]
-          },
-          {
-            "short_name": "__destroy",
+            "short_name": "operator()",
             "distinct_addresses": 7,
             "addresses": [
-              "0x16240",
-              "0x164b4",
-              "0x171f4",
-              "0x172b0",
-              "0x17a70",
-              "0x17bb0",
-              "0x17dbc"
+              "0x1fec4",
+              "0x29ec8",
+              "0x48594",
+              "0x53c6c",
+              "0x6e884",
+              "0x6e944",
+              "0xe9f4"
             ],
             "example_qualified": [
-              "void std::_Destroy_aux<true>::__destroy<Node**>(Node**, Node**)",
-              "void std::_Destroy_aux<true>::__destroy<Edge**>(Edge**, Edge**)",
-              "void std::_Destroy_aux<true>::__destroy<Node const**>(Node const**, Node const**)"
+              "EdgeCmp::operator()(Edge const*, Edge const*) const",
+              "std::hash<StringPiece>::operator()(StringPiece) const",
+              "EdgePriorityLess::operator()(Edge const*, Edge const*) const"
             ]
           },
           {
-            "short_name": "operator==",
+            "short_name": "LoadDyndeps",
             "distinct_addresses": 6,
             "addresses": [
-              "0x10004",
-              "0x108ac",
-              "0x11854",
-              "0x12948",
-              "0x12ae0",
-              "0x18e50"
+              "0x28a04",
+              "0x38680",
+              "0x3b0bc",
+              "0x3b190",
+              "0x513e0",
+              "0x51414"
             ],
             "example_qualified": [
-              "bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)",
-              "bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, char const*)",
-              "bool std::operator==<char, std::char_traits<char>, std::allocator<char> >(char const*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)"
-            ]
-          },
-          {
-            "short_name": "forward",
-            "distinct_addresses": 6,
-            "addresses": [
-              "0x11e44",
-              "0x14434",
-              "0x14a74",
-              "0x15188",
-              "0x15dcc",
-              "0x16564"
-            ],
-            "example_qualified": [
-              "bool&& std::forward<bool>(std::remove_reference<bool>::type&)",
-              "Edge* const& std::forward<Edge* const&>(std::remove_reference<Edge* const&>::type&)",
-              "Node* const& std::forward<Node* const&>(std::remove_reference<Node* const&>::type&)"
+              "Builder::LoadDyndeps(Node*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "Cleaner::LoadDyndeps()",
+              "DyndepLoader::LoadDyndeps(Node*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*) const"
             ]
           },
           {
             "short_name": "operator!=",
-            "distinct_addresses": 6,
-            "addresses": [
-              "0x101a0",
-              "0x10584",
-              "0x10a68",
-              "0x10bc0",
-              "0x10eb4",
-              "0xfb80"
-            ],
-            "example_qualified": [
-              "bool __gnu_cxx::operator!=<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > >(__gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&, __gnu_cxx::__normal_iterator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::vector<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > > > const&)",
-              "bool __gnu_cxx::operator!=<Node**, std::vector<Node*, std::allocator<Node*> > >(__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*> > > const&, __gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*> > > const&)",
-              "bool __gnu_cxx::operator!=<Edge**, std::vector<Edge*, std::allocator<Edge*> > >(__gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*> > > const&, __gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*> > > const&)"
-            ]
-          },
-          {
-            "short_name": "__get_helper",
             "distinct_addresses": 5,
             "addresses": [
-              "0x16fa4",
-              "0x17b2c",
-              "0x17b48",
-              "0x17b64",
-              "0x1ccc8"
+              "0x203b8",
+              "0x38998",
+              "0x53a04",
+              "0x6f14c",
+              "0x6f224"
             ],
             "example_qualified": [
-              "Rule const* const& std::__get_helper<0ul, Rule const*, std::default_delete<Rule const> >(std::_Tuple_impl<0ul, Rule const*, std::default_delete<Rule const> > const&)",
-              "Jobserver::Client*& std::__get_helper<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >&)",
-              "Jobserver::Client* const& std::__get_helper<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> >(std::_Tuple_impl<0ul, Jobserver::Client*, std::default_delete<Jobserver::Client> > const&)"
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator!=(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator const&) const",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator!=(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator const&) const",
+              "StringPiece::operator!=(StringPiece const&) const"
             ]
           },
           {
-            "short_name": "const*, ...)",
+            "short_name": "end",
             "distinct_addresses": 5,
             "addresses": [
-              "0x777e4",
-              "0x77968",
-              "0x77acc",
-              "0x77c30",
-              "0x78bc8"
+              "0x20344",
+              "0x3897c",
+              "0x49d74",
+              "0x6f130",
+              "0x6f1b0"
             ],
             "example_qualified": [
-              "Fatal(char const*, ...)",
-              "Warning(char const*, ...)",
-              "Error(char const*, ...)"
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::end()",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::end() const",
+              "StringPiece::end() const"
             ]
           },
           {
-            "short_name": "__niter_base",
-            "distinct_addresses": 4,
+            "short_name": "Dump",
+            "distinct_addresses": 5,
             "addresses": [
-              "0x17fb8",
-              "0x1879c",
-              "0x19230",
-              "0x1b5dc"
+              "0x25a7c",
+              "0x52224",
+              "0x52618",
+              "0x6d31c",
+              "0x6e354"
             ],
             "example_qualified": [
-              "Edge** std::__niter_base<Edge**>(Edge**)",
-              "Node** std::__niter_base<Node**>(Node**)",
-              "char const** std::__niter_base<char const**>(char const**)"
+              "Plan::Dump() const",
+              "Edge::Dump(char const*) const",
+              "Node::Dump(char const*) const"
             ]
           },
           {
-            "short_name": "_M_realloc_insert",
-            "distinct_addresses": 4,
-            "addresses": [
-              "0x12238",
-              "0x12c08",
-              "0x13ba8",
-              "0x15a34"
-            ],
-            "example_qualified": [
-              "void std::vector<Edge*, std::allocator<Edge*> >::_M_realloc_insert<Edge* const&>(__gnu_cxx::__normal_iterator<Edge**, std::vector<Edge*, std::allocator<Edge*> > >, Edge* const&)",
-              "void std::vector<Node*, std::allocator<Node*> >::_M_realloc_insert<Node* const&>(__gnu_cxx::__normal_iterator<Node**, std::vector<Node*, std::allocator<Node*> > >, Node* const&)",
-              "void std::vector<char const*, std::allocator<char const*> >::_M_realloc_insert<char const* const&>(__gnu_cxx::__normal_iterator<char const**, std::vector<char const*, std::allocator<char const*> > >, char const* const&)"
-            ]
-          },
-          {
-            "short_name": "const*)",
+            "short_name": "StringPiece",
             "distinct_addresses": 4,
             "addresses": [
               "0x387dc",
-              "0x7a23c",
-              "0x8546c",
-              "0xeac0"
+              "0x4058c",
+              "0x458ec",
+              "0xe318"
             ],
             "example_qualified": [
-              "CommandCollector::CollectFrom(Node const*)",
+              "StringPiece::StringPiece(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)",
               "StringPiece::StringPiece(char const*)",
-              "platformAwareUnlink(char const*)"
+              "StringPiece::StringPiece()"
             ]
           },
           {
-            "short_name": "basic_string*)",
+            "short_name": "max_load_factor",
             "distinct_addresses": 4,
             "addresses": [
-              "0x784b4",
-              "0x7864c",
-              "0x78814",
-              "0x7a1d0"
+              "0x21898",
+              "0x23070",
+              "0x7093c",
+              "0x722ac"
             ],
             "example_qualified": [
-              "GetShellEscapedString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*)",
-              "GetWin32EscapedString(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*)",
-              "ReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*)"
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::max_load_factor(float)",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::max_load_factor() const",
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::max_load_factor(float)"
             ]
           },
           {
-            "short_name": "__relocate_a",
-            "distinct_addresses": 3,
+            "short_name": "begin",
+            "distinct_addresses": 4,
             "addresses": [
-              "0x164ec",
-              "0x169b4",
-              "0x17ad0"
+              "0x20608",
+              "0x38908",
+              "0x49d5c",
+              "0x6f194"
             ],
             "example_qualified": [
-              "Edge** std::__relocate_a<Edge**, Edge**, std::allocator<Edge*> >(Edge**, Edge**, Edge**, std::allocator<Edge*>&)",
-              "Node** std::__relocate_a<Node**, Node**, std::allocator<Node*> >(Node**, Node**, Node**, std::allocator<Node*>&)",
-              "char const** std::__relocate_a<char const**, char const**, std::allocator<char const*> >(char const**, char const**, char const**, std::allocator<char const*>&)"
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::begin()",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::begin() const",
+              "StringPiece::begin() const"
+            ]
+          },
+          {
+            "short_name": "operator->",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x203e8",
+              "0x389f0",
+              "0x6f17c",
+              "0x6f27c"
+            ],
+            "example_qualified": [
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator->() const",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator->() const",
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::const_iterator::operator->() const"
+            ]
+          },
+          {
+            "short_name": "AddTarget",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x23784",
+              "0x263f0",
+              "0x26554",
+              "0x5b2f8"
+            ],
+            "example_qualified": [
+              "Plan::AddTarget(Node const*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "Builder::AddTarget(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "Builder::AddTarget(Node*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "Parse",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x3a9f8",
+              "0x3eb8c",
+              "0x5dd10",
+              "0x842f0"
+            ],
+            "example_qualified": [
+              "CLParser::Parse(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "DyndepParser::Parse(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "ManifestParser::Parse(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)"
+            ]
+          },
+          {
+            "short_name": "Error",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x74428",
+              "0x77a40",
+              "0x77acc",
+              "0x850b4"
+            ],
+            "example_qualified": [
+              "StatusPrinter::Error(char const*, ...)",
+              "Error(char const*, std::__va_list)",
+              "Error(char const*, ...)"
             ]
           },
           {
@@ -1132,6 +1456,62 @@
               "ToolTargetsList",
               "ToolTargetsList",
               "ToolTargetsList"
+            ]
+          },
+          {
+            "short_name": "operator++",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x20624",
+              "0x389c8",
+              "0x6f254"
+            ],
+            "example_qualified": [
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator::operator++()",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::operator++()",
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::iterator::operator++()"
+            ]
+          },
+          {
+            "short_name": "Load",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x1e270",
+              "0x440f4",
+              "0x6a5b4"
+            ],
+            "example_qualified": [
+              "BuildLog::Load(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "DepsLog::Load(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, State*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*)",
+              "Parser::Load(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>>*, Lexer*)"
+            ]
+          },
+          {
+            "short_name": "Reset",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x23748",
+              "0x38640",
+              "0x6e238"
+            ],
+            "example_qualified": [
+              "Plan::Reset()",
+              "Cleaner::Reset()",
+              "State::Reset()"
+            ]
+          },
+          {
+            "short_name": "operator=",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x29c3c",
+              "0x49e64",
+              "0x5c754"
+            ],
+            "example_qualified": [
+              "Jobserver::Slot::operator=(Jobserver::Slot&&)",
+              "EvalString::operator=(EvalString const&)",
+              "Jobserver::Config::operator=(Jobserver::Config&&)"
             ]
           },
           {
@@ -1157,99 +1537,91 @@
               "0x701a4"
             ],
             "example_qualified": [
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> >, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> > > >, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> >, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> > > >, emhash8::DefaultPolicy>::iterator const&)",
-              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> >, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> > > >, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> >, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry> > > >, emhash8::DefaultPolicy> const*, unsigned int)",
-              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*> >, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*> >, emhash8::DefaultPolicy> const*, unsigned int)"
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::iterator const&)",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy> const*, unsigned int)",
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::const_iterator::const_iterator(emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy> const*, unsigned int)"
             ]
           },
           {
-            "short_name": "const&)",
+            "short_name": "EvalString",
             "distinct_addresses": 3,
             "addresses": [
+              "0x40864",
               "0x41984",
-              "0x7297c",
-              "0x7c0dc"
+              "0x43710"
             ],
             "example_qualified": [
+              "EvalString::EvalString()",
               "EvalString::EvalString(EvalString const&)",
-              "StatusPrinter::StatusPrinter(BuildConfig const&)",
-              "CGroupSubSys::CGroupSubSys(CGroupSubSys const&)"
+              "EvalString::EvalString(EvalString&&)"
             ]
           },
           {
-            "short_name": "allocator >&)",
+            "short_name": "Start",
             "distinct_addresses": 3,
             "addresses": [
-              "0x79160",
-              "0x797cc",
-              "0x79964"
+              "0x5b7e4",
+              "0x7f8b8",
+              "0x85508"
             ],
             "example_qualified": [
-              "ParseMountInfo(std::map<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, CGroupSubSys, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, CGroupSubSys> > >&)",
-              "ParseCgroupV1(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)",
-              "ParseCgroupV2(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >&)"
+              "GraphViz::Start()",
+              "Subprocess::Start(SubprocessSet*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char>> const&)",
+              "Lexer::Start(StringPiece, StringPiece)"
             ]
           },
           {
-            "short_name": "__va_list)",
+            "short_name": "Info",
             "distinct_addresses": 3,
             "addresses": [
+              "0x74500",
+              "0x77ba4",
+              "0x77c30"
+            ],
+            "example_qualified": [
+              "StatusPrinter::Info(char const*, ...)",
+              "Info(char const*, std::__va_list)",
+              "Info(char const*, ...)"
+            ]
+          },
+          {
+            "short_name": "Warning",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x74350",
               "0x778dc",
-              "0x77a40",
-              "0x77ba4"
+              "0x77968"
             ],
             "example_qualified": [
+              "StatusPrinter::Warning(char const*, ...)",
               "Warning(char const*, std::__va_list)",
-              "Error(char const*, std::__va_list)",
-              "Info(char const*, std::__va_list)"
+              "Warning(char const*, ...)"
             ]
           },
           {
-            "short_name": "_M_equals_tr",
-            "distinct_addresses": 2,
+            "short_name": "CGroupSubSys",
+            "distinct_addresses": 3,
             "addresses": [
-              "0x1bcfc",
-              "0x1c040"
+              "0x7ade8",
+              "0x7c0dc",
+              "0x7e378"
             ],
             "example_qualified": [
-              "bool std::__detail::_Hashtable_base<Node const*, Node const*, std::__detail::_Identity, std::equal_to<Node const*>, std::hash<Node const*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Hashtable_traits<false, true, true> >::_M_equals_tr<Node const*>(Node const* const&, unsigned long, std::__detail::_Hash_node_value<Node const*, false> const&) const",
-              "bool std::__detail::_Hashtable_base<Edge*, Edge*, std::__detail::_Identity, std::equal_to<Edge*>, std::hash<Edge*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Hashtable_traits<false, true, true> >::_M_equals_tr<Edge*>(Edge* const&, unsigned long, std::__detail::_Hash_node_value<Edge*, false> const&) const"
+              "CGroupSubSys::CGroupSubSys()",
+              "CGroupSubSys::CGroupSubSys(CGroupSubSys const&)",
+              "CGroupSubSys::CGroupSubSys(CGroupSubSys&&)"
             ]
           },
           {
-            "short_name": "_M_construct_node",
+            "short_name": "clearkv",
             "distinct_addresses": 2,
             "addresses": [
-              "0x1a350",
-              "0x1a608"
+              "0x12828",
+              "0x20a24"
             ],
             "example_qualified": [
-              "void std::_Rb_tree<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >, std::_Identity<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::less<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >, std::allocator<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > >::_M_construct_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&>(std::_Rb_tree_node<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > >*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)",
-              "void std::_Rb_tree<Edge*, Edge*, std::_Identity<Edge*>, EdgeCmp, std::allocator<Edge*> >::_M_construct_node<Edge* const&>(std::_Rb_tree_node<Edge*>*, Edge* const&)"
-            ]
-          },
-          {
-            "short_name": "_M_hash_code_tr",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0x198d0",
-              "0x19e28"
-            ],
-            "example_qualified": [
-              "unsigned long std::__detail::_Hash_code_base<Node const*, Node const*, std::__detail::_Identity, std::hash<Node const*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, false>::_M_hash_code_tr<Node const*>(Node const* const&) const",
-              "unsigned long std::__detail::_Hash_code_base<Edge*, Edge*, std::__detail::_Identity, std::hash<Edge*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, false>::_M_hash_code_tr<Edge*>(Edge* const&) const"
-            ]
-          },
-          {
-            "short_name": "_M_key_equals_tr",
-            "distinct_addresses": 2,
-            "addresses": [
-              "0x197d0",
-              "0x19d28"
-            ],
-            "example_qualified": [
-              "bool std::__detail::_Hashtable_base<Node const*, Node const*, std::__detail::_Identity, std::equal_to<Node const*>, std::hash<Node const*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Hashtable_traits<false, true, true> >::_M_key_equals_tr<Node const*>(Node const* const&, std::__detail::_Hash_node_value<Node const*, false> const&) const",
-              "bool std::__detail::_Hashtable_base<Edge*, Edge*, std::__detail::_Identity, std::equal_to<Edge*>, std::hash<Edge*>, std::__detail::_Mod_range_hashing, std::__detail::_Default_ranged_hash, std::__detail::_Hashtable_traits<false, true, true> >::_M_key_equals_tr<Edge*>(Edge* const&, std::__detail::_Hash_node_value<Edge*, false> const&) const"
+              "emhash8::HashMap<StringPiece, Node*, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, Node*>>, emhash8::DefaultPolicy>::clearkv()",
+              "emhash8::HashMap<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>, std::hash<StringPiece>, std::equal_to<StringPiece>, std::allocator<std::pair<StringPiece, std::unique_ptr<BuildLog::LogEntry, std::default_delete<BuildLog::LogEntry>>>>, emhash8::DefaultPolicy>::clearkv()"
             ]
           }
         ]
@@ -1257,15 +1629,15 @@
     }
   ],
   "aggregated_raw": {
-    "source_function_addresses": 1665,
-    "collision_addresses": 1417,
-    "collision_rate": 0.851051,
-    "collision_rate_pct": "85.11%"
+    "source_function_addresses": 4068,
+    "collision_addresses": 2674,
+    "collision_rate": 0.657325,
+    "collision_rate_pct": "65.73%"
   },
   "aggregated_project": {
-    "source_function_addresses": 386,
-    "collision_addresses": 172,
-    "collision_rate": 0.445596,
-    "collision_rate_pct": "44.56%"
+    "source_function_addresses": 702,
+    "collision_addresses": 258,
+    "collision_rate": 0.367521,
+    "collision_rate_pct": "36.75%"
   }
 }

@@ -21,6 +21,30 @@ The current scope is intentionally narrow: **confirm one candidate at a time aga
 
 Snappy is retained as the first confirmed target because it is a small real C++ library with a straightforward build, no mandatory third-party runtime dependency for the core library, and a relatively limited object-oriented hierarchy compared with larger C++ applications. It is therefore a useful baseline for DecBench's experimental C++ path before moving to more collision-heavy targets.
 
+## Reviewed candidate
+
+### Google double-conversion v3.3.1
+
+**Status: reviewed candidate, suitable for next validation step.**
+
+- upstream: `google/double-conversion`
+- stable release: `v3.3.1`
+- resolved commit: `ae0dbfeb9744efd216c95b30555049d75d47116a`
+- language: C++
+- build: CMake + GCC
+- expected modes: `O0`, `O2`, `O2-noinline`
+- ground-truth path: DWARF + preprocessed `.ii`
+
+Reason for selection:
+
+- compact but real C++ implementation;
+- algorithm-heavy code (floating-point conversion, arithmetic, parsing);
+- limited inheritance/virtual hierarchy compared with larger C++ applications;
+- low dependency burden;
+- good fit as a clean C++ baseline after Snappy.
+
+It is intentionally kept separate from the confirmed target until the DecBench compile path validation is completed.
+
 ## DecBench integration shape
 
 `targets/snappy.toml` is shaped for the current DecBench project model. It keeps DecBench in control of optimization flags, enables a shared library so the linked-image collector has a benchmark target, disables Snappy tests and benchmarks, and preserves `-g -save-temps=obj` for DWARF and `.ii` collection.

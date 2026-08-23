@@ -1,0 +1,97 @@
+name: WinSparkle native MSVC qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/msvc-winsparkle-validation.yml"
+      - "scripts/validate_winsparkle_msvc.ps1"
+      - "scripts/qualify_msvc_pdb.ps1"
+      - "targets/windows/winsparkle.toml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: winsparkle-msvc-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualify:
+    name: ${{ matrix.mode }}
+    runs-on: windows-2025
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [O0, O2, O2-noinline]
+
+    env:
+      WINSPARKLE_REF: a8986caf620262f7d4581b241436ceaa0cc9370f
+      EVIDENCE_ROOT: msvc-evidence/winsparkle/${{ matrix.mode }}
+
+    steps:
+      - name: Checkout qualification workspace
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned WinSparkle with submodules
+        uses: actions/checkout@v4
+        with:
+          repository: vslavik/winsparkle
+          ref: ${{ env.WINSPARKLE_REF }}
+          path: winsparkle
+          fetch-depth: 1
+          submodules: recursive
+
+      - name: Verify pinned source revision
+        shell: pwsh
+        run: |
+          $actual = (git -C winsparkle rev-parse HEAD).Trim()
+          if ($actual -ne $env:WINSPARKLE_REF) {
+            throw "WinSparkle revision mismatch: expected $env:WINSPARKLE_REF, got $actual"
+          }
+          "WinSparkle revision: $actual"
+          git -C winsparkle submodule status --recursive
+
+      - name: Build and qualify with native MSVC x64
+        shell: cmd
+        run: |
+          @echo on
+          for /f "usebackq tokens=*" %%i in (`"%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath`) do set "VSROOT=%%i"
+          if not defined VSROOT exit /b 1
+          call "%VSROOT%\Common7\Tools\VsDevCmd.bat" -arch=x64 -host_arch=x64
+          if errorlevel 1 exit /b %errorlevel%
+          where cl
+          where link
+          where msbuild
+          where nuget
+          where llvm-pdbutil
+          where llvm-readobj
+          pwsh -NoProfile -ExecutionPolicy Bypass -File scripts\validate_winsparkle_msvc.ps1 -Mode "${{ matrix.mode }}" -SourceRoot winsparkle -EvidenceRoot "%EVIDENCE_ROOT%"
+
+      - name: Record runner environment
+        if: always()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path $env:EVIDENCE_ROOT | Out-Null
+          @(
+            "GitHub Actions native MSVC WinSparkle qualification",
+            "=================================================",
+            "Runner OS: $env:RUNNER_OS",
+            "Runner arch: $env:RUNNER_ARCH",
+            "Image OS: $env:ImageOS",
+            "Image version: $env:ImageVersion",
+            "WinSparkle revision: $env:WINSPARKLE_REF",
+            "Workflow commit: $env:GITHUB_SHA",
+            "Optimization: ${{ matrix.mode }}"
+          ) | Set-Content -Encoding utf8 "$env:EVIDENCE_ROOT/environment.txt"
+
+      - name: Upload WinSparkle MSVC evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: winsparkle-msvc-${{ matrix.mode }}
+          path: ${{ env.EVIDENCE_ROOT }}/
+          if-no-files-found: error
+          retention-days: 30

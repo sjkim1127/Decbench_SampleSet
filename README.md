@@ -21,7 +21,7 @@ The current scope is intentionally narrow: **confirm one candidate at a time aga
 
 Snappy is retained as the first confirmed target because it is a small real C++ library with a straightforward build, no mandatory third-party runtime dependency for the core library, and a relatively limited object-oriented hierarchy compared with larger C++ applications. It is therefore a useful baseline for DecBench's experimental C++ path before moving to more collision-heavy targets.
 
-## Reviewed candidate
+## Reviewed candidates
 
 ### Google double-conversion v3.3.1
 
@@ -44,6 +44,26 @@ Reason for selection:
 - good fit as a clean C++ baseline after Snappy.
 
 It is intentionally kept separate from the confirmed target until the DecBench compile path validation is completed.
+
+### Ninja
+
+**Status: reviewed candidate, recommended for next validation step.**
+
+- upstream: `ninja-build/ninja`
+- language: C++
+- build: CMake / bootstrap build
+- expected modes: `O0`, `O2`, `O2-noinline`
+- ground-truth path: DWARF + preprocessed `.ii`
+
+Reason for selection:
+
+- real-world C++ executable rather than only a library;
+- build-system and dependency management code provide a different workload from Snappy and double-conversion;
+- low external dependency burden;
+- suitable size for initial DecBench C++ expansion;
+- provides a system/tooling-oriented C++ target between small libraries and large applications.
+
+Ninja is kept separate from confirmed targets until the DecBench compile path validation is completed.
 
 ## DecBench integration shape
 

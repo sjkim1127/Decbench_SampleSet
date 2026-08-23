@@ -1,0 +1,36 @@
+diff --git a/PowerEditor/gcc/makefile b/PowerEditor/gcc/makefile
+index 7b0d7eaa5..decbench001 100644
+--- a/PowerEditor/gcc/makefile
++++ b/PowerEditor/gcc/makefile
+@@ -61,9 +61,9 @@ ifeq "$(filter-out 0,$(DEBUG))" ""
+ BUILD_TYPE := release
+ BUILD_SUFFIX :=
+-CXXFLAGS += -O3
++CXXFLAGS += $(DECBENCH_CXXFLAGS)
+ CPP_DEFINE += NDEBUG
+-LDFLAGS += -s
++# Keep symbols/debug sections: DecBench uses DWARF as ground truth.
+ else
+ BUILD_TYPE := debug
+ BUILD_SUFFIX := -debug
+@@ -214,7 +214,8 @@ CPDIR := cp -r
+ RMDIR := rm -rf
+ CP := cp
+ RM := rm -f
+-PREBUILD_EVENT_CMD := cmd //C "$(MAKEFILE_ABS_DIR)/../src/NppLibsVersionH-generator.bat"
++# The release-pinned version header is supplied by the DecBench target patch.
++PREBUILD_EVENT_CMD := true
+ normalize-path = $1
+ else ifneq "$(wildcard $(dir $(SHELL))ls.exe)" ""
+ # a Windows system with a proper shell
+diff --git a/PowerEditor/src/NppLibsVersion.h b/PowerEditor/src/NppLibsVersion.h
+new file mode 100644
+index 000000000..decbench002
+--- /dev/null
++++ b/PowerEditor/src/NppLibsVersion.h
+@@ -0,0 +1,5 @@
++// Generated for the pinned Notepad++ v8.9.6.1 DecBench build.
++// Values mirror the release's bundled dependency version files.
++#define NPP_SCINTILLA_VERSION "5.6.2"
++#define NPP_LEXILLA_VERSION "5.4.9"
++#define NPP_BOOST_REGEX_VERSION "1_90"

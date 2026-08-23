@@ -1,0 +1,298 @@
+name: DecBench C++ corpus qualification
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/decbench-cpp-qualification.yml'
+      - 'decbench-drafts/**'
+      - 'scripts/qualification/**'
+      - 'qualification/**'
+
+permissions:
+  contents: read
+
+env:
+  DECBENCH_REF: d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f
+
+jobs:
+  qualify:
+    name: DecBench / ${{ matrix.target }} / clean build ${{ matrix.replicate }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        target: [tinyxml2, notepadplusplus]
+        replicate: [1, 2, 3]
+
+    steps:
+      - name: Checkout qualification workspace
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned DecBench revision
+        uses: actions/checkout@v4
+        with:
+          repository: Noelo-Lab/decbench
+          ref: ${{ env.DECBENCH_REF }}
+          path: decbench
+
+      - name: Install DecBench-shaped target draft
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cp "decbench-drafts/${{ matrix.target }}.toml" "decbench/projects/cpp/${{ matrix.target }}.toml"
+          if [ "${{ matrix.target }}" = "notepadplusplus" ]; then
+            cp decbench-drafts/notepadplusplus-decbench.patch decbench/projects/cpp/notepadplusplus-decbench.patch
+          fi
+
+      - name: Add MinGW C++ frontend to DecBench compile image
+        shell: python
+        run: |
+          from pathlib import Path
+          path = Path('decbench/docker/compile.Dockerfile')
+          text = path.read_text()
+          needle = '    gcc-mingw-w64 \\\n'
+          replacement = '    gcc-mingw-w64 g++-mingw-w64 \\\n'
+          if needle not in text:
+              raise SystemExit('expected gcc-mingw-w64 package line was not found')
+          path.write_text(text.replace(needle, replacement, 1))
+
+      - name: Build pinned DecBench compile image
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker build -f decbench/docker/compile.Dockerfile -t decbench-compile-cpp decbench
+
+      - name: Compile all declared optimization levels through DecBench
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker run --rm \
+            -v "$PWD/decbench:/workspace" \
+            -w /workspace \
+            -e PYTHONPATH=/workspace \
+            decbench-compile-cpp \
+            python3 scripts/compile_all.py results/qualification 3 "${{ matrix.target }}"
+
+      - name: Enforce build + linked-image + .ii qualification gate
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          path = Path('decbench/results/qualification/compile_report.json')
+          rows = json.loads(path.read_text())
+          expected = {'O0', 'O2', 'O2-noinline'}
+          got = {row['opt'] for row in rows}
+          assert got == expected, f'optimization coverage mismatch: {got}'
+          for row in rows:
+              assert row['ok'], row
+              assert row['linked_binaries'] > 0, row
+              assert row['i_files'] > 0, row
+          print(json.dumps(rows, indent=2))
+
+      - name: Audit DWARF identity and short-name collisions
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker run --rm \
+            -v "$PWD/decbench:/workspace" \
+            -v "$PWD/scripts/qualification:/qualification:ro" \
+            -w /workspace \
+            decbench-compile-cpp \
+            python3 /qualification/dwarf_audit.py results/qualification \
+              --output results/qualification/dwarf-audit.json
+
+      - name: Set up Java for pyjoern
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install source-CFG audit dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'pyjoern>=1.2.18' 'networkx>=3.0'
+
+      - name: Run DecBench Joern parse audit over every captured .ii
+        id: joern
+        continue-on-error: true
+        shell: bash
+        run: |
+          PYTHONPATH="$PWD/decbench" python scripts/qualification/joern_audit.py \
+            decbench/results/qualification \
+            --decbench-root decbench \
+            --workers 4 \
+            --output decbench/results/qualification/joern-audit.json
+
+      - name: Preserve Joern setup/failure evidence
+        if: always()
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+          path = Path('decbench/results/qualification/joern-audit.json')
+          if not path.exists():
+              path.write_text(json.dumps({
+                  'ii_files': 0,
+                  'parsed_files': 0,
+                  'nonempty_files': 0,
+                  'parse_rate': 0.0,
+                  'nonempty_rate': 0.0,
+                  'functions_seen': 0,
+                  'unique_joern_short_names': 0,
+                  'cross_tu_duplicate_short_names': 0,
+                  'infrastructure_error': 'Joern audit did not produce a report',
+              }, indent=2))
+
+      - name: Render qualification report
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p qualification-output
+          python scripts/qualification/render_report.py \
+            --target '${{ matrix.target }}' \
+            --replicate '${{ matrix.replicate }}' \
+            --results decbench/results/qualification \
+            --dwarf decbench/results/qualification/dwarf-audit.json \
+            --joern decbench/results/qualification/joern-audit.json \
+            --output qualification-output/QUALIFICATION.md
+
+      - name: Package complete qualification evidence
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p handoff/results handoff/reports
+          cp -a decbench/results/qualification/. handoff/results/ || true
+          cp qualification-output/QUALIFICATION.md handoff/reports/ || true
+          cp decbench/results/qualification/dwarf-audit.json handoff/reports/ || true
+          cp decbench/results/qualification/joern-audit.json handoff/reports/ || true
+          cp decbench/results/qualification/compile_report.json handoff/reports/ || true
+          cp "decbench/projects/cpp/${{ matrix.target }}.toml" handoff/reports/ || true
+
+      - name: Upload qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: qualification-${{ matrix.target }}-rep-${{ matrix.replicate }}
+          path: handoff
+          retention-days: 30
+
+  reproducibility:
+    name: Reproducibility / ${{ matrix.target }}
+    needs: qualify
+    if: always()
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [tinyxml2, notepadplusplus]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all clean-build replicates
+        uses: actions/download-artifact@v4
+        with:
+          pattern: qualification-${{ matrix.target }}-rep-*
+          path: replicates
+          merge-multiple: false
+      - name: Compare binary SHA-256 values
+        shell: bash
+        run: |
+          python scripts/qualification/check_reproducibility.py replicates \
+            --output reproducibility-${{ matrix.target }}.json
+      - name: Upload reproducibility report
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproducibility-${{ matrix.target }}
+          path: |
+            reproducibility-${{ matrix.target }}.json
+            reproducibility-${{ matrix.target }}.md
+
+  angr-smoke:
+    name: DecBench angr smoke / tinyxml2 O2
+    needs: qualify
+    if: always()
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: Noelo-Lab/decbench
+          ref: ${{ env.DECBENCH_REF }}
+          path: decbench
+      - name: Download one qualified tinyxml2 build
+        uses: actions/download-artifact@v4
+        with:
+          name: qualification-tinyxml2-rep-1
+          path: payload
+      - name: Restore DecBench project config and compiled tree
+        shell: bash
+        run: |
+          set -euxo pipefail
+          cp decbench-drafts/tinyxml2.toml decbench/projects/cpp/tinyxml2.toml
+          rm -rf decbench/results/qualification
+          mkdir -p decbench/results/qualification
+          cp -a payload/results/. decbench/results/qualification/
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - name: Install DecBench runtime
+        id: install
+        continue-on-error: true
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ./decbench
+      - name: Run DecBench C++ unit tests
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        working-directory: decbench
+        shell: bash
+        run: python -m pytest tests/test_cpp_support.py -q
+      - name: Run an actual O2 angr decompile/evaluate smoke
+        id: smoke
+        if: steps.install.outcome == 'success'
+        continue-on-error: true
+        working-directory: decbench
+        shell: bash
+        env:
+          DECBENCH_OPT_LEVELS: O2
+          DECBENCH_DECOMPILERS: angr
+          DECBENCH_WORKERS: '2'
+          DECBENCH_DECOMPILE_TIMEOUT: '600'
+        run: python scripts/run_benchmark.py results/qualification -- tinyxml2
+      - name: Record smoke status
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p smoke-report
+          {
+            echo "install=${{ steps.install.outcome }}"
+            echo "smoke=${{ steps.smoke.outcome }}"
+            echo "decbench_ref=${DECBENCH_REF}"
+          } > smoke-report/status.txt
+          find decbench/results/qualification -maxdepth 3 -type f -printf '%p\n' 2>/dev/null | sort > smoke-report/result-files.txt || true
+      - name: Upload smoke evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: decbench-angr-smoke-tinyxml2
+          path: |
+            smoke-report
+            decbench/results/qualification

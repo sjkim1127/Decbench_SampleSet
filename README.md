@@ -123,6 +123,32 @@ Reason for selection:
 
 Caveat: DirectXTex contains many overloads (`Compress`, `CompressEx`, `SaveToDDS*`, `EvaluateImage`, `TransformImage`, etc.). Under DecBench's current unqualified C++ function-identity model, it should be treated as a richer/stress target until qualified-name handling is fixed or collision rates are explicitly measured.
 
+### WinSparkle v0.9.4
+
+**Status: selected Windows/MSVC application-library target.**
+
+- upstream: `vslavik/winsparkle`
+- stable release: `v0.9.4`
+- resolved commit: `a8986caf620262f7d4581b241436ceaa0cc9370f`
+- language: C++ / Win32
+- build: Visual Studio / MSBuild
+- ground-truth path: PDB / CodeView
+- output: `WinSparkle.dll` + import library + PDB for Win32/x64/ARM64 configurations
+- intended role: Windows updater / networking / threading / UI-oriented C++
+
+Reason for selection:
+
+- native Windows DLL rather than another cross-platform library;
+- project-owned C++ covers appcast parsing, WinInet-based download/update behavior, signature verification, registry/settings handling, Win32 UI, and worker-thread coordination;
+- provides object-oriented and asynchronous/threaded C++ behavior that is distinct from Detours and DirectXTex;
+- stable release produces linked PE DLL and PDB artifacts directly.
+
+Caveats:
+
+- the `Thread` hierarchy intentionally repeats virtual names such as `Run` and `IsJoinable`, and `UpdateChecker` subclasses also repeat virtual methods. This gives WinSparkle a moderate short-name collision risk under DecBench's current C++ identity model;
+- the Visual Studio Release configuration enables size optimization and whole-program/LTCG behavior, so benchmark integration must explicitly override optimization and LTO settings for controlled `/Od` and `/O2` variants;
+- the project includes/vends third-party components such as Expat, OpenSSL-related material, wxWidgets headers, and Ed25519 code, so source/compiland filtering should restrict benchmark ground truth to WinSparkle-owned sources.
+
 ## Initial C++ target shortlist
 
 1. **Snappy 1.2.2** — small compression/library baseline — GCC/DWARF
@@ -130,6 +156,7 @@ Caveat: DirectXTex contains many overloads (`Compress`, `CompressEx`, `SaveToDDS
 3. **Ninja v1.13.1** — system / tooling executable — GCC/DWARF
 4. **Microsoft Detours v4.0.1** — Windows instrumentation / PE systems target — MSVC/PDB
 5. **Microsoft DirectXTex may2026** — Windows graphics / image-processing stress target — MSVC/PDB
+6. **WinSparkle v0.9.4** — Windows updater / networking / threading / UI-oriented target — MSVC/PDB
 
 The Powder Toy was removed from the initial shortlist. Its application diversity is useful, but its dependency footprint, GUI-style inheritance, repeated method names, and optimization/build behavior make it less suitable than the selected Windows targets for this first corpus.
 

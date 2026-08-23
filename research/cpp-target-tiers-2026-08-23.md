@@ -1,183 +1,145 @@
 # DecBench multi-lang C++ target tiers — 2026-08-23
 
-This note refreshes the Windows/C++ target search around **small / medium / large** tiers.
-
-The tier is **not** based only on GitHub repository size. It is a provisional benchmark-cost classification based on expected build cost, dependency graph, linked binary size/function population, and source/third-party contamination. CI measurements should override these provisional labels.
+This note organizes the Windows/C++ target search around **small / medium / large** tiers. Tiering is based on expected benchmark cost: build time, dependency graph, linked function population, source/third-party contamination, and oracle complexity.
 
 ## Pinning policy
 
-For benchmark candidates, prefer a **published stable release** over a moving branch head or an arbitrary latest commit.
+The candidate pool is now **release-only**.
 
-For reproducibility, record both:
+- Use a published stable release/tag as the corpus version.
+- Record the exact commit SHA that the tag resolves to.
+- CI clones the tag and verifies that SHA before building.
+- Do not use branch heads, arbitrary latest commits, prereleases, or snapshots as final corpus pins.
+- If a project has no usable stable source release, keep it out of the active pool instead of falling back to a development commit.
 
-1. the release/tag name used as the human-facing corpus version, and
-2. the exact commit SHA to which that tag resolved when the corpus was validated.
+The canonical list is maintained in [`research/release-pins.md`](./release-pins.md).
 
-Avoid prereleases unless the benchmark explicitly needs them. If a project has no usable stable release, pin an exact commit and document why. Existing commit-only pins below are historical validation pins; before final upstream integration they should be migrated to stable release pins where practical.
+## Recommended balance
 
-## Recommended initial balance
-
-| Tier | Primary | Secondary | Additional gap-filler | Why |
+| Tier | Primary | Secondary | Additional | Role |
 | --- | --- | --- | --- | --- |
-| Small | TrafficMonitor Lite | SpaceCadetPinball | tinyxml2 + Microsoft Detours | GUI/game plus clean-control and Windows-systems coverage |
-| Medium | The Powder Toy | Explorer++ | — | algorithm/physics-heavy + native Win32 application |
-| Large | OpenLoco | Notepad++ | — | large real-world C++ + a Windows target with both MSVC and MinGW build paths |
-| Stress / expansion | x64dbg | OpenConsole component subset | — | system/reversing and very heavy Windows-system code; not first-line corpus targets |
+| Small | TrafficMonitor `V1.86` | SpaceCadetPinball `Release_2.1.0` | tinyxml2 `11.0.0`, Detours `v4.0.1` | GUI/game + clean-control + Windows systems |
+| Medium | The Powder Toy `v100.0.399` | Explorer++ `version-1.4.0` | Rainmeter `v4.5.26.3894` reserve | algorithm-heavy + native Win32 application |
+| Large | OpenLoco `v26.07.1` | Notepad++ `v8.9.6.1` | — | large real-world C++ + dual-toolchain Windows app |
+| Stress / expansion | x64dbg `2026.05.27` | Windows Terminal `v1.24.11321.0` OpenConsole subset | — | reversing/system-heavy stress targets |
 
-The target-discovery phase can be considered effectively saturated after adding the two small-tier gap-fillers. The next useful work is build/oracle validation rather than collecting more names.
+Target discovery is effectively saturated. The useful work now is release build/oracle validation rather than collecting more names.
 
 ## Small tier
 
-### 0. tinyxml2 — release-pinned clean control
+### tinyxml2 — clean control
 - Repo: https://github.com/leethomason/tinyxml2
-- Stable release/tag: `11.0.0`
-- Release-resolved commit: `9148bdf719e997d1f474be6bcc7943881046dba1`
-- Profile: compact C++ XML parser; the core library is essentially `tinyxml2.cpp` + `tinyxml2.h`, with `xmltest.cpp` available as a test executable.
-- Build system: CMake; no large dependency graph is required for the baseline.
-- Strength: extremely low build/vendor noise, useful as a clean compiler/optimization control target.
-- Role: **small clean-control C++ baseline**.
+- Stable tag: `11.0.0`
+- Resolved SHA: `9148bdf719e997d1f474be6bcc7943881046dba1`
+- Role: low-noise C++ baseline with minimal dependency/build-system contamination.
+- Release CI: MSVC x64 build validated.
+- Oracle caveat: the default Release configuration did not emit a PDB; native MSVC type/oracle experiments would need explicit debug-info flags.
 
-### 1. Microsoft Detours — release-pinned Windows systems baseline
+### Microsoft Detours — Windows systems baseline
 - Repo: https://github.com/microsoft/Detours
-- Stable release/tag: `v4.0.1`
-- Release-resolved commit: `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`
-- Profile: Microsoft Research Windows API instrumentation / binary-rewriting library.
-- License: MIT.
-- Build: Visual Studio developer environment + `nmake`; the upstream tree contains focused C++ library sources and small sample executables/DLLs.
-- Important caveat: `v4.0.1` is old relative to current `main`, but it is still the latest published stable release. For benchmark reproducibility we intentionally prefer the release first; current-main experiments can remain a separate comparison if needed.
-- Strength: fills the missing Windows systems/instrumentation niche without x64dbg/OpenConsole-scale build cost.
-- Role: **small Windows-systems C++ baseline**.
+- Stable tag: `v4.0.1`
+- Resolved SHA: `e4bfd6b03e50de46b47abfbd1e46b384f0c5f833`
+- Role: compact Windows API instrumentation/binary-rewriting C++.
+- Release CI: MSVC x64 library + focused sample build validated.
+- Build note: upstream samples require `syelog` before the `simple` sample.
 
-### 2. TrafficMonitor Lite — validated historical probe
+### TrafficMonitor Lite — native Windows GUI
 - Repo: https://github.com/zhongyang219/TrafficMonitor
-- Historical probe pin: `5efd2159af8117301a2b6a755897aaa995887678`
-- Profile: Windows desktop utility / MFC / Win32 C++.
-- Existing clean CI result: MSVC x64 Release PASS.
-- Existing measured output: 1,942,016 B EXE, 19,845,120 B PDB, raw `PROC32` 5,297.
-- Role: **small native-Windows GUI baseline**.
-- Before final corpus integration: choose and validate a stable release tag if available.
+- Stable tag: `V1.86`
+- Resolved SHA: `02a817a069bac6bf4d263b5209d9c1b07fe2f950`
+- Role: MFC/Win32 application baseline.
+- CI requirement: use a VS2022 image with the required MFC components rather than relying on `windows-latest`.
 
-### 3. SpaceCadetPinball — high-priority dual-toolchain candidate
+### SpaceCadetPinball — dual-toolchain small target
 - Repo: https://github.com/k4zmu2a/SpaceCadetPinball
-- Historical probe pin: `cb9b7b886244a27773f66b0b19fdc2998392565e`
-- Profile: C++11 game / reverse-engineered Windows title / SDL2 + SDL2_mixer.
-- Windows build: Visual Studio supported.
-- Compatibility-first path: upstream supports MinGW Windows builds.
-- Strength: unusually clean A/B bridge — the same project can plausibly be evaluated as native MSVC/PDB and MinGW/PE+DWARF.
-- Caveat: original game resources are not included; compilation itself does not require shipping those resources.
-- Role: **small dual-toolchain C++ target**.
-- Before final corpus integration: choose and validate a stable release tag if available.
-
-### 4. Nilesoft Shell — reserve
-- Repo: https://github.com/moudey/Shell
-- Historical probe pin: `81ec1a410d1277efa58aff52be912a254f66e5a3`
-- Profile: Windows File Explorer context-menu extension.
-- License: MIT.
-- Upstream CI builds `src/Shell.sln` in Release for x64, x86 and ARM64 with MSBuild.
-- Caveat: currently treated as MSVC-native; MinGW compatibility is not established.
-- Role: **small native-Windows reserve target**.
+- Stable tag: `Release_2.1.0`
+- Resolved SHA: `6a30ccbef12c7b7781ccf89788d77461fa20a90a`
+- Profile: C++11, SDL2/SDL2_mixer, game/OO code.
+- Role: same source can be probed under MSVC/PDB and MinGW/PE+DWARF+`.ii`.
+- Caveat: original game resources are not part of the source release; compilation itself remains usable for corpus validation.
 
 ## Medium tier
 
-### 1. The Powder Toy — high-priority
+### The Powder Toy — algorithm/simulation target
 - Repo: https://github.com/The-Powder-Toy/The-Powder-Toy
-- Historical probe pin used in our CI: `b31f4462bc7d217159b83859a35405db9b640455`
+- Stable tag: `v100.0.399`
+- Resolved SHA: `9c94feba3ed5eaa75a819ac000c0d29e4ce92570`
 - Profile: C++20 physics/simulation sandbox.
-- Build system: Meson.
-- Upstream build logic distinguishes MSVC, clang-cl, Windows GCC/MinGW and Windows Clang/MinGW-style environments.
-- Prebuilt dependency variants include both Windows MinGW and Windows MSVC configurations.
-- Strength: algorithm/physics-heavy code instead of another GUI-only target; good MSVC vs MinGW comparison candidate.
-- Caveat: several third-party libraries; project-owned function attribution will matter, especially for static builds.
-- Role: **medium algorithm-heavy dual-toolchain target**.
-- Before final corpus integration: choose and validate a stable release tag if available.
+- Role: algorithm-heavy C++ and a strong MSVC vs MinGW comparison candidate.
+- Caveat: static/prebuilt dependencies require project-owned function attribution.
 
-### 2. Explorer++ — high-priority
+### Explorer++ — native Win32 application
 - Repo: https://github.com/derceg/explorerplusplus
-- Historical probe pin: `4d3f5320b9c307bef325fc78801d1dd7c6deb09d`
-- Profile: lightweight native Windows file manager.
-- Build requirements: Visual Studio, Desktop C++, Windows SDK; vcpkg manages dependencies.
-- Has active upstream build CI and x86/x64/ARM64 release builds.
-- Strength: representative Win32 GUI/file-system code without Windows Terminal-scale infrastructure.
-- Caveat: vcpkg dependency restore cost must be measured; no MinGW path is currently assumed.
-- Role: **medium native-Windows application**.
-- Before final corpus integration: choose and validate a stable release tag if available.
+- Stable tag: `version-1.4.0`
+- Resolved SHA: `384c2f687fd55c1e71e9fcb272f9113de009a248`
+- Role: Windows file-manager code without Windows Terminal-scale build cost.
+- Caveat: release-era vcpkg/submodule layout must be validated independently from current-main CI assumptions.
 
-### 3. Rainmeter — reserve
+### Rainmeter — reserve
 - Repo: https://github.com/rainmeter/rainmeter
-- Historical probe pin: `e7403adda22d2b2d254c5c2efcc74e615d4846ff`
-- Profile: mature Windows desktop customization application.
-- License: GPLv2.
-- Strength: mature Win32/event/timer/plugin-oriented application code.
-- Caveat: full solution/install tooling may add noise; benchmark should target core runtime binaries rather than packaging projects.
-- Role: **medium native-Windows reserve target**.
-
-### 4. nCine — compatibility reserve
-- Repo: https://github.com/nCine/nCine
-- Profile: C++11 cross-platform 2D game engine, MIT.
-- Upstream advertises separate Windows and MinGW CI and supports Windows with both MSVC and MinGW-w64/MSYS2.
-- Strength: direct compiler-pair comparison is feasible.
-- Caveat: broad dependency set may increase build and attribution cost.
-- Role: **medium dual-toolchain reserve target**.
+- Stable tag: `v4.5.26.3894`
+- Resolved SHA: `5a124b6a09e2f7f67f8be9232718c489100e6173`
+- Role: mature Windows event/timer/plugin-oriented application reserve.
+- Recommendation: target core runtime binaries, not installer/packaging projects.
 
 ## Large tier
 
-### 1. OpenLoco — validated historical probe
+### OpenLoco — large real-world target
 - Repo: https://github.com/OpenLoco/OpenLoco
-- Historical probe pin: `96de081155f326a7af83f925185c1a934ba536b4`
-- Profile: substantial game/simulation C++ codebase.
-- Existing clean CI result: MSVC x64 Release PASS.
-- Existing measured output: 7,745,536 B EXE, 61,722,624 B PDB, raw `PROC32` 21,257.
-- Clean build cost observed: 1,699.576 s on Windows CI.
-- Role: **large real-world C++ target**.
-- Before final corpus integration: choose and validate a stable release tag if available.
+- Stable tag: `v26.07.1`
+- Resolved SHA: `5c95820e2c022698f89908b8aade12423b1eef21`
+- Role: substantial game/simulation C++.
+- CI requirement: use VS2022 because the Windows preset explicitly targets the Visual Studio 17 2022 generator.
 
-### 2. Notepad++ — high-priority large candidate
+### Notepad++ — large dual-toolchain Windows target
 - Repo: https://github.com/notepad-plus-plus/notepad-plus-plus
-- Historical probe pin: `a6c46fd4cb0fa115ced3b3bfb1ff53fbdb8989f3`
-- Profile: mature Windows-native text editor.
-- License: GPLv3 with project clarifications/exceptions.
-- MSVC path: Visual Studio x86/x64/ARM64.
-- Compatibility-first path: upstream regularly tests MinGW-w64/GCC builds; Clang can also be selected.
-- Strength: one of the strongest candidates for comparing the same Windows C++ application across MSVC and MinGW.
-- Caveat: `notepad++.exe` links static Scintilla/Lexilla code and vendored Boost regex support, so project-owned vs bundled-library attribution needs an explicit policy.
-- Role: **large dual-toolchain Windows application**.
-- Before final corpus integration: choose and validate a stable release tag if available.
+- Stable tag: `v8.9.6.1`
+- Resolved SHA: `41dd976310db0ba551bb8a2810b60331df3a77f5`
+- Role: mature Windows-native application with both MSVC and MinGW/GCC paths.
+- Caveat: Scintilla/Lexilla and bundled/vendor code must be separated from Notepad++-owned function attribution.
 
-### 3. x64dbg — validated stress candidate
+## Stress / expansion
+
+### x64dbg
 - Repo: https://github.com/x64dbg/x64dbg
-- Historical probe pin: `17233957ea0a7e70d188187380bd74f80c2a4b93`
-- Profile: Windows debugger / reverse-engineering system code.
-- Existing clean CI result: MSVC x64 Release PASS.
-- Core outputs validated: `x64gui.dll`, `x64dbg.dll`, `x64bridge.dll`.
-- Caveat: dependency/submodule graph is heavy and current Release PDBs are not yet a complete source-level oracle.
-- Role: **large system/reversing stress target**, preferably after the initial corpus works.
+- Stable tag: `2026.05.27`
+- Resolved SHA: `9c8ca1cae0b6d56cc44f31fddcb10e3b02ffbb87`
+- Role: reversing/system-heavy Windows C++ stress target.
+- Keep after the initial corpus because dependency/submodule and oracle cost are materially higher.
 
-### 4. Windows Terminal / OpenConsole — stress only
+### Windows Terminal / OpenConsole
 - Repo: https://github.com/microsoft/terminal
-- Historical probe pin: `20588130d8ef2ba40eb56bdae88e04cce7fc5b5d`
-- Profile: very large Windows console/terminal system codebase.
-- Recommendation: do **not** use the full solution as an initial corpus target. Select a component such as `Host.EXE` / conhost with its required dependencies.
-- Role: **very-large component-level stress target**.
+- Stable tag: `v1.24.11321.0`
+- Resolved SHA: `b4e69c68620a822407d45bfbba6ee10feebc70a3`
+- Role: very-large Windows systems stress target.
+- Use an OpenConsole/conhost component subset rather than treating the entire solution as one initial corpus target.
 
-## Proposed initial C++ corpus shape
+## Excluded under release-only policy
 
-1. **Small clean control:** tinyxml2 `11.0.0`
-2. **Small Windows systems:** Microsoft Detours `v4.0.1`
-3. **Small Windows GUI/game:** TrafficMonitor Lite + SpaceCadetPinball
-4. **Medium:** The Powder Toy + Explorer++
-5. **Large:** OpenLoco + Notepad++
-6. **Stress later:** x64dbg + OpenConsole subset
+- **Nilesoft Shell:** no usable GitHub stable source release was identified in this pass; do not fall back to a branch-head pin.
+- **nCine:** no usable current GitHub stable release was identified in this pass; keep as an external reserve idea only.
 
-This is intentionally a candidate pool, not a commitment to include every project in the final function sample set.
+## Proposed initial corpus shape
 
-## Next validation pass
+1. Small clean control: tinyxml2 `11.0.0`
+2. Small Windows systems: Detours `v4.0.1`
+3. Small application/game: TrafficMonitor `V1.86`, SpaceCadetPinball `Release_2.1.0`
+4. Medium: The Powder Toy `v100.0.399`, Explorer++ `version-1.4.0`
+5. Large: OpenLoco `v26.07.1`, Notepad++ `v8.9.6.1`
+6. Stress later: x64dbg `2026.05.27`, OpenConsole from Windows Terminal `v1.24.11321.0`
 
-- [ ] Validate tinyxml2 `11.0.0` MSVC x64 and record build/binary/PDB metrics.
-- [ ] Validate Microsoft Detours `v4.0.1` MSVC x64 and a focused sample executable/DLL.
-- [ ] Convert the remaining high-priority historical commit pins to stable release pins where practical.
-- [ ] Validate SpaceCadetPinball with MSVC and MinGW-w64, preserving DWARF + `.ii` on the GCC path.
-- [ ] Validate The Powder Toy MinGW counterpart.
-- [ ] Validate Explorer++ MSVC x64 Release and measure dependency/build cost.
-- [ ] Validate Notepad++ both MSVC and MinGW builds; separate Notepad++ / Scintilla / Lexilla attribution.
-- [ ] Measure actual linked function populations before fixing final small/medium/large labels.
-- [ ] Keep x64dbg/OpenConsole out of the initial corpus until the smaller pipeline is stable.
+This remains a candidate pool, not a commitment to include every project in the final function sample set.
+
+## Validation checklist
+
+- [x] tinyxml2 release pin + MSVC clean build
+- [x] Detours release pin + MSVC focused sample build
+- [ ] TrafficMonitor `V1.86` release build on VS2022/MFC
+- [ ] SpaceCadetPinball `Release_2.1.0` MSVC + MinGW/DWARF/`.ii`
+- [ ] The Powder Toy `v100.0.399` MSVC + MinGW/DWARF/`.ii`
+- [ ] Explorer++ `version-1.4.0` release build
+- [ ] OpenLoco `v26.07.1` release build on VS2022
+- [ ] Notepad++ `v8.9.6.1` MSVC + MinGW/DWARF/`.ii`
+- [ ] x64dbg `2026.05.27` release build
+- [ ] Windows Terminal `v1.24.11321.0` OpenConsole component build
+- [ ] Measure linked function populations and source/vendor attribution before final tier lock-in

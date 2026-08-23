@@ -1,0 +1,53 @@
+# Experimental DecBench Windows/MSVC validation config.
+# This is metadata for the PR #36-style MSVC/PDB path and is NOT consumed by
+# the current DecBench Project.from_toml GCC/DWARF pipeline.
+
+schema = "decbench-msvc-candidate-v1"
+name = "winsparkle"
+version = "v0.9.4"
+source_remote = "https://github.com/vslavik/winsparkle"
+resolved_commit = "a8986caf620262f7d4581b241436ceaa0cc9370f"
+language = "C++ / Win32"
+intended_role = "Windows updater / networking / threading / UI-oriented C++"
+
+[source]
+include = ["src/*.cpp", "src/*.h", "include/*.h"]
+exclude = ["3rdparty/**", "examples/**", "tests/**"]
+
+[build]
+system = "Visual Studio / MSBuild"
+project = "WinSparkle.vcxproj"
+platform = "x64"
+toolchain = "MSVC with PDB generation; native Windows or the DecBench experimental MSVC/Wine path"
+requires_adapter = true
+linked_images = ["x64/Release/WinSparkle.dll", "x64/Debug/WinSparkle.dll"]
+pdb_images = ["x64/Release/WinSparkle.pdb", "x64/Debug/WinSparkle.pdb"]
+notes = [
+  "Override project optimization properties instead of using stock Debug/Release semantics as benchmark modes.",
+  "Disable WholeProgramOptimization/LTCG for controlled O0/O2/O2-noinline comparisons.",
+  "Filter PDB compilands to WinSparkle-owned sources because the project vendors third-party components.",
+]
+
+[ground_truth]
+format = "PDB / CodeView"
+require_pdb = true
+source_filter = "Keep WinSparkle-owned src/include compilation units; reject 3rdparty and example units."
+
+[optimization.O0]
+compile_flags = ["/Od", "/Ob0", "/Zi"]
+link_flags = ["/DEBUG", "/LTCG:OFF"]
+
+[optimization.O2]
+compile_flags = ["/O2", "/Zi"]
+link_flags = ["/DEBUG", "/LTCG:OFF"]
+
+[optimization."O2-noinline"]
+compile_flags = ["/O2", "/Ob0", "/Zi"]
+link_flags = ["/DEBUG", "/LTCG:OFF"]
+
+[validation]
+require_linked_pe = true
+require_ground_truth = true
+measure_short_name_collisions = true
+record_compiland_ownership = true
+collision_note = "Thread/UpdateChecker hierarchies repeat virtual method names such as Run and IsJoinable; measure rather than assume acceptability."

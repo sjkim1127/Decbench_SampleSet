@@ -13,13 +13,17 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: decbench-cpp-qualification-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 env:
   DECBENCH_REF: d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f
 
 jobs:
   qualify:
     name: DecBench / ${{ matrix.target }} / clean build ${{ matrix.replicate }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 180
     strategy:
       fail-fast: false
@@ -106,6 +110,20 @@ jobs:
             python3 /qualification/dwarf_audit.py results/qualification \
               --output results/qualification/dwarf-audit.json
 
+      - name: Audit project-owned functions and optimization survival
+        shell: bash
+        run: |
+          set -euxo pipefail
+          docker run --rm \
+            -v "$PWD/decbench:/workspace" \
+            -v "$PWD/scripts/qualification:/qualification:ro" \
+            -w /workspace \
+            -e PYTHONPATH=/workspace \
+            decbench-compile-cpp \
+            python3 /qualification/source_ownership_audit.py results/qualification \
+              --decbench-root /workspace \
+              --output results/qualification/source-ownership-audit.json
+
       - name: Set up Java for pyjoern
         uses: actions/setup-java@v4
         with:
@@ -116,7 +134,6 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
 
       - name: Install source-CFG audit dependencies
         shell: bash
@@ -165,6 +182,7 @@ jobs:
             --replicate '${{ matrix.replicate }}' \
             --results decbench/results/qualification \
             --dwarf decbench/results/qualification/dwarf-audit.json \
+            --source decbench/results/qualification/source-ownership-audit.json \
             --joern decbench/results/qualification/joern-audit.json \
             --output qualification-output/QUALIFICATION.md
 
@@ -176,6 +194,7 @@ jobs:
           cp -a decbench/results/qualification/. handoff/results/ || true
           cp qualification-output/QUALIFICATION.md handoff/reports/ || true
           cp decbench/results/qualification/dwarf-audit.json handoff/reports/ || true
+          cp decbench/results/qualification/source-ownership-audit.json handoff/reports/ || true
           cp decbench/results/qualification/joern-audit.json handoff/reports/ || true
           cp decbench/results/qualification/compile_report.json handoff/reports/ || true
           cp "decbench/projects/cpp/${{ matrix.target }}.toml" handoff/reports/ || true
@@ -192,7 +211,7 @@ jobs:
     name: Reproducibility / ${{ matrix.target }}
     needs: qualify
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -222,7 +241,7 @@ jobs:
     name: DecBench angr smoke / tinyxml2 O2
     needs: qualify
     if: always()
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -251,7 +270,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
       - name: Install DecBench runtime
         id: install
         continue-on-error: true

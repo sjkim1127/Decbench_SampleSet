@@ -1,0 +1,56 @@
+# Experimental DecBench Windows/MSVC validation config.
+# This is metadata for the PR #36-style MSVC/PDB path and is NOT consumed by
+# the current DecBench Project.from_toml GCC/DWARF pipeline.
+
+schema = "decbench-msvc-candidate-v1"
+name = "directxtex"
+version = "may2026"
+source_remote = "https://github.com/microsoft/DirectXTex"
+resolved_commit = "4feb3e11a020f35b796fc769a74216a555d4f5ef"
+language = "C++17 / Windows"
+intended_role = "Windows graphics / image processing / rich C++ stress"
+
+[source]
+include = ["DirectXTex/*.cpp", "DirectXTex/*.h"]
+exclude = ["Auxiliary/**", "Texassemble/**", "Texconv/**", "Texdiag/**", "Tests/**"]
+
+[build]
+system = "CMake + MSVC"
+toolchain = "cl.exe + link.exe under the DecBench PR #36/Wine environment"
+requires_adapter = true
+preferred_output = "DirectXTex.dll"
+optional_linked_images = ["texconv.exe", "texassemble.exe", "texdiag.exe"]
+configure = [
+  "-DBUILD_SHARED_LIBS=ON",
+  "-DBUILD_SAMPLE=OFF",
+  "-DBUILD_DX11=OFF",
+]
+notes = [
+  "Keep optional OpenEXR/JPEG/PNG integrations disabled unless intentionally added to the corpus.",
+  "Prefer the project-owned DLL as the clean benchmark image; tools may be evaluated separately.",
+  "Do not inherit a Release preset that introduces uncontrolled IPO/LTCG; inject benchmark flags explicitly.",
+]
+
+[ground_truth]
+format = "PDB / CodeView"
+require_pdb = true
+source_filter = "Keep DirectXTex-owned compilation units; exclude optional tools/vendor integrations unless explicitly selected."
+
+[optimization.O0]
+compile_flags = ["/Od", "/Ob0", "/Zi"]
+link_flags = ["/DEBUG"]
+
+[optimization.O2]
+compile_flags = ["/O2", "/Zi"]
+link_flags = ["/DEBUG"]
+
+[optimization."O2-noinline"]
+compile_flags = ["/O2", "/Ob0", "/Zi"]
+link_flags = ["/DEBUG"]
+
+[validation]
+require_linked_pe = true
+require_ground_truth = true
+measure_short_name_collisions = true
+record_compiland_ownership = true
+collision_note = "DirectXTex intentionally contains many overloads; treat it as a stress target until qualified-name handling is fixed or measured collision rates are acceptable."

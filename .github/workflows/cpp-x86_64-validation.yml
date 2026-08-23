@@ -1,0 +1,177 @@
+name: C++ x86_64 DecBench qualification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/cpp-x86_64-validation.yml"
+      - "targets/snappy.toml"
+      - "targets/double-conversion.toml"
+      - "targets/ninja.toml"
+      - "scripts/measure_collisions.py"
+
+permissions:
+  contents: read
+
+env:
+  DECBENCH_REF: d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f
+  RESULT_ROOT: results/cpp_x86_64
+
+jobs:
+  qualify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout qualification workspace
+        uses: actions/checkout@v4
+
+      - name: Assert x86_64 runner
+        run: |
+          set -euxo pipefail
+          test "$(uname -m)" = "x86_64"
+          uname -a
+
+      - name: Checkout pinned DecBench
+        uses: actions/checkout@v4
+        with:
+          repository: Noelo-Lab/decbench
+          ref: ${{ env.DECBENCH_REF }}
+          path: decbench
+
+      - name: Install C++ target configs
+        run: |
+          set -euxo pipefail
+          mkdir -p decbench/projects/cpp
+          cp targets/snappy.toml decbench/projects/cpp/snappy.toml
+          cp targets/double-conversion.toml decbench/projects/cpp/double-conversion.toml
+          cp targets/ninja.toml decbench/projects/cpp/ninja.toml
+
+      - name: Build pinned DecBench compile image
+        run: |
+          set -euxo pipefail
+          docker build -f decbench/docker/compile.Dockerfile -t decbench-compile decbench
+
+      - name: Compile all GCC/DWARF targets
+        run: |
+          set -euxo pipefail
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/decbench:/workspace" \
+            -w /workspace \
+            -e PYTHONPATH=/workspace \
+            decbench-compile \
+            python3 scripts/compile_all.py "$RESULT_ROOT" 3 \
+            snappy double-conversion ninja
+
+      - name: Validate compile report
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report_path = Path("decbench/results/cpp_x86_64/compile_report.json")
+          rows = json.loads(report_path.read_text())
+          expected_targets = {"snappy": 4, "double-conversion": 8, "ninja": 33}
+          expected_opts = {"O0", "O2", "O2-noinline"}
+
+          by_key = {(r["project"], r["opt"]): r for r in rows}
+          expected_keys = {(t, o) for t in expected_targets for o in expected_opts}
+          missing = expected_keys - by_key.keys()
+          extra = by_key.keys() - expected_keys
+          if missing:
+              raise SystemExit(f"missing compile rows: {sorted(missing)}")
+          if extra:
+              raise SystemExit(f"unexpected compile rows: {sorted(extra)}")
+
+          for target, expected_ii in expected_targets.items():
+              for opt in sorted(expected_opts):
+                  row = by_key[(target, opt)]
+                  if not row.get("ok"):
+                      raise SystemExit(f"{target}/{opt}: compile row not ok: {row.get('errors')}")
+                  if row.get("errors"):
+                      raise SystemExit(f"{target}/{opt}: compile errors: {row['errors']}")
+                  if row["linked_binaries"] != 1:
+                      raise SystemExit(
+                          f"{target}/{opt}: expected exactly 1 linked image, got {row['linked_binaries']}"
+                      )
+                  if row["i_files"] != expected_ii:
+                      raise SystemExit(
+                          f"{target}/{opt}: expected {expected_ii} preprocessed units, got {row['i_files']}"
+                      )
+                  print(
+                      f"PASS {target:17} {opt:11} "
+                      f"linked={row['linked_binaries']} ii={row['i_files']} seconds={row['seconds']}"
+                  )
+          PY
+
+      - name: Prepare collision-analysis environment
+        run: |
+          set -euxo pipefail
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install pyelftools==0.33 cxxfilt
+          mkdir -p x86_64-evidence/collision
+
+      - name: Measure x86_64 short-name collisions
+        run: |
+          set -euxo pipefail
+          for opt in O0 O2 O2-noinline; do
+            for target in snappy double-conversion ninja; do
+              .venv/bin/python scripts/measure_collisions.py \
+                "decbench/results/cpp_x86_64/${opt}/${target}/compiled" \
+                --output "x86_64-evidence/collision/${target}_${opt}.json"
+            done
+          done
+
+      - name: Validate collision reports and print summary
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          targets = ("snappy", "double-conversion", "ninja")
+          opts = ("O0", "O2", "O2-noinline")
+
+          for target in targets:
+              for opt in opts:
+                  path = Path(f"x86_64-evidence/collision/{target}_{opt}.json")
+                  data = json.loads(path.read_text())
+                  if data.get("elf_image_count") != 1:
+                      raise SystemExit(f"{target}/{opt}: expected one ELF image")
+                  project = data.get("aggregated_project", {})
+                  raw = data.get("aggregated_raw", {})
+                  if project.get("source_function_addresses", 0) <= 0:
+                      raise SystemExit(f"{target}/{opt}: no project source functions")
+                  if raw.get("source_function_addresses", 0) <= 0:
+                      raise SystemExit(f"{target}/{opt}: no raw functions")
+                  print(
+                      f"{target:17} {opt:11} "
+                      f"project={project['source_function_addresses']:4d} "
+                      f"collision={project['collision_rate_pct']:>7} "
+                      f"raw={raw['source_function_addresses']:5d} "
+                      f"raw_collision={raw['collision_rate_pct']:>7}"
+                  )
+          PY
+
+      - name: Record x86_64 environment
+        run: |
+          {
+            echo "GitHub Actions x86_64 DecBench qualification"
+            echo "=========================================="
+            echo "Runner: $(uname -a)"
+            echo "DecBench revision: $DECBENCH_REF"
+            echo "Workflow commit: $GITHUB_SHA"
+            echo
+            echo "Container toolchain:"
+            docker run --rm decbench-compile bash -lc 'uname -m; g++ --version | head -1; python3 --version'
+          } > x86_64-evidence/environment.txt
+          cp decbench/results/cpp_x86_64/compile_report.json x86_64-evidence/compile_report.json
+
+      - name: Upload x86_64 qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-x86_64-decbench-qualification
+          path: x86_64-evidence/
+          if-no-files-found: error

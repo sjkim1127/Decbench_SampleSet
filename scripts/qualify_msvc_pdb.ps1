@@ -78,7 +78,7 @@ function Test-ProjectModule {
     foreach ($needleValue in $objectNeedles) {
         $needle = $needleValue.ToLowerInvariant()
         if ($lower -eq $needle -or
-            $lower.EndsWith("\\$needle") -or
+            $lower.EndsWith("\$needle") -or
             $lower.EndsWith("/$needle") -or
             $lower.Contains("($needle)")) {
             return $true

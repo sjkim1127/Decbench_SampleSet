@@ -1,0 +1,80 @@
+name: double-conversion DecBench validation
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "targets/double-conversion.toml"
+      - ".github/workflows/double-conversion-decbench-validation.yml"
+
+permissions:
+  contents: read
+
+env:
+  DECBENCH_REF: d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout validation workspace
+        uses: actions/checkout@v4
+
+      - name: Checkout pinned DecBench
+        uses: actions/checkout@v4
+        with:
+          repository: Noelo-Lab/decbench
+          ref: ${{ env.DECBENCH_REF }}
+          path: decbench
+
+      - name: Install double-conversion target config
+        run: cp targets/double-conversion.toml decbench/projects/cpp/double-conversion.toml
+
+      - name: Build DecBench compile image
+        run: docker build -f decbench/docker/compile.Dockerfile -t decbench-compile decbench
+
+      - name: Compile double-conversion through DecBench
+        run: |
+          docker run --rm \
+            -v "$GITHUB_WORKSPACE/decbench:/workspace" \
+            -w /workspace \
+            -e PYTHONPATH=/workspace \
+            decbench-compile \
+            python3 scripts/compile_all.py results/double-conversion 3 double-conversion
+
+      - name: Require all three optimization builds
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          report = json.loads(Path("decbench/results/double-conversion/compile_report.json").read_text())
+          rows = {row["opt"]: row for row in report if row["project"] == "double-conversion"}
+          required = {"O0", "O2", "O2-noinline"}
+
+          missing = required - rows.keys()
+          if missing:
+              raise SystemExit(f"missing optimization rows: {sorted(missing)}")
+
+          for opt in sorted(required):
+              row = rows[opt]
+              if row["linked_binaries"] < 1:
+                  raise SystemExit(f"{opt}: no linked ELF/PE image collected")
+              if row["i_files"] < 1:
+                  raise SystemExit(f"{opt}: no preprocessed .ii source collected")
+              print(
+                  f"{opt}: linked={row['linked_binaries']} "
+                  f"preprocessed={row['i_files']} seconds={row['seconds']}"
+              )
+          PY
+
+      - name: Upload compile report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: double-conversion-decbench-compile-report
+          path: decbench/results/double-conversion/compile_report.json
+          if-no-files-found: warn

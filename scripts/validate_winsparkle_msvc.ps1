@@ -78,12 +78,18 @@ if (-not (Test-Path $solutionPath)) { throw "WinSparkle.sln not found" }
 $ns = [System.Xml.XmlNamespaceManager]::new($xml.NameTable)
 $ns.AddNamespace("m", "http://schemas.microsoft.com/developer/msbuild/2003")
 
+# Under StrictMode, PowerShell's XML property adapter throws when an optional XML
+# attribute is absent. MSBuild files legitimately contain PropertyGroup elements
+# without Condition/Label attributes, so use XmlElement.GetAttribute() instead of
+# property-style access such as $_.Condition or $pg.Label.
 $propertyGroups = @($xml.SelectNodes("//m:PropertyGroup", $ns) | Where-Object {
-    $_.Condition -and $_.Condition -match "Release\|x64"
+    $condition = $_.GetAttribute("Condition")
+    -not [string]::IsNullOrWhiteSpace($condition) -and $condition -match "Release\|x64"
 })
 if ($propertyGroups.Count -eq 0) { throw "Could not find Release|x64 property groups" }
 foreach ($pg in $propertyGroups) {
-    if ($pg.Label -eq "Configuration" -or $null -ne $pg.SelectSingleNode("m:WholeProgramOptimization", $ns)) {
+    $label = $pg.GetAttribute("Label")
+    if ($label -eq "Configuration" -or $null -ne $pg.SelectSingleNode("m:WholeProgramOptimization", $ns)) {
         Set-XmlChildText -Parent $pg -Name "WholeProgramOptimization" -Value "false" -Ns $ns
     }
     if ($null -ne $pg.SelectSingleNode("m:LinkIncremental", $ns)) {
@@ -92,7 +98,8 @@ foreach ($pg in $propertyGroups) {
 }
 
 $itemGroups = @($xml.SelectNodes("//m:ItemDefinitionGroup", $ns) | Where-Object {
-    $_.Condition -and $_.Condition -match "Release\|x64"
+    $condition = $_.GetAttribute("Condition")
+    -not [string]::IsNullOrWhiteSpace($condition) -and $condition -match "Release\|x64"
 })
 if ($itemGroups.Count -ne 1) { throw "Expected one Release|x64 ItemDefinitionGroup, found $($itemGroups.Count)" }
 $itemGroup = [System.Xml.XmlElement]$itemGroups[0]

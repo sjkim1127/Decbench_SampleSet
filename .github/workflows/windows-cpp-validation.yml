@@ -13,10 +13,23 @@ permissions:
 jobs:
   trafficmonitor:
     name: TrafficMonitor Lite / MSVC x64 Release
-    runs-on: windows-latest
-    timeout-minutes: 60
+    runs-on: windows-2022
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
+
+      - name: Install Visual C++ MFC
+        shell: pwsh
+        run: |
+          $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe"
+          $installer = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\setup.exe"
+          $vsPath = & $vswhere -latest -products * -property installationPath
+          if (-not $vsPath) { throw 'Visual Studio installation not found' }
+          Write-Host "Visual Studio: $vsPath"
+          & $installer modify --installPath "$vsPath" --add Microsoft.VisualStudio.Component.VC.ATLMFC --quiet --norestart --nocache
+          $code = $LASTEXITCODE
+          if ($code -ne 0 -and $code -ne 3010) { exit $code }
+
       - uses: microsoft/setup-msbuild@v2
 
       - name: Clone pinned source
@@ -38,7 +51,7 @@ jobs:
         shell: pwsh
         run: |
           $sw = [Diagnostics.Stopwatch]::StartNew()
-          msbuild target\TrafficMonitor_Lite.sln /m /p:Configuration="Release (lite)" /p:Platform=x64
+          msbuild target\TrafficMonitor\TrafficMonitor.vcxproj /m /p:Configuration="Release (lite)" /p:Platform=x64
           $code = $LASTEXITCODE
           $sw.Stop()
           "build_seconds=$([math]::Round($sw.Elapsed.TotalSeconds, 3))" | Add-Content reports/trafficmonitor/metadata.txt
@@ -65,7 +78,7 @@ jobs:
 
   openloco:
     name: OpenLoco / MSVC x64 Release
-    runs-on: windows-latest
+    runs-on: windows-2022
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
@@ -162,11 +175,11 @@ jobs:
           "build_exit_code=$code" | Add-Content reports/x64dbg/metadata.txt
           exit $code
 
-      - name: Collect PE/PDB metrics
+      - name: Collect core PE/PDB metrics
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'x64dbg.exe' -OutDir reports/x64dbg -TargetName 'x64dbg x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'x64*.dll' -OutDir reports/x64dbg -TargetName 'x64dbg core DLLs x64 Release'
 
       - name: Upload report
         if: always()

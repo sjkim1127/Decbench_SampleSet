@@ -1,4 +1,4 @@
-name: Tiered C++ corpus validation
+name: Tiered C++ release validation
 
 on:
   push:
@@ -16,20 +16,24 @@ permissions:
 
 jobs:
   spacecadet-msvc:
-    name: Small / SpaceCadetPinball / MSVC x64 Release
+    name: Small / SpaceCadetPinball Release_2.1.0 / MSVC x64
     runs-on: windows-2022
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
 
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/k4zmu2a/SpaceCadetPinball.git target
-          git -C target checkout cb9b7b886244a27773f66b0b19fdc2998392565e
+          git clone --branch Release_2.1.0 --depth 1 https://github.com/k4zmu2a/SpaceCadetPinball.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '6a30ccbef12c7b7781ccf89788d77461fa20a90a') {
+            throw "Release_2.1.0 resolved to unexpected commit: $head"
+          }
           New-Item -ItemType Directory -Force reports/spacecadet-msvc | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/spacecadet-msvc/metadata.txt
+          "release=Release_2.1.0" | Set-Content reports/spacecadet-msvc/metadata.txt
+          "commit=$head" | Add-Content reports/spacecadet-msvc/metadata.txt
           "tier=small" | Add-Content reports/spacecadet-msvc/metadata.txt
           "compiler=MSVC" | Add-Content reports/spacecadet-msvc/metadata.txt
 
@@ -65,13 +69,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'SpaceCadetPinball.exe' -OutDir reports/spacecadet-msvc -TargetName 'SpaceCadetPinball MSVC x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'SpaceCadetPinball.exe' -OutDir reports/spacecadet-msvc -TargetName 'SpaceCadetPinball Release_2.1.0 MSVC x64'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: spacecadet-msvc-report
+          name: spacecadet-Release_2.1.0-msvc-report
           path: reports/spacecadet-msvc
 
       - name: Preserve build failure status
@@ -80,18 +84,22 @@ jobs:
         run: exit 1
 
   spacecadet-mingw:
-    name: Small / SpaceCadetPinball / MinGW x64 O2+DWARF
+    name: Small / SpaceCadetPinball Release_2.1.0 / MinGW x64 O2+DWARF
     runs-on: windows-2022
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/k4zmu2a/SpaceCadetPinball.git target
-          git -C target checkout cb9b7b886244a27773f66b0b19fdc2998392565e
+          git clone --branch Release_2.1.0 --depth 1 https://github.com/k4zmu2a/SpaceCadetPinball.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '6a30ccbef12c7b7781ccf89788d77461fa20a90a') {
+            throw "Release_2.1.0 resolved to unexpected commit: $head"
+          }
           New-Item -ItemType Directory -Force reports/spacecadet-mingw | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/spacecadet-mingw/metadata.txt
+          "release=Release_2.1.0" | Set-Content reports/spacecadet-mingw/metadata.txt
+          "commit=$head" | Add-Content reports/spacecadet-mingw/metadata.txt
           "tier=small" | Add-Content reports/spacecadet-mingw/metadata.txt
           "compiler=MinGW-w64 GCC" | Add-Content reports/spacecadet-mingw/metadata.txt
 
@@ -152,7 +160,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: spacecadet-mingw-report
+          name: spacecadet-Release_2.1.0-mingw-report
           path: reports/spacecadet-mingw
 
       - name: Preserve build failure status
@@ -161,19 +169,23 @@ jobs:
         run: exit 1
 
   powder-toy-mingw:
-    name: Medium / The Powder Toy / MinGW x64 O2+DWARF
+    name: Medium / The Powder Toy v100.0.399 / MinGW x64 O2+DWARF
     runs-on: windows-2022
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/The-Powder-Toy/The-Powder-Toy.git target
-          git -C target checkout b31f4462bc7d217159b83859a35405db9b640455
+          git clone --branch v100.0.399 --depth 1 https://github.com/The-Powder-Toy/The-Powder-Toy.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '9c94feba3ed5eaa75a819ac000c0d29e4ce92570') {
+            throw "v100.0.399 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/powder-toy-mingw | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/powder-toy-mingw/metadata.txt
+          "release=v100.0.399" | Set-Content reports/powder-toy-mingw/metadata.txt
+          "commit=$head" | Add-Content reports/powder-toy-mingw/metadata.txt
           "tier=medium" | Add-Content reports/powder-toy-mingw/metadata.txt
           "compiler=MinGW-w64 GCC" | Add-Content reports/powder-toy-mingw/metadata.txt
 
@@ -238,7 +250,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: powder-toy-mingw-report
+          name: powder-toy-v100.0.399-mingw-report
           path: reports/powder-toy-mingw
 
       - name: Preserve build failure status
@@ -247,7 +259,7 @@ jobs:
         run: exit 1
 
   explorerplusplus-msvc:
-    name: Medium / Explorer++ / MSVC x64 Release
+    name: Medium / Explorer++ version-1.4.0 / MSVC x64
     runs-on: windows-2022
     timeout-minutes: 120
     steps:
@@ -256,14 +268,18 @@ jobs:
         with:
           msbuild-architecture: x64
 
-      - name: Clone pinned source and submodules
+      - name: Clone stable release tag and submodules
         shell: pwsh
         run: |
-          git clone --recurse-submodules https://github.com/derceg/explorerplusplus.git target
-          git -C target checkout 4d3f5320b9c307bef325fc78801d1dd7c6deb09d
+          git clone --branch version-1.4.0 --depth 1 https://github.com/derceg/explorerplusplus.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '384c2f687fd55c1e71e9fcb272f9113de009a248') {
+            throw "version-1.4.0 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/explorerplusplus | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/explorerplusplus/metadata.txt
+          "release=version-1.4.0" | Set-Content reports/explorerplusplus/metadata.txt
+          "commit=$head" | Add-Content reports/explorerplusplus/metadata.txt
           "tier=medium" | Add-Content reports/explorerplusplus/metadata.txt
           "compiler=MSVC" | Add-Content reports/explorerplusplus/metadata.txt
 
@@ -271,7 +287,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~\AppData\Local\vcpkg\archives
-          key: explorerplusplus-vcpkg-${{ hashFiles('target/vcpkg.json', 'target/vcpkg-configuration.json') }}
+          key: explorerplusplus-1.4.0-vcpkg-${{ hashFiles('target/vcpkg.json', 'target/vcpkg-configuration.json') }}
 
       - name: Bootstrap vcpkg
         shell: pwsh
@@ -294,13 +310,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Explorer++.exe' -OutDir reports/explorerplusplus -TargetName 'Explorer++ MSVC x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Explorer++.exe' -OutDir reports/explorerplusplus -TargetName 'Explorer++ version-1.4.0 MSVC x64'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: explorerplusplus-msvc-report
+          name: explorerplusplus-version-1.4.0-msvc-report
           path: reports/explorerplusplus
 
       - name: Preserve build failure status
@@ -309,19 +325,23 @@ jobs:
         run: exit 1
 
   notepadplusplus-msvc:
-    name: Large / Notepad++ / MSVC x64 Release
+    name: Large / Notepad++ v8.9.6.1 / MSVC x64
     runs-on: windows-2022
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/notepad-plus-plus/notepad-plus-plus.git target
-          git -C target checkout a6c46fd4cb0fa115ced3b3bfb1ff53fbdb8989f3
+          git clone --branch v8.9.6.1 --depth 1 https://github.com/notepad-plus-plus/notepad-plus-plus.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '41dd976310db0ba551bb8a2810b60331df3a77f5') {
+            throw "v8.9.6.1 resolved to unexpected commit: $head"
+          }
           New-Item -ItemType Directory -Force reports/notepadplusplus-msvc | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/notepadplusplus-msvc/metadata.txt
+          "release=v8.9.6.1" | Set-Content reports/notepadplusplus-msvc/metadata.txt
+          "commit=$head" | Add-Content reports/notepadplusplus-msvc/metadata.txt
           "tier=large" | Add-Content reports/notepadplusplus-msvc/metadata.txt
           "compiler=MSVC" | Add-Content reports/notepadplusplus-msvc/metadata.txt
 
@@ -342,13 +362,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Notepad++.exe' -OutDir reports/notepadplusplus-msvc -TargetName 'Notepad++ MSVC x64 Release'
+          ./scripts/collect-pe-metrics.ps1 -Root target -ExecutablePattern 'Notepad++.exe' -OutDir reports/notepadplusplus-msvc -TargetName 'Notepad++ v8.9.6.1 MSVC x64'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: notepadplusplus-msvc-report
+          name: notepadplusplus-v8.9.6.1-msvc-report
           path: reports/notepadplusplus-msvc
 
       - name: Preserve build failure status
@@ -357,18 +377,22 @@ jobs:
         run: exit 1
 
   notepadplusplus-mingw:
-    name: Large / Notepad++ / MinGW x64 O2+DWARF
+    name: Large / Notepad++ v8.9.6.1 / MinGW x64 O2+DWARF
     runs-on: windows-2022
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/notepad-plus-plus/notepad-plus-plus.git target
-          git -C target checkout a6c46fd4cb0fa115ced3b3bfb1ff53fbdb8989f3
+          git clone --branch v8.9.6.1 --depth 1 https://github.com/notepad-plus-plus/notepad-plus-plus.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '41dd976310db0ba551bb8a2810b60331df3a77f5') {
+            throw "v8.9.6.1 resolved to unexpected commit: $head"
+          }
           New-Item -ItemType Directory -Force reports/notepadplusplus-mingw | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/notepadplusplus-mingw/metadata.txt
+          "release=v8.9.6.1" | Set-Content reports/notepadplusplus-mingw/metadata.txt
+          "commit=$head" | Add-Content reports/notepadplusplus-mingw/metadata.txt
           "tier=large" | Add-Content reports/notepadplusplus-mingw/metadata.txt
           "compiler=MinGW-w64 GCC" | Add-Content reports/notepadplusplus-mingw/metadata.txt
 
@@ -430,7 +454,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: notepadplusplus-mingw-report
+          name: notepadplusplus-v8.9.6.1-mingw-report
           path: reports/notepadplusplus-mingw
 
       - name: Preserve build failure status

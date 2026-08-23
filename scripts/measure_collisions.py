@@ -328,10 +328,15 @@ def main() -> int:
         if p.is_file() and p.name not in exclude and _is_linked_elf(p)
     )
 
+    # Format paths relative to repo root / working dir
+    clean_dir = str(compiled)
+    if "results/cpp_local" in clean_dir:
+        clean_dir = "results/cpp_local" + clean_dir.split("results/cpp_local")[-1]
+
     if not elf_paths:
         print(f"WARNING: No ELF images in {compiled}", file=sys.stderr)
         result = {
-            "compiled_dir": str(compiled),
+            "compiled_dir": clean_dir,
             "source_stems": stems,
             "elf_image_count": 0,
             "aggregated_raw": {},
@@ -342,13 +347,15 @@ def main() -> int:
         for ep in elf_paths:
             if args.verbose:
                 print(f"  [{ep.name}] (stems={len(stems)})", file=sys.stderr)
-            per_image.append(measure_elf(ep, stem_index, args.verbose))
+            img_res = measure_elf(ep, stem_index, args.verbose)
+            img_res["path"] = ep.name
+            per_image.append(img_res)
 
         result = {
-            "compiled_dir": str(compiled),
+            "compiled_dir": clean_dir,
             "source_stems": stems,
             "exclude_images": list(exclude),
-            "elf_images": [str(p) for p in elf_paths],
+            "elf_images": [p.name for p in elf_paths],
             "elf_image_count": len(elf_paths),
             "per_image": per_image,
             "aggregated_raw": _agg(per_image, "raw"),

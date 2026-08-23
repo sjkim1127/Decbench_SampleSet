@@ -1,5 +1,7 @@
 # DecBench C++ Target Qualification
 
+> **Disclaimer:** Unofficial DecBench target-qualification workspace; not an official Noelo-Lab repository.
+
 Artifact-backed qualification workspace for candidate C++ targets for a future
 DecBench multi-language corpus.
 

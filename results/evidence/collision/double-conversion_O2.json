@@ -1,5 +1,5 @@
 {
-  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/double-conversion/compiled",
+  "compiled_dir": "results/cpp_local/O2/double-conversion/compiled",
   "source_stems": [
     "bignum-dtoa.cc",
     "bignum.cc",
@@ -12,12 +12,12 @@
   ],
   "exclude_images": [],
   "elf_images": [
-    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/double-conversion/compiled/libdouble-conversion.so.3.3.0"
+    "libdouble-conversion.so.3.3.0"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/double-conversion/compiled/libdouble-conversion.so.3.3.0",
+      "path": "libdouble-conversion.so.3.3.0",
       "cu_stats": {
         "total": 8,
         "probe": 0,

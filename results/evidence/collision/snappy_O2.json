@@ -1,5 +1,5 @@
 {
-  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled",
+  "compiled_dir": "results/cpp_local/O2/snappy/compiled",
   "source_stems": [
     "snappy-c.cc",
     "snappy-sinksource.cc",
@@ -8,12 +8,12 @@
   ],
   "exclude_images": [],
   "elf_images": [
-    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2"
+    "libsnappy.so.1.2.2"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2",
+      "path": "libsnappy.so.1.2.2",
       "cu_stats": {
         "total": 4,
         "probe": 0,

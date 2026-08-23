@@ -1,5 +1,5 @@
 {
-  "compiled_dir": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled",
+  "compiled_dir": "results/cpp_local/O0/ninja/compiled",
   "source_stems": [
     "browse.cc",
     "build.cc",
@@ -37,12 +37,12 @@
   ],
   "exclude_images": [],
   "elf_images": [
-    "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled/ninja"
+    "ninja"
   ],
   "elf_image_count": 1,
   "per_image": [
     {
-      "path": "/Users/sjkim1127/Decbench_SampleSet/decbench/results/cpp_local/O0/ninja/compiled/ninja",
+      "path": "ninja",
       "cu_stats": {
         "total": 33,
         "probe": 0,

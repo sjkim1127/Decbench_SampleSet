@@ -1,5 +1,14 @@
 # DecBench C++ target validation result — Google Snappy
 
+## Status
+
+**VALIDATED** on the GCC/DWARF track at DecBench revision
+`d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f`.
+
+This report is synchronized with the machine-readable evidence under
+`results/evidence/` and the final source-stem collision methodology in
+`scripts/measure_collisions.py`.
+
 ## Target metadata
 
 | Field | Value |
@@ -8,177 +17,130 @@
 | Upstream | `google/snappy` |
 | Release/tag | `1.2.2` |
 | Resolved commit | `6af9287fbdb913f0794d0148c6aa43b58e63c8e3` |
-| Track | GCC/DWARF |
+| Track | GCC / DWARF / `.ii` |
 | DecBench revision | `d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f` |
 | Validation date | 2026-08-23 |
-| Host | macOS 26.5.1, arm64 (Docker container: Ubuntu 24.04 aarch64) |
-| Container / OS | `decbench-compile` Docker image, Ubuntu 24.04 |
-| Compiler | GCC/G++ 13.3.0 (aarch64) |
-| Linker | GNU ld (via GCC) |
-| Windows SDK | N/A |
-| Wine/msvc-wine | N/A |
+| Host | macOS 26.5.1 arm64 |
+| Build environment | `decbench-compile` Docker image, Ubuntu 24.04 aarch64 |
+| Compiler | GCC/G++ 13.3.0 |
+| Intended role | Small real-world compression/library baseline |
 
-## Build and ground-truth summary
+## Build and ground-truth results
 
-| Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
-|---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 157 (proj) / 341 (raw) | 105 / 236 | 31 / 62 | 83 / 167 | **52.87%** (proj) / 48.97% (raw) |
-| O2 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 79 (proj) / 84 (raw) | 57 / 62 | 20 / 20 | 42 / 42 | **53.16%** (proj) / 50.00% (raw) |
-| O2-noinline | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 152 (proj) / 332 (raw) | 104 / 231 | 31 / 62 | 79 / 163 | **51.97%** (proj) / 49.10% (raw) |
+| Mode | Build | Linked image | `.ii` | Project addrs | Raw addrs | Project collisions | Raw collisions |
+|---|---|---|---:|---:|---:|---:|---:|
+| O0 | PASS | `libsnappy.so.1.2.2` | 4 | 157 | 341 | **83 / 157 = 52.87%** | 167 / 341 = 48.97% |
+| O2 | PASS | `libsnappy.so.1.2.2` | 4 | 79 | 84 | **42 / 79 = 53.16%** | 42 / 84 = 50.00% |
+| O2-noinline | PASS | `libsnappy.so.1.2.2` | 4 | 152 | 332 | **79 / 152 = 51.97%** | 163 / 332 = 49.10% |
 
-> **Collision measurement methodology:** `scripts/measure_collisions.py` directly executes DecBench's
-> exact C++ oracle logic (`evalkit/resolve.py` + `utils.binfmt`):
-> - **Collision identity key**: Resolved `DW_AT_name` (following `DW_AT_specification` and `DW_AT_abstract_origin`
->   chains across DIEs).
-> - **Diagnostic display**: Demangled `DW_AT_linkage_name` for human inspection.
-> - **Source-stem filtering**: `DW_AT_decl_file` basename stems are matched against the 4 compiled `.ii`
->   translation-unit stems via `build_stem_index(source_stems)` and `strip_source_ext()`.
-> - **raw**: all concrete subprograms in the ELF.
-> - **project**: subprograms whose declaration stem matches a project translation unit.
->
-> Snappy's project collision rate (52–53%) is driven by virtual destructor duals (D1+D2 thunks) and
-> overloaded functions (e.g. `Compress`, `GetAppendBuffer`). Full raw JSON evidence is preserved in `results/evidence/collision/`.
-
-
-Collision rate formula: `collision_addresses / source_function_addresses`
+All three builds contain usable DWARF and exactly one intended linked ELF image.
+The compile report records no build errors.
 
 ## Optimization control
 
-DW_AT_producer from O2 build:
-```
-GNU C++17 13.3.0 -mlittle-endian -mabi=lp64 -g -O2 -fno-builtin ...
-```
+The target configuration leaves `CMAKE_BUILD_TYPE` empty and injects DecBench's
+flags through `CMAKE_CXX_FLAGS="$CFLAGS"`.
 
-### O0
 ```text
-compile: g++ -O0 -g -fno-builtin -save-temps=obj [from CFLAGS] + CMake project flags
-         cmake -S . -B build -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="$CFLAGS"
-                -DBUILD_SHARED_LIBS=ON -DSNAPPY_BUILD_TESTS=OFF -DSNAPPY_BUILD_BENCHMARKS=OFF
-link:    cmake --build build -j && rm -rf build/CMakeFiles/[0-9]*
+O0:          -O0 -g -fno-builtin -save-temps=obj
+O2:          -O2 -g -fno-builtin -save-temps=obj
+O2-noinline: -O2 -fno-inline -g -fno-builtin -save-temps=obj
 ```
 
-### O2
+`DW_AT_producer` inspection did not show `-flto`, profile-guided optimization,
+whole-program optimization, or an upstream Release IPO preset. On this aarch64
+host, Snappy's normal CMake feature detection enabled the architecture-appropriate
+SIMD path; this is part of the recorded aarch64 qualification and is one reason
+x86-64 should be re-qualified before final corpus publication.
+
+## Project source scope
+
+The project ground-truth set follows DecBench's source-stem rule: compiled `.ii`
+translation-unit stems are matched against each function's resolved
+`DW_AT_decl_file` basename.
+
+The four translation units are:
+
 ```text
-compile: g++ -O2 -g -fno-builtin -save-temps=obj [from CFLAGS]
-link:    cmake --build build -j
+snappy.cc
+snappy-c.cc
+snappy-sinksource.cc
+snappy-stubs-internal.cc
 ```
 
-### O2-noinline
+Header-defined helpers and standard-library/template bodies that do not resolve to
+one of these translation-unit stems remain visible in the raw metric but are not
+counted as project-source functions.
+
+## Collision methodology
+
+Collision identity is the resolved unqualified `DW_AT_name`, following
+`DW_AT_specification` and, for C++, `DW_AT_abstract_origin` exactly as DecBench's
+DWARF ground-truth path does. Demangled `DW_AT_linkage_name` is retained only as
+diagnostic metadata.
+
+The metric is:
+
 ```text
-compile: g++ -O2 -fno-inline -g -fno-builtin -save-temps=obj [from CFLAGS]
-link:    cmake --build build -j
+collision_rate = addresses belonging to duplicated DW_AT_name groups
+                 ----------------------------------------------------
+                 all source-function addresses in the selected scope
 ```
 
-Unexpected optimization/LTO/IPO/inlining behavior:
+This is intentionally a measure of how much DecBench's current unqualified C++
+identity model is exposed to ambiguity; it is not a claim that the binary itself
+is ambiguous.
+
+## Main finding
+
+Snappy is a useful **collision-heavy small target**. Its project collision rate is
+stable at roughly 52–53% across all three optimization modes.
+
+Representative causes observed in DWARF include:
+
+- overloaded APIs such as `Compress`, `Uncompress`, `RawCompress`, and
+  `CompressFromIOVec`;
+- repeated virtual-interface names across `Source`/`Sink` implementations such as
+  `Available`, `Peek`, `Skip`, and buffer methods;
+- GCC ABI destructor variants that produce multiple concrete addresses with the
+  same `DW_AT_name`, e.g. `~Source`, `~Sink`, and
+  `~UncheckedByteArraySink`.
+
+The high rate therefore reflects real pressure on the current short-name identity
+model rather than a build failure or measurement parser artifact.
+
+## Evidence
+
+Canonical evidence:
+
 ```text
-None. No -flto, -fprofile, or IPO flags detected in DW_AT_producer.
-DecBench correctly controls optimization through CFLAGS injection.
-CMAKE_BUILD_TYPE intentionally left empty — no upstream Release preset triggered.
-NEON SIMD was detected/enabled by Snappy's CMake checks (aarch64 host).
+results/evidence/compile_report.json
+results/evidence/environment.txt
+results/evidence/collision/snappy_O0.json
+results/evidence/collision/snappy_O2.json
+results/evidence/collision/snappy_O2-noinline.json
 ```
 
-## Linked images
+The JSON collision reports preserve source stems, linked image paths, project/raw
+address counts, collision groups, addresses, and representative demangled names.
 
-### O0
-```text
-results/cpp_local/O0/snappy/compiled/libsnappy.so.1.2.2
-  ELF 64-bit LSB shared object, ARM aarch64, dynamically linked
-  BuildID: b53a58ae4070a435d058d1619290996a80aec828
-  Size: 850720 bytes
-  DWARF: present (7 sections)
-  Not stripped
-```
+## Qualification decision
 
-### O2
-```text
-results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2
-  ELF 64-bit LSB shared object, ARM aarch64, dynamically linked
-  BuildID: 5bfa092d685f5a5729c70a77bfba79c0038d2d52
-  Size: 817064 bytes
-  DWARF: present (7 sections)
-```
+Snappy remains **VALIDATED** and **recommended** for an initial C++ corpus because:
 
-### O2-noinline
-```text
-results/cpp_local/O2-noinline/snappy/compiled/libsnappy.so.1.2.2
-  ELF 64-bit LSB shared object, ARM aarch64, dynamically linked
-  BuildID: f1553870bc2174b7ec149c3b225da31e481c6344
-  Size: 880568 bytes   (larger than O2 — inlining disabled, more function instances)
-  DWARF: present (7 sections)
-```
+- all required optimization modes build through the real DecBench compile path;
+- one linked shared object is produced per mode;
+- four `.ii` units are preserved per mode;
+- DWARF ground truth is usable;
+- optimization control is clean;
+- its collision behavior is measured and reproducible.
 
-## Source ownership filter
+The collision rate is not a reason to discard the target. Instead, Snappy provides
+a compact regression/stress case for the exact C++ function-identity problem that
+DecBench is currently exposing.
 
-Included project-owned paths/compilands:
-```text
-snappy.cc, snappy-c.cc, snappy-sinksource.cc, snappy-stubs-internal.cc
-(.ii files for each: verified present)
-```
+## Remaining caveat
 
-Excluded tests/vendor/compiler-probe/generated paths:
-```text
-snappy_unittest.cc, snappy_test_utils.cc (BUILD_TESTING=OFF)
-Benchmarks excluded (BUILD_BENCHMARKS=OFF)
-CMakeFiles/[0-9]* compiler-probe directories removed by make_cmd
-```
-
-Any uncertain ownership cases:
-```text
-stdlib/libstdc++ template instantiations appear in DWARF when O0/-fno-inline
-causes them to be emitted as non-inlined subprograms in the shared object.
-These are filtered by namespace prefix for project-owned collision rate.
-```
-
-## Short-name collision details
-
-All collisions are measured from compiled DWARF, not inferred from source.
-
-| Short name | Distinct addresses | Example qualified names | Notes |
-|---|---:|---|---|
-| `~UncheckedByteArraySink` | 2 | `snappy::UncheckedByteArraySink::~UncheckedByteArraySink()` (×2) | Virtual destructor dual (D1+D2 thunks) |
-| `~ByteArraySource` | 2 | `snappy::ByteArraySource::~ByteArraySource()` (×2) | Virtual destructor dual |
-| `~Sink` | 2 | `snappy::Sink::~Sink()` (×2) | Virtual destructor dual |
-| `~Source` | 2 | `snappy::Source::~Source()` (×2) | Virtual destructor dual |
-| `~SnappyIOVecReader` | 2 | `snappy::SnappyIOVecReader::~SnappyIOVecReader()` (×2) | Virtual destructor dual |
-| `__normal_iterator` | 4 | `__gnu_cxx::__normal_iterator<SnappySinkAllocator::Datablock*,...>` | stdlib template — not project-owned |
-| `pair` | 3 | `std::pair<unsigned long, bool>::pair<...>` | stdlib — not project-owned |
-| `_Vector_impl` | 3 | `std::_Vector_base<...>::_Vector_impl::_Vector_impl()` | stdlib — not project-owned |
-
-Key finding: The main source of project-owned collisions in Snappy is GCC's virtual destructor
-dual emission. Each virtual destructor generates two distinct addresses (D1 complete-object
-destructor, D2 base-object destructor) with identical short names. Under DecBench's current
-unqualified identity model, these appear as collisions. This affects all 5+ virtual classes
-in Snappy.
-
-## Preprocessed source / oracle notes
-
-For GCC/DWARF targets:
-
-- `.ii` preservation: ✅ 4 `.cc.ii` files per mode (snappy.cc.ii, snappy-c.cc.ii, snappy-sinksource.cc.ii, snappy-stubs-internal.cc.ii)
-- DWARF `DW_AT_specification` handling checked: ✅ (used in collision script)
-- DWARF `DW_AT_abstract_origin` handling checked: ✅ (used in collision script)
-
-## Final status
-
-Status: **VALIDATED**
-
-Decision rationale:
-```text
-All three optimization modes built successfully. One linked ELF image per mode.
-Four .ii source units per mode. DWARF present (7 sections) in all modes.
-Collision analysis completed from measured DWARF.
-
-The collision rate is real and significant (52-65% raw, 19-52% project-owned).
-The primary driver is virtual destructor dual emission — a known GCC/ABI behavior.
-This does NOT make Snappy unsuitable as a benchmark target; it documents a real
-constraint on DecBench's current unqualified C++ identity model.
-
-Snappy is confirmed as the first validated GCC/DWARF target. It correctly
-represents a small real C++ library with a specific, measurable identity challenge.
-```
-
-Remaining blockers:
-```text
-None for this target. The DecBench C++ identity model's handling of virtual
-destructor duals (D1/D2 thunks) is a separate open issue in DecBench itself.
-```
+This qualification was performed on GCC 13.3.0 **aarch64**. Re-run the same
+artifact checks on the architecture used for the final multi-language corpus,
+especially if that corpus is produced on x86-64.

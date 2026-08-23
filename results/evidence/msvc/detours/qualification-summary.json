@@ -1,0 +1,136 @@
+{
+  "schema": "decbench-msvc-detours-qualification-v1",
+  "target": "Microsoft Detours v4.0.1",
+  "target_commit": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+  "final_harness_commit": "aaad01ce4c45dd42c189151c6bc473d209223ce9",
+  "environment": {
+    "runner_os": "Windows Server 2025",
+    "runner_arch": "X64",
+    "runner_image": "windows-2025-vs2026 / win25-vs2026",
+    "image_version": "20260818.207.1",
+    "visual_studio": "Visual Studio 2026 Developer Command Prompt v18.9.1",
+    "msvc_compiler_version": "19.51.36256.0",
+    "msvc_linker_version": "14.51.36256.0",
+    "msvc_toolset_path_version": "14.51.36231",
+    "pdb_tool": "llvm-pdbutil",
+    "pe_tool": "llvm-readobj"
+  },
+  "artifact_provenance": {
+    "raw_evidence_run_id": 32633376778,
+    "note": "The raw PE/PDB artifacts completed before a validation-parser preamble bug. The final harness commit only changes empty-module preamble handling; re-analysis with the final parser passes the substantive gates.",
+    "artifacts": {
+      "O0": {
+        "artifact_id": 9491652051,
+        "sha256": "5dec773675da8b7206e12fa7061829e0ed6cb4b7a92f368f756157e9225bf369"
+      },
+      "O2": {
+        "artifact_id": 9491652923,
+        "sha256": "8510b3d6f35d914e02ce28eea1eda2126c87236ea15879ecc043af80991700a8"
+      },
+      "O2-noinline": {
+        "artifact_id": 9491654177,
+        "sha256": "052c784b545cc3b8a9eadff29adf4ebd53cf81f3edebf19bc12da5827240932f"
+      }
+    }
+  },
+  "linked_image": "withdll.exe",
+  "ground_truth": "native MSVC PDB / CodeView",
+  "modes": {
+    "O0": {
+      "result": "PASS",
+      "core_optimization_flags": "/Od /Ob0 /Zi",
+      "link_flags": "/DEBUG:FULL /INCREMENTAL:NO /SUBSYSTEM:CONSOLE",
+      "pe_machine": "IMAGE_FILE_MACHINE_AMD64",
+      "pdb_has_debug_info": true,
+      "pdb_has_types": true,
+      "pdb_has_ids": true,
+      "pdb_has_globals": true,
+      "pdb_has_publics": true,
+      "pdb_is_stripped": false,
+      "pdb_is_incrementally_linked": false,
+      "pdb_blocks": 1563,
+      "pdb_streams": 253,
+      "pdb_guid": "A40F7403-2D69-4005-88BD-234670090640",
+      "selected_compile3_records": 5,
+      "selected_ltcg_compile3_records": 0,
+      "selected_optimized_frame_records_diagnostic_only": 163,
+      "project_compiland_hits": ["detours.obj", "modules.obj", "disasm.obj", "creatwth.obj"],
+      "project_source_hits": ["detours.cpp", "modules.cpp", "disasm.cpp", "creatwth.cpp"],
+      "project_procedure_records": 136,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 136,
+        "unique_names": 132,
+        "collision_groups": 4,
+        "collision_addresses": 8,
+        "collision_rate_pct": "5.88%"
+      },
+      "collision_group_names": ["StringCopyWorkerA", "StringLengthWorkerA", "StringValidateDestA", "StringValidateDestAndLengthA"]
+    },
+    "O2": {
+      "result": "PASS",
+      "core_optimization_flags": "/O2 /Zi",
+      "link_flags": "/DEBUG:FULL /INCREMENTAL:NO /SUBSYSTEM:CONSOLE",
+      "pe_machine": "IMAGE_FILE_MACHINE_AMD64",
+      "pdb_has_debug_info": true,
+      "pdb_has_types": true,
+      "pdb_has_ids": true,
+      "pdb_has_globals": true,
+      "pdb_has_publics": true,
+      "pdb_is_stripped": false,
+      "pdb_is_incrementally_linked": false,
+      "pdb_blocks": 1577,
+      "pdb_streams": 252,
+      "pdb_guid": "943B2954-A82E-4026-99D9-B6BC9F548FD4",
+      "selected_compile3_records": 5,
+      "selected_ltcg_compile3_records": 0,
+      "selected_optimized_frame_records_diagnostic_only": 163,
+      "project_compiland_hits": ["detours.obj", "modules.obj", "disasm.obj", "creatwth.obj"],
+      "project_source_hits": ["detours.cpp", "modules.cpp", "disasm.cpp", "creatwth.cpp"],
+      "project_procedure_records": 136,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 136,
+        "unique_names": 132,
+        "collision_groups": 4,
+        "collision_addresses": 8,
+        "collision_rate_pct": "5.88%"
+      },
+      "collision_group_names": ["StringCopyWorkerA", "StringLengthWorkerA", "StringValidateDestA", "StringValidateDestAndLengthA"]
+    },
+    "O2-noinline": {
+      "result": "PASS",
+      "core_optimization_flags": "/O2 /Ob0 /Zi",
+      "link_flags": "/DEBUG:FULL /INCREMENTAL:NO /SUBSYSTEM:CONSOLE",
+      "pe_machine": "IMAGE_FILE_MACHINE_AMD64",
+      "pdb_has_debug_info": true,
+      "pdb_has_types": true,
+      "pdb_has_ids": true,
+      "pdb_has_globals": true,
+      "pdb_has_publics": true,
+      "pdb_is_stripped": false,
+      "pdb_is_incrementally_linked": false,
+      "pdb_blocks": 1571,
+      "pdb_streams": 252,
+      "pdb_guid": "04561A5E-7C5B-4E83-A1C0-5C54E5670468",
+      "selected_compile3_records": 5,
+      "selected_ltcg_compile3_records": 0,
+      "selected_optimized_frame_records_diagnostic_only": 163,
+      "project_compiland_hits": ["detours.obj", "modules.obj", "disasm.obj", "creatwth.obj"],
+      "project_source_hits": ["detours.cpp", "modules.cpp", "disasm.cpp", "creatwth.cpp"],
+      "project_procedure_records": 136,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 136,
+        "unique_names": 132,
+        "collision_groups": 4,
+        "collision_addresses": 8,
+        "collision_rate_pct": "5.88%"
+      },
+      "collision_group_names": ["StringCopyWorkerA", "StringLengthWorkerA", "StringValidateDestA", "StringValidateDestAndLengthA"]
+    }
+  },
+  "caveats": [
+    "The PDB collision metric is not asserted to be equivalent to DecBench DWARF DW_AT_name identity.",
+    "Only Detours-owned compilands actually pulled into the linked withdll.exe are counted; static-library objects not linked into the sample are absent.",
+    "FRAMEPROC opt-speed markers are diagnostic only and are not used as the optimization-mode oracle.",
+    "This is target/oracle qualification, not an end-to-end DecBench GED/type/byte benchmark run."
+  ]
+}

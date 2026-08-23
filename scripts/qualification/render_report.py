@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render compile/DWARF/Joern evidence into a compact Markdown handoff."""
+"""Render compile/DWARF/ownership/Joern evidence into a compact handoff."""
 
 from __future__ import annotations
 
@@ -20,12 +20,14 @@ def main() -> int:
     ap.add_argument("--replicate", required=True)
     ap.add_argument("--results", type=Path, required=True)
     ap.add_argument("--dwarf", type=Path, required=True)
+    ap.add_argument("--source", type=Path, required=True)
     ap.add_argument("--joern", type=Path, required=True)
     ap.add_argument("--output", type=Path, required=True)
     args = ap.parse_args()
 
     compile_report = load(args.results / "compile_report.json") or []
     dwarf = load(args.dwarf) or {}
+    source = load(args.source) or {}
     joern = load(args.joern) or {}
 
     rows = []
@@ -37,6 +39,17 @@ def main() -> int:
 
     binaries = dwarf.get("binaries", [])
     hashes = sorted({b.get("sha256") for b in binaries if b.get("sha256")})
+    source_rows = []
+    per_opt = source.get("per_optimization", {})
+    survival = source.get("optimization_survival", {})
+    for opt in ("O0", "O2-noinline", "O2"):
+        data = per_opt.get(opt, {})
+        surv = survival.get(opt, {})
+        source_rows.append(
+            f"| {opt} | {data.get('project_owned_function_records', 0)} | "
+            f"{data.get('unique_short_names', 0)} | {surv.get('survival_rate_vs_O0', 0):.2%} |"
+        )
+
     lines = [
         f"# DecBench C++ qualification — {args.target}",
         "",
@@ -56,6 +69,14 @@ def main() -> int:
         f"- Aggregate short-name collision rate: **{dwarf.get('aggregate_short_name_collision_rate', 0):.2%}**",
         f"- Distinct image SHA-256 values: **{len(hashes)}**",
         "",
+        "## Project-owned function / optimization survival",
+        "",
+        "| Optimization | project-owned DWARF records | unique short names | identity survival vs O0 |",
+        "| --- | ---: | ---: | ---: |",
+        *source_rows,
+        "",
+        "The ownership audit uses the captured `.ii` translation-unit stems plus DecBench's own DWARF helpers, so bundled/toolchain functions are not intentionally counted as project source.",
+        "",
         "## Joern / source CFG qualification",
         "",
         f"- `.ii` files checked: **{joern.get('ii_files', 0)}**",
@@ -67,7 +88,7 @@ def main() -> int:
         "",
         "## Interpretation",
         "",
-        "This report separates build success, ground-truth availability, short-name collision pressure, and Joern parseability. A green build alone is not treated as sufficient qualification for DecBench corpus inclusion.",
+        "This report separates build success, ground-truth availability, project-source attribution, optimization survival, short-name collision pressure, and Joern parseability. A green upstream build alone is not treated as sufficient qualification for DecBench corpus inclusion.",
         "",
     ]
     args.output.parent.mkdir(parents=True, exist_ok=True)

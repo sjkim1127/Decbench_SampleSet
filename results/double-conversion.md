@@ -22,13 +22,15 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 5 | 12 | 21.82% |
-| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 26 | 22 | 2 | 4 | 15.38% |
-| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 5 | 12 | 21.82% |
+| O0 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 12 | 25 | **45.45%** (proj = raw) |
+| O2 | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 26 | 20 | 7 | 15 | **57.69%** (proj = raw) |
+| O2-noinline | ✅ PASS | 1 (`libdouble-conversion.so.3.3.0`) | 8 | DWARF: ✅ present (7 sections) | 55 | 45 | 12 | 25 | **45.45%** (proj = raw) |
 
-> **Note:** All collision groups here are project-owned (no stdlib contamination detected).
-> Collisions are from legitimate C++ overloads and constructor overloads in the
-> `double_conversion::` namespace. No stdlib filter adjustment needed.
+> **Note:** `project == raw` for all modes: double-conversion contains no stdlib template
+> instantiations in its DWARF (the library has minimal STL usage and its headers do not cause
+> observable template body emission). All collision groups are in the `double_conversion::` namespace.
+> Both rates are recorded in `results/evidence/collision/`.
+
 
 Collision rate formula: `collision_addresses / source_function_addresses`
 

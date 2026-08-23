@@ -1,0 +1,172 @@
+{
+  "compiled_dir": "results/cpp_local/O2/snappy/compiled",
+  "exclude_images": [
+    "boo"
+  ],
+  "elf_images": [
+    "results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2"
+  ],
+  "elf_image_count": 1,
+  "per_image": [
+    {
+      "path": "results/cpp_local/O2/snappy/compiled/libsnappy.so.1.2.2",
+      "cu_stats": {
+        "total": 4,
+        "probe": 0,
+        "stdlib_fns": 0
+      },
+      "raw": {
+        "source_function_addresses": 19,
+        "unique_short_names": 14,
+        "collision_groups": 5,
+        "collision_addresses": 10,
+        "collision_rate": 0.526316,
+        "collision_rate_pct": "52.63%",
+        "top_collision_groups": [
+          {
+            "short_name": "~UncheckedByteArraySink",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3364",
+              "0x3380"
+            ],
+            "example_qualified": [
+              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
+              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+            ]
+          },
+          {
+            "short_name": "~ByteArraySource",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x32f4",
+              "0x3310"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::~ByteArraySource()",
+              "snappy::ByteArraySource::~ByteArraySource()"
+            ]
+          },
+          {
+            "short_name": "~Sink",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3360",
+              "0x33a4"
+            ],
+            "example_qualified": [
+              "snappy::Sink::~Sink()",
+              "snappy::Sink::~Sink()"
+            ]
+          },
+          {
+            "short_name": "~Source",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x32f0",
+              "0x3334"
+            ],
+            "example_qualified": [
+              "snappy::Source::~Source()",
+              "snappy::Source::~Source()"
+            ]
+          },
+          {
+            "short_name": "~SnappyIOVecReader",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x67d0",
+              "0x67f0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
+              "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+            ]
+          }
+        ]
+      },
+      "project": {
+        "source_function_addresses": 19,
+        "unique_short_names": 14,
+        "collision_groups": 5,
+        "collision_addresses": 10,
+        "collision_rate": 0.526316,
+        "collision_rate_pct": "52.63%",
+        "top_collision_groups": [
+          {
+            "short_name": "~UncheckedByteArraySink",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3364",
+              "0x3380"
+            ],
+            "example_qualified": [
+              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()",
+              "snappy::UncheckedByteArraySink::~UncheckedByteArraySink()"
+            ]
+          },
+          {
+            "short_name": "~ByteArraySource",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x32f4",
+              "0x3310"
+            ],
+            "example_qualified": [
+              "snappy::ByteArraySource::~ByteArraySource()",
+              "snappy::ByteArraySource::~ByteArraySource()"
+            ]
+          },
+          {
+            "short_name": "~Sink",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x3360",
+              "0x33a4"
+            ],
+            "example_qualified": [
+              "snappy::Sink::~Sink()",
+              "snappy::Sink::~Sink()"
+            ]
+          },
+          {
+            "short_name": "~Source",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x32f0",
+              "0x3334"
+            ],
+            "example_qualified": [
+              "snappy::Source::~Source()",
+              "snappy::Source::~Source()"
+            ]
+          },
+          {
+            "short_name": "~SnappyIOVecReader",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x67d0",
+              "0x67f0"
+            ],
+            "example_qualified": [
+              "snappy::SnappyIOVecReader::~SnappyIOVecReader()",
+              "snappy::SnappyIOVecReader::~SnappyIOVecReader()"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "aggregated_raw": {
+    "source_function_addresses": 19,
+    "collision_addresses": 10,
+    "collision_rate": 0.526316,
+    "collision_rate_pct": "52.63%"
+  },
+  "aggregated_project": {
+    "source_function_addresses": 19,
+    "collision_addresses": 10,
+    "collision_rate": 0.526316,
+    "collision_rate_pct": "52.63%"
+  }
+}

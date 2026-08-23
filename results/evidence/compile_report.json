@@ -1,0 +1,101 @@
+[
+  {
+    "project": "double-conversion",
+    "opt": "O2-noinline",
+    "linked_binaries": 1,
+    "i_files": 8,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 5.0,
+    "ok": true
+  },
+  {
+    "project": "double-conversion",
+    "opt": "O2",
+    "linked_binaries": 1,
+    "i_files": 8,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 6.1,
+    "ok": true
+  },
+  {
+    "project": "double-conversion",
+    "opt": "O0",
+    "linked_binaries": 1,
+    "i_files": 8,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 6.2,
+    "ok": true
+  },
+  {
+    "project": "ninja",
+    "opt": "O0",
+    "linked_binaries": 2,
+    "i_files": 33,
+    "compile_results": 2,
+    "successes": 2,
+    "errors": [],
+    "seconds": 5.9,
+    "ok": true
+  },
+  {
+    "project": "ninja",
+    "opt": "O2-noinline",
+    "linked_binaries": 2,
+    "i_files": 33,
+    "compile_results": 2,
+    "successes": 2,
+    "errors": [],
+    "seconds": 7.1,
+    "ok": true
+  },
+  {
+    "project": "ninja",
+    "opt": "O2",
+    "linked_binaries": 2,
+    "i_files": 33,
+    "compile_results": 2,
+    "successes": 2,
+    "errors": [],
+    "seconds": 7.3,
+    "ok": true
+  },
+  {
+    "project": "snappy",
+    "opt": "O0",
+    "linked_binaries": 1,
+    "i_files": 4,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 3.6,
+    "ok": true
+  },
+  {
+    "project": "snappy",
+    "opt": "O2",
+    "linked_binaries": 1,
+    "i_files": 4,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 3.5,
+    "ok": true
+  },
+  {
+    "project": "snappy",
+    "opt": "O2-noinline",
+    "linked_binaries": 1,
+    "i_files": 4,
+    "compile_results": 1,
+    "successes": 1,
+    "errors": [],
+    "seconds": 3.6,
+    "ok": true
+  }
+]

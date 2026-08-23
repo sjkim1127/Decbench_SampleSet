@@ -1,0 +1,272 @@
+{
+  "compiled_dir": "results/cpp_local/O0/double-conversion/compiled",
+  "exclude_images": [
+    "boo"
+  ],
+  "elf_images": [
+    "results/cpp_local/O0/double-conversion/compiled/libdouble-conversion.so.3.3.0"
+  ],
+  "elf_image_count": 1,
+  "per_image": [
+    {
+      "path": "results/cpp_local/O0/double-conversion/compiled/libdouble-conversion.so.3.3.0",
+      "cu_stats": {
+        "total": 8,
+        "probe": 0,
+        "stdlib_fns": 0
+      },
+      "raw": {
+        "source_function_addresses": 55,
+        "unique_short_names": 38,
+        "collision_groups": 8,
+        "collision_addresses": 25,
+        "collision_rate": 0.454545,
+        "collision_rate_pct": "45.45%",
+        "top_collision_groups": [
+          {
+            "short_name": "const&)",
+            "distinct_addresses": 5,
+            "addresses": [
+              "0x5594",
+              "0x5aa0",
+              "0x5de8",
+              "0x6b14",
+              "0x77c8"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignBignum(double_conversion::Bignum const&)",
+              "double_conversion::Bignum::AddBignum(double_conversion::Bignum const&)",
+              "double_conversion::Bignum::SubtractBignum(double_conversion::Bignum const&)"
+            ]
+          },
+          {
+            "short_name": "const",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x5420",
+              "0x7230",
+              "0x7de4",
+              "0x7e5c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::RawBigit(int) const",
+              "double_conversion::Bignum::BigitOrZero(int) const",
+              "double_conversion::Bignum::IsClamped() const"
+            ]
+          },
+          {
+            "short_name": "long)",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x12398",
+              "0x5500",
+              "0x5a14",
+              "0x624c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignUInt64(unsigned long)",
+              "double_conversion::Bignum::AddUInt64(unsigned long)",
+              "double_conversion::Bignum::MultiplyByUInt64(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Bignum const&)",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x72bc",
+              "0x743c",
+              "0x7d8c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::Compare(double_conversion::Bignum const&, double_conversion::Bignum const&)",
+              "double_conversion::Bignum::PlusCompare(double_conversion::Bignum const&, double_conversion::Bignum const&, double_conversion::Bignum const&)",
+              "double_conversion::Bignum::LessEqual(double_conversion::Bignum const&, double_conversion::Bignum const&)"
+            ]
+          },
+          {
+            "short_name": "int)",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x16878",
+              "0x6100",
+              "0xb3b8"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::MultiplyByUInt32(unsigned int)",
+              "double_conversion::Vector<char>::Vector(char*, int)",
+              "double_conversion::Single::Single(unsigned int)"
+            ]
+          },
+          {
+            "short_name": "const>)",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x56ec",
+              "0x5858"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignDecimalString(double_conversion::Vector<char const>)",
+              "double_conversion::Bignum::AssignHexString(double_conversion::Vector<char const>)"
+            ]
+          },
+          {
+            "short_name": "Double",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x123bc",
+              "0x9194"
+            ],
+            "example_qualified": [
+              "double_conversion::Double::Double(double)",
+              "double_conversion::Double::Double(double_conversion::DiyFp)"
+            ]
+          },
+          {
+            "short_name": "Vector",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x127d8",
+              "0x169c8"
+            ],
+            "example_qualified": [
+              "double_conversion::Vector<char const>::Vector(char const*, int)",
+              "double_conversion::Vector<char const>::Vector()"
+            ]
+          }
+        ]
+      },
+      "project": {
+        "source_function_addresses": 55,
+        "unique_short_names": 38,
+        "collision_groups": 8,
+        "collision_addresses": 25,
+        "collision_rate": 0.454545,
+        "collision_rate_pct": "45.45%",
+        "top_collision_groups": [
+          {
+            "short_name": "const&)",
+            "distinct_addresses": 5,
+            "addresses": [
+              "0x5594",
+              "0x5aa0",
+              "0x5de8",
+              "0x6b14",
+              "0x77c8"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignBignum(double_conversion::Bignum const&)",
+              "double_conversion::Bignum::AddBignum(double_conversion::Bignum const&)",
+              "double_conversion::Bignum::SubtractBignum(double_conversion::Bignum const&)"
+            ]
+          },
+          {
+            "short_name": "const",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x5420",
+              "0x7230",
+              "0x7de4",
+              "0x7e5c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::RawBigit(int) const",
+              "double_conversion::Bignum::BigitOrZero(int) const",
+              "double_conversion::Bignum::IsClamped() const"
+            ]
+          },
+          {
+            "short_name": "long)",
+            "distinct_addresses": 4,
+            "addresses": [
+              "0x12398",
+              "0x5500",
+              "0x5a14",
+              "0x624c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignUInt64(unsigned long)",
+              "double_conversion::Bignum::AddUInt64(unsigned long)",
+              "double_conversion::Bignum::MultiplyByUInt64(unsigned long)"
+            ]
+          },
+          {
+            "short_name": "Bignum const&)",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x72bc",
+              "0x743c",
+              "0x7d8c"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::Compare(double_conversion::Bignum const&, double_conversion::Bignum const&)",
+              "double_conversion::Bignum::PlusCompare(double_conversion::Bignum const&, double_conversion::Bignum const&, double_conversion::Bignum const&)",
+              "double_conversion::Bignum::LessEqual(double_conversion::Bignum const&, double_conversion::Bignum const&)"
+            ]
+          },
+          {
+            "short_name": "int)",
+            "distinct_addresses": 3,
+            "addresses": [
+              "0x16878",
+              "0x6100",
+              "0xb3b8"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::MultiplyByUInt32(unsigned int)",
+              "double_conversion::Vector<char>::Vector(char*, int)",
+              "double_conversion::Single::Single(unsigned int)"
+            ]
+          },
+          {
+            "short_name": "const>)",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x56ec",
+              "0x5858"
+            ],
+            "example_qualified": [
+              "double_conversion::Bignum::AssignDecimalString(double_conversion::Vector<char const>)",
+              "double_conversion::Bignum::AssignHexString(double_conversion::Vector<char const>)"
+            ]
+          },
+          {
+            "short_name": "Double",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x123bc",
+              "0x9194"
+            ],
+            "example_qualified": [
+              "double_conversion::Double::Double(double)",
+              "double_conversion::Double::Double(double_conversion::DiyFp)"
+            ]
+          },
+          {
+            "short_name": "Vector",
+            "distinct_addresses": 2,
+            "addresses": [
+              "0x127d8",
+              "0x169c8"
+            ],
+            "example_qualified": [
+              "double_conversion::Vector<char const>::Vector(char const*, int)",
+              "double_conversion::Vector<char const>::Vector()"
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "aggregated_raw": {
+    "source_function_addresses": 55,
+    "collision_addresses": 25,
+    "collision_rate": 0.454545,
+    "collision_rate_pct": "45.45%"
+  },
+  "aggregated_project": {
+    "source_function_addresses": 55,
+    "collision_addresses": 25,
+    "collision_rate": 0.454545,
+    "collision_rate_pct": "45.45%"
+  }
+}

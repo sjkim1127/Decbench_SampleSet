@@ -22,19 +22,28 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 70 | 45 | 18 | 43 | 61.43% |
-| O2 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 19 | 14 | 5 | 10 | 52.63% |
-| O2-noinline | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 63 | 39 | 17 | 41 | 65.08% |
+| O0 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 38 (proj) / 70 (raw) | 24 / 43 | 11 / 18 | 17 / 46 | **44.74%** (proj) / 65.71% (raw) |
+| O2 | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 19 (proj) / 19 (raw) | 14 / 14 | 5 / 5 | 10 / 10 | **52.63%** (proj) / 52.63% (raw) |
+| O2-noinline | ✅ PASS | 1 (`libsnappy.so.1.2.2`) | 4 | DWARF: ✅ present (7 sections) | 33 (proj) / 63 (raw) | 20 / 39 | 10 / 17 | 15 / 44 | **45.45%** (proj) / 69.84% (raw) |
 
-> **Note on collision measurement:** The raw collision_rate (computed across all DWARF subprograms) includes
-> stdlib/libstdc++ template instantiations (e.g. `__normal_iterator`, `pair`, `_Vector_impl`) that are
-> inlined into the shared library at O0 and O2-noinline. When filtered to project-owned snappy:: functions
-> only, the project-level collision rate is: O0=20.0%, O2=52.6%, O2-noinline=19.0%.
+> **Collision measurement methodology:** `scripts/measure_collisions.py` runs against the ELF and
+> produces two rates per image:
+> - **raw**: all concrete DWARF subprograms excluding CMake probe CUs
+> - **project**: subprograms whose fully-qualified demangled name does NOT start with a stdlib/system
+>   namespace prefix (`std::`, `__gnu_cxx::`, `__cxxabiv::`, `__detail::`, `__gnu_pbds::`)
 >
-> Even the project-level rate is driven primarily by **virtual destructor duals**: GCC emits both a
-> D1 (complete-object) and D2 (base-object) destructor for virtual classes, giving them two distinct
-> addresses but the same demangled short name. This is a real identity problem for DecBench's
-> current unqualified C++ model.
+> Because DecBench builds in `/tmp/tmp*/` sandboxes, source-path–based CU filtering cannot
+> distinguish stdlib template instantiations from project code. Namespace-prefix filtering is the
+> authoritative project-owned rate. Both values are recorded in `results/evidence/collision/`.
+>
+> The O0/O2-noinline `raw ≠ project` delta is from libstdc++ template bodies emitted into the
+> shared library when inlining is disabled. At O2 all 19 concrete subprograms are project-owned
+> (no stdlib template bodies survive inlining), so raw == project.
+>
+> The project collision rate (44–53%) is driven primarily by **virtual destructor duals**: GCC emits
+> both a D1 (complete-object) and D2 (base-object) destructor for every virtual class, giving two
+> distinct addresses with the same demangled short name.
+
 
 Collision rate formula: `collision_addresses / source_function_addresses`
 

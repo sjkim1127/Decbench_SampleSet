@@ -22,24 +22,25 @@
 
 | Mode | Build | Linked image(s) | `.ii` count | Ground truth | Source-owned function addresses | Unique short names | Collision groups | Collision addresses | Collision rate |
 |---|---|---:|---:|---|---:|---:|---:|---:|---:|
-| O0 | ✅ PASS | 2 (`ninja` + `boo`†) | 33 | DWARF: ✅ in `ninja` | 1665 (all) / ~1664 (boo=0) | — | 25 (stdlib) + 1 proj | 1382 | 83.00% (raw); ~1.1% (proj-only) |
-| O2 | ✅ PASS | 2 (`ninja` + `boo`†) | 33 | DWARF: ✅ in `ninja` | 218 (all) / 218 (boo=0) | 177 | 6 stdlib + 19 proj | 67 | 30.73% (raw); ~18.8% (proj-only) |
-| O2-noinline | ✅ PASS | 2 (`ninja` + `boo`†) | 33 | DWARF: ✅ in `ninja` | 1565 (all) / ~1565 (boo=0) | — | 25 (stdlib) + 1 proj | 1297 | 82.88% (raw); ~0.9% (proj-only) |
+| O0 | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 386 (proj) / 1665 (raw) | 266 / 460 | 52 / 212 | 172 / 1417 | **44.56%** (proj) / 85.11% (raw) |
+| O2 | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 189 (proj) / 218 (raw) | 132 / 142 | 22 / 28 | 79 / 104 | **41.80%** (proj) / 47.71% (raw) |
+| O2-noinline | ✅ PASS | 1 (`ninja` ex-`boo`†) | 33 | DWARF: ✅ in `ninja` | 360 (proj) / 1565 (raw) | 249 / 433 | 47 / 202 | 158 / 1334 | **43.89%** (proj) / 85.24% (raw) |
 
-† `boo` is a pre-existing test binary (single `_Z3foov` = `foo()` symbol, BuildID identical
-across all three modes, **no DWARF**, not compiled by DecBench). It is collected by DecBench's
-source-copy step as an executable artifact but contributes 0 addresses to collision measurement.
-See "Source ownership filter" below.
+† `boo` is a pre-compiled CMake test binary (single `_Z3foov` = `foo()` symbol, BuildID identical
+across all three modes, **no DWARF**, not compiled by DecBench). It has been excluded from measurement
+via `--exclude-image boo`, and `targets/ninja.toml` has been updated with `rm -f build/boo` in `make_cmd`.
 
-> **Critical measurement note:** The raw collision rates at O0 and O2-noinline (83%) are massively
-> inflated by stdlib template instantiations inlined into the ninja executable. At O0/-fno-inline,
-> ~1600 of the ~1665 source addresses in DWARF belong to libstdc++ template instantiations
-> (`_M_erase`, `~vector`, `_M_realloc_insert`, `~_Deque_base`, etc.) that share short names
-> across different template specializations. When filtered to project-owned Ninja code only,
-> the true project collision rate is approximately 1% (O0), 18.8% (O2), 0.9% (O2-noinline).
+> **Collision measurement methodology:** `scripts/measure_collisions.py` evaluates two sets of metrics:
+> - **raw**: all concrete DWARF subprograms in `ninja`
+> - **project**: subprograms whose fully-qualified demangled name does NOT start with a stdlib/system
+>   namespace prefix (`std::`, `__gnu_cxx::`, `__cxxabiv::`, `__detail::`, `__gnu_pbds::`)
 >
-> The O2 mode shows far fewer total addresses (218 vs 1665) because inlining at -O2 eliminates
-> most stdlib template bodies from the DWARF subprogram list.
+> At O0 and O2-noinline, non-inlined libstdc++ template bodies (`std::_Rb_tree`, `std::vector`, etc.)
+> make up over 75% of the concrete DWARF subprograms in `ninja`. Filtering stdlib out yields 386 and 360
+> project addresses respectively, with project collision rates of ~44–45%.
+> At O2, standard library template bodies are mostly inlined away (leaving 189 project addresses out of 218 total),
+> resulting in a project collision rate of 41.80%. Project collisions are driven by constructor/method overloads
+> and virtual destructor duals (D1+D2 thunks). Full raw data is preserved in `results/evidence/collision/`.
 
 Collision rate formula: `collision_addresses / source_function_addresses`
 
@@ -155,25 +156,26 @@ the executable (Ninja has its own getopt_long).
 
 ## Short-name collision details
 
-**O2 collision groups (most actionable, with O2 stdlib mostly inlined away):**
+**O2 collision groups (project-owned, with O2 stdlib mostly inlined away):**
+
+In O2 mode, stdlib template bodies are mostly inlined, leaving 189 project subprograms.
+Collisions are driven by method/constructor overloads and virtual destructor duals (GCC D1+D2 thunks):
 
 | Short name | Distinct addresses | Example qualified names | Notes |
 |---|---:|---|---|
-| `_Iter_less_iter>` | 4 | `void std::__insertion_sort<...>`, `void std::__adjust_heap<...>` | stdlib template suffix — not Ninja code |
-| `_M_realloc_insert` | 3 | `std::vector<Edge*,...>::_M_realloc_insert<Edge* const&>`, `std::vector<Node*,...>::_M_realloc_insert` | stdlib — not Ninja code |
-| `~ManifestParser` | 2 | `ManifestParser::~ManifestParser()` (D1+D2) | Virtual destructor dual |
-| `~Client` | 2 | `Jobserver::Client::~Client()` (D1+D2) | Virtual destructor dual |
-| `LogEntry` | 2 | `BuildLog::LogEntry::LogEntry(std::string)` | Constructor overload or D1/D2 |
+| `~ManifestParser` | 2 | `ManifestParser::~ManifestParser()` | Virtual destructor dual (D1+D2 thunks) |
+| `~Client` | 2 | `Jobserver::Client::~Client()` | Virtual destructor dual (D1+D2 thunks) |
+| `~BindingEnv` | 2 | `BindingEnv::~BindingEnv()` | Virtual destructor dual (D1+D2 thunks) |
+| `~DyndepParser` | 2 | `DyndepParser::~DyndepParser()` | Virtual destructor dual (D1+D2 thunks) |
+| `~RealDiskInterface` | 2 | `RealDiskInterface::~RealDiskInterface()` | Virtual destructor dual (D1+D2 thunks) |
+| `Close` | 2 | `BuildLog::Close()` | Overload / distinct implementation |
+| `rehash` | 2 | `emhash8::HashMap<...>::rehash` | Hashmap template instantiation |
 
-**O0/O2-noinline dominant collisions (stdlib template instantiation noise):**
+**O0/O2-noinline dominant collisions:**
 
-| Short name | Distinct addresses | Notes |
-|---|---:|---|
-| `_M_erase` | 9 | 9 distinct std::_Rb_tree<T,...>::_M_erase specializations |
-| `~vector` | 6 | 6 distinct std::vector<T,...>::~vector specializations |
-| `_Iter_less_iter>` | 4–14 | std template helper |
-| `_M_realloc_insert` | 3 | std::vector specializations |
-| `~_Deque_base` | 3 | std::_Deque_base specializations |
+At O0 / O2-noinline, non-inlined template specializations (`std::_Rb_tree`, `std::vector`, etc.)
+dominate the raw DWARF (1665 / 1565 subprograms). When stdlib namespaces are excluded, project-owned
+functions show ~44% collision rates, consisting of constructor overloads, operator overloads, and destructor duals.
 
 ## Preprocessed source / oracle notes
 
@@ -184,6 +186,7 @@ For GCC/DWARF targets:
 - DWARF `DW_AT_abstract_origin` handling checked: ✅
 - `boo` binary investigation: pre-compiled test binary with no DWARF, single `foo()` symbol.
   BuildID identical across all three optimization modes — definitively not compiled by DecBench.
+  **Resolved:** removed via `rm -f build/boo` in `targets/ninja.toml`.
 
 ## Final status
 
@@ -198,35 +201,23 @@ sections) in the ninja executable in all modes.
 LTO/IPO check: PASSED. DW_AT_producer confirms -O2 at O2 mode with no -flto.
 CMAKE_BUILD_TYPE left empty successfully prevents Ninja's Release IPO preset.
 
-Collision analysis completed. Key findings:
+Collision analysis completed:
+1. boo: A pre-compiled test binary was originally collected alongside ninja.
+   This was identified, verified to have no DWARF and identical BuildID across
+   modes, and resolved by updating make_cmd with `&& rm -f build/boo` (commit b9cf2c3).
+2. Stdlib template presence at O0/O2-noinline: Non-inlined libstdc++ templates
+   account for >75% of raw DWARF subprograms when inlining is disabled.
+   When filtered to project namespaces, project collision rate is ~42-45%.
+3. Raw collision data and reproducible reports are saved in results/evidence/.
 
-1. boo: A pre-compiled test binary is collected alongside ninja in the compiled/
-   directory. It has identical BuildID across all modes (= not compiled by DecBench),
-   no DWARF, and a single trivial symbol. It MUST be excluded from benchmark
-   measurement. The make_cmd already targets --target ninja and removes CMakeFiles/[0-9]*,
-   but boo is not removed. Consider adding `&& rm -f build/boo` to the make_cmd if
-   DecBench's image collector cannot distinguish it.
-
-2. Stdlib contamination at O0/O2-noinline: When inlining is disabled, libstdc++
-   template instantiations appear as concrete DWARF subprograms in the ninja
-   executable (~1600 of ~1665 addresses at O0). This inflates the raw collision
-   rate to ~83%. Project-owned Ninja code has approximately 1% collision rate
-   at O0 — much lower than Snappy or double-conversion.
-
-3. O2 collision rate (~19% project-owned) is driven by stdlib helpers that remain
-   despite inlining. When filtered to non-stdlib functions, Ninja's own code
-   shows ~2 collision groups (virtual destructor duals).
-
-Ninja is validated as a GCC/DWARF target. The boo artifact issue is documented
-as a caveat. The stdlib contamination issue is a fundamental DecBench C++ oracle
-problem, not a Ninja-specific issue.
+Ninja is validated as a GCC/DWARF target. The boo artifact fix has been applied.
+DecBench's C++ oracle will benefit from namespace/CU filtering when indexing
+template-heavy C++ codebases.
 ```
 
 Remaining blockers:
 ```text
-1. boo artifact: Should be filtered or removed. Config fix: add `&& rm -f build/boo`
-   to make_cmd in targets/ninja.toml (see config fix section).
-2. Stdlib template contamination: DecBench's source-function oracle needs CU source
-   path filtering to exclude /usr/include/c++ compilation units. This affects all
-   C++ targets using heavy template code (Ninja is most affected).
+None for target configuration. (The boo artifact fix was already applied in targets/ninja.toml).
+For DecBench's internal ground-truth pipeline: C++ oracle needs namespace/CU filtering
+to separate standard library template instantiations from project-owned logic.
 ```

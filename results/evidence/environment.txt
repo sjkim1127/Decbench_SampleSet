@@ -1,0 +1,41 @@
+DecBench Local Validation Environment
+======================================
+Date:              2026-08-23
+Host OS:           macOS 26.5.1 (arm64)
+Docker version:    29.4.0
+Docker image:      decbench-compile (built from docker/compile.Dockerfile)
+Container OS:      Ubuntu 24.04 (aarch64)
+GCC version:       GCC/G++ 13.3.0 (Ubuntu 13.3.0-6ubuntu2~24.04.1)
+CMake:             provided by Ubuntu 24.04 apt (cmake 3.x)
+pyelftools:        0.33
+
+DecBench revision: d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f
+  (Verified: git rev-parse HEAD in decbench/ == d9f4f8af...)
+
+Target TOMLs from: Decbench_SampleSet/targets/
+  snappy.toml            -> targets snappy v1.2.2 (commit 6af9287f)
+  double-conversion.toml -> targets v3.3.1 (commit ae0dbfeb)
+  ninja.toml             -> targets v1.13.1 (commit 79feac0f)
+
+Compile command:
+  docker run --rm -v "$PWD":/workspace -w /workspace -e PYTHONPATH=/workspace \
+    decbench-compile \
+    python3 scripts/compile_all.py results/cpp_local 3 \
+    snappy double-conversion ninja
+
+Architecture note:
+  All builds are for aarch64 (ARM64). The decbench-compile image runs natively
+  on arm64 Docker (host: Apple Silicon). x86-64 results may differ in function
+  count and collision rate due to different NEON/SSE codepaths and alignment.
+
+Collision measurement script:
+  scripts/measure_collisions.py (namespace-based stdlib filter)
+  --exclude-image boo  (pre-compiled bootstrap stub, no DWARF)
+  stdlib filter: demangled names starting with std::, __gnu_cxx::, __cxxabiv::,
+                 __detail::, std::__, __gnu_pbds:: are excluded from project stats.
+
+Known limitation:
+  The collision helper uses DW_AT_linkage_name (demangled) as the primary name
+  source, while DecBench's C++ oracle uses DW_AT_name via specification/origin
+  chains. Results are a close diagnostic approximation, not a byte-for-byte
+  replay of DecBench's own counter.

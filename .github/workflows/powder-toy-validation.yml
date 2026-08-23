@@ -1,10 +1,14 @@
-name: The Powder Toy C++ candidate validation
+name: The Powder Toy release validation
 
 on:
   push:
     branches: [main]
+    paths:
+      - '.github/workflows/powder-toy-validation.yml'
   pull_request:
     branches: [main]
+    paths:
+      - '.github/workflows/powder-toy-validation.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,7 +16,7 @@ permissions:
 
 jobs:
   powder-toy:
-    name: The Powder Toy / MSVC x64 O2+LTO
+    name: The Powder Toy v100.0.399 / MSVC x64 O2+LTO
     runs-on: windows-2022
     timeout-minutes: 120
     steps:
@@ -29,14 +33,18 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install meson ninja
 
-      - name: Clone pinned source
+      - name: Clone stable release tag
         shell: pwsh
         run: |
-          git clone https://github.com/The-Powder-Toy/The-Powder-Toy.git target
-          git -C target checkout b31f4462bc7d217159b83859a35405db9b640455
+          git clone --branch v100.0.399 --depth 1 https://github.com/The-Powder-Toy/The-Powder-Toy.git target
+          $head = (git -C target rev-parse HEAD).Trim()
+          if ($head -ne '9c94feba3ed5eaa75a819ac000c0d29e4ce92570') {
+            throw "v100.0.399 resolved to unexpected commit: $head"
+          }
           git -C target submodule update --init --recursive
           New-Item -ItemType Directory -Force reports/powder-toy | Out-Null
-          "commit=$(git -C target rev-parse HEAD)" | Set-Content reports/powder-toy/metadata.txt
+          "release=v100.0.399" | Set-Content reports/powder-toy/metadata.txt
+          "commit=$head" | Add-Content reports/powder-toy/metadata.txt
           "submodules=$(@(git -C target submodule status --recursive).Count)" | Add-Content reports/powder-toy/metadata.txt
           $bytes = (Get-ChildItem target -Recurse -File -ErrorAction SilentlyContinue | Measure-Object Length -Sum).Sum
           "clone_bytes=$bytes" | Add-Content reports/powder-toy/metadata.txt
@@ -73,13 +81,13 @@ jobs:
         if: always()
         shell: pwsh
         run: |
-          ./scripts/collect-pe-metrics.ps1 -Root target/build-ci -ExecutablePattern 'powder.exe' -OutDir reports/powder-toy -TargetName 'The Powder Toy x64 O2+LTO'
+          ./scripts/collect-pe-metrics.ps1 -Root target/build-ci -ExecutablePattern 'powder.exe' -OutDir reports/powder-toy -TargetName 'The Powder Toy v100.0.399 x64 O2+LTO'
 
       - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: powder-toy-report
+          name: powder-toy-v100.0.399-report
           path: reports/powder-toy
 
       - name: Preserve build failure status

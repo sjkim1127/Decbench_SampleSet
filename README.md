@@ -2,11 +2,13 @@
 
 Focused validation workspace for a future DecBench multi-language C++ corpus.
 
-The current scope is intentionally narrow: **validate one candidate at a time against DecBench's existing GCC/DWARF C++ path before expanding the corpus.**
+The current scope is intentionally narrow: **confirm one candidate at a time against DecBench's existing GCC/DWARF C++ path before expanding the corpus.**
 
-## Current candidate
+## Confirmed target
 
 ### Google Snappy 1.2.2
+
+**Status: confirmed for the C++ target shortlist.**
 
 - upstream: `google/snappy`
 - stable release: `1.2.2`
@@ -17,7 +19,7 @@ The current scope is intentionally narrow: **validate one candidate at a time ag
 - ground-truth path: DWARF + preprocessed `.ii`
 - output: shared `libsnappy` linked image
 
-Snappy is being tried first because it is a small real C++ library with a straightforward build, no mandatory third-party runtime dependency for the core library, and a relatively limited object-oriented hierarchy compared with larger C++ applications. It is therefore a useful first probe for DecBench's experimental C++ path before moving to more collision-heavy targets.
+Snappy is retained as the first confirmed target because it is a small real C++ library with a straightforward build, no mandatory third-party runtime dependency for the core library, and a relatively limited object-oriented hierarchy compared with larger C++ applications. It is therefore a useful baseline for DecBench's experimental C++ path before moving to more collision-heavy targets.
 
 ## DecBench integration shape
 
@@ -27,10 +29,10 @@ The validation workflow pins DecBench to:
 
 `d9f4f8af6097d7c42c4965cfc3f197dcf76f0a4f`
 
-`.github/workflows/snappy-decbench-validation.yml` runs the real DecBench `scripts/compile_all.py` path and only checks the first integration gate:
+`.github/workflows/snappy-decbench-validation.yml` runs the real DecBench `scripts/compile_all.py` path and checks the first integration gate:
 
 - all three optimization modes are attempted;
 - at least one linked image is collected for each mode;
 - at least one preprocessed `.ii` unit is collected for each mode.
 
-This repository is not treating a green build as final corpus qualification yet. Function-identity collision and scoring behavior can be measured after the basic DecBench compile path is confirmed.
+Other candidates in this repository remain provisional until separately reviewed and confirmed.

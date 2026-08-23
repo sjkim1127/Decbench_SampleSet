@@ -1,0 +1,32 @@
+# DecBench candidate: Google double-conversion
+# Stable release pin: v3.3.1
+# Resolved upstream commit: ae0dbfeb9744efd216c95b30555049d75d47116a
+
+name = "double-conversion"
+version = "v3.3.1"
+source_remote = "https://github.com/google/double-conversion"
+remote_type = "git"
+package_dir = "double-conversion"
+source_dir = "."
+
+post_download_cmds = []
+
+# Keep DecBench in control of optimization and build only the project-owned
+# shared library. v3.3.1 supports the CMake version shipped by Ubuntu 24.04.
+pre_make_cmds = [
+  'cmake -S . -B build -DCMAKE_BUILD_TYPE= -DCMAKE_CXX_COMPILER=g++ -DCMAKE_CXX_FLAGS="$CFLAGS" -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=OFF',
+]
+
+# Drop CMake compiler-probe binaries so they cannot be collected as benchmark
+# targets. The shared libdouble-conversion image remains.
+make_cmd = 'cmake --build build -j && rm -rf build/CMakeFiles/[0-9]*'
+
+labels = ["cpp", "library", "numeric", "control"]
+
+[compilation]
+optimization_levels = ["O0", "O2", "O2-noinline"]
+base_flags = ["-g", "-fno-builtin", "-save-temps=obj"]
+c_compiler = "gcc"
+# DecBench currently does not wire cpp_compiler into the generic build env;
+# CMake selects g++ explicitly above.
+cpp_compiler = "g++"

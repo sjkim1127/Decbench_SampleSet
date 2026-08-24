@@ -14,8 +14,9 @@ The current state is:
 - **3 GCC/DWARF targets** validated through DecBench's real compile path on both
   local aarch64 and GitHub-hosted x86_64 Linux;
 - **Microsoft Detours v4.0.1** validated on a native Windows x86_64 MSVC/PDB path;
-- **DirectXTex** and **WinSparkle** remain shortlisted but have not yet received the
-  same runtime MSVC/PDB qualification;
+- **Microsoft DirectXTex may2026** validated on a native Windows x86_64 MSVC/PDB
+  path after an artifact-backed PDB module-matcher fix;
+- **WinSparkle v0.9.4** remains pending native MSVC/PDB runtime qualification;
 - compact machine-readable summaries are committed so the conclusions do not
   depend on expiring GitHub Actions artifacts.
 
@@ -29,14 +30,14 @@ The current state is:
 | **double-conversion v3.3.1** | GCC / DWARF | PASS | PASS | PASS | `libdouble-conversion.so.3.3.0` | DWARF + `.ii` | x86_64 project collision: 7.87% / 15.58% / 8.06% | **VALIDATED** |
 | **Ninja v1.13.1** | GCC / DWARF | PASS | PASS | PASS | `ninja` | DWARF + `.ii` | x86_64 project collision: 26.70% / 32.38% / 27.55% | **VALIDATED WITH CAVEATS** |
 | **Microsoft Detours v4.0.1** | native MSVC / PDB | PASS | PASS | PASS | `withdll.exe` | PDB / CodeView | PDB raw-name diagnostic: 5.88% / 5.88% / 5.88% | **VALIDATED** |
-| **Microsoft DirectXTex may2026** | MSVC / PDB | — | — | — | expected `DirectXTex.dll` | PDB / CodeView | not measured | **PENDING** |
-| **WinSparkle v0.9.4** | MSVC / PDB | — | — | — | expected `WinSparkle.dll` | PDB / CodeView | not measured | **PENDING** |
+| **Microsoft DirectXTex may2026** | native MSVC / PDB | PASS | PASS | PASS | `DirectXTex.dll` | PDB / CodeView | PDB raw-name diagnostic: 12.92% / 17.65% / 13.27% | **VALIDATED** |
+| **WinSparkle v0.9.4** | native MSVC / PDB | — | — | — | expected `WinSparkle.dll` | PDB / CodeView | not measured | **PENDING** |
 
 The three values in each row are ordered `O0 / O2 / O2-noinline`.
 
-The GCC value is DecBench-aligned project-source `DW_AT_name` collision exposure.
-The Detours value is a **separate PDB/CodeView raw-name diagnostic** and must not be
-interpreted as numerically equivalent to the DWARF metric.
+The GCC values are DecBench-aligned project-source `DW_AT_name` collision exposure.
+The Detours and DirectXTex values are **separate PDB/CodeView raw-name diagnostics**
+and must not be interpreted as numerically equivalent to the DWARF metric.
 
 The aggregate report is [`results/summary.md`](results/summary.md).
 
@@ -97,7 +98,7 @@ The x86_64 producer audit also confirms `EM_X86_64`, the expected optimization
 flags, and no `-flto`, `-fltrans`, `-fwpa`, or `-fwhole-program` markers in any of
 the nine final binaries.
 
-A compact copy of the artifact-derived result is committed at:
+Compact evidence:
 
 ```text
 results/evidence/x86_64/qualification-summary.json
@@ -105,36 +106,29 @@ results/evidence/x86_64/qualification-summary.json
 
 ### Native MSVC / PDB / CodeView
 
-Detours is now runtime-qualified on a real GitHub-hosted Windows toolchain rather
-than only statically reviewed.
+The Windows track uses native Visual Studio `cl.exe`/`link.exe`, PE validation via
+`llvm-readobj`, and linked-PDB analysis via `llvm-pdbutil`.
 
-Validated target:
+The generic PDB analyzer:
+
+- verifies `IMAGE_FILE_MACHINE_AMD64`;
+- dumps PDB summary, module/file provenance, and module symbols;
+- restricts project ownership to object names derived from selected source roots;
+- checks project `S_COMPILE3` records and rejects selected LTCG compilands;
+- extracts project-owned procedure records;
+- records raw PDB-name and leaf-name collision diagnostics.
+
+`FRAMEPROC OptimizedForSpeed` counts are diagnostic only and are not used as the
+optimization oracle.
+
+#### Detours v4.0.1
 
 ```text
-upstream: microsoft/Detours
-release:  v4.0.1
-commit:   e4bfd6b03e50de46b47abfbd1e46b384f0c5f833
-image:    withdll.exe
+commit: e4bfd6b03e50de46b47abfbd1e46b384f0c5f833
+image:  withdll.exe
 ```
 
-Observed CI environment:
-
-```text
-OS:             Windows Server 2025 x64
-Runner image:   windows-2025-vs2026 / win25-vs2026
-Image version:  20260818.207.1
-Visual Studio:  2026 Developer Command Prompt v18.9.1
-cl.exe:         19.51.36256.0
-link.exe:       14.51.36256.0
-MSVC toolset:   14.51.36231
-PDB tooling:    llvm-pdbutil
-PE tooling:     llvm-readobj
-```
-
-The harness uses native Visual Studio `cl.exe`, `link.exe`, and `nmake.exe`; it
-also explicitly rejects accidentally resolving Git's unrelated `link.exe`.
-
-Validated optimization modes:
+Validated modes:
 
 ```text
 O0:          /Od /Ob0 /Zi
@@ -143,27 +137,8 @@ O2-noinline: /O2 /Ob0 /Zi
 link:        /DEBUG:FULL /INCREMENTAL:NO /SUBSYSTEM:CONSOLE
 ```
 
-All three modes produce an `IMAGE_FILE_MACHINE_AMD64` PE and a matching full PDB.
-The PDBs report debug info, types, IDs, globals, and publics; they are not stripped
-and are not incrementally linked.
-
-For the selected Detours/wrapper compilands, each mode contains **5 `S_COMPILE3`
-records and 0 LTCG-marked `S_COMPILE3` records**. `FRAMEPROC opt speed` counts are
-kept only as diagnostics and are not used as the optimization-mode oracle.
-
-The linked `withdll.exe` pulls the following Detours-owned core compilands into the
-image:
-
-```text
-detours.obj
-modules.obj
-disasm.obj
-creatwth.obj
-```
-
-and the corresponding source provenance is present in the PDB. Static-library
-objects that are not needed by `withdll.exe` are naturally absent from this linked
-image, so the result is scoped to the code actually selected by the linker.
+All three modes contain **5 selected `S_COMPILE3` records** and **0 selected
+LTCG-marked `S_COMPILE3` records**.
 
 Artifact-derived Detours procedure diagnostic, identical across all three modes:
 
@@ -175,22 +150,80 @@ collision addresses:               8
 raw-name collision rate:        5.88%
 ```
 
-The four duplicated raw-name groups are:
-
-```text
-StringCopyWorkerA
-StringLengthWorkerA
-StringValidateDestA
-StringValidateDestAndLengthA
-```
-
-Compact machine-readable evidence is committed at:
+Compact evidence:
 
 ```text
 results/evidence/msvc/detours/qualification-summary.json
 ```
 
 Detailed report: [`results/detours.md`](results/detours.md)
+
+#### DirectXTex may2026
+
+```text
+commit:          4feb3e11a020f35b796fc769a74216a555d4f5ef
+image:           DirectXTex.dll
+workflow run:    32684847948
+workflow commit: 040e7dfc3a08ed94179b3a15746296d8be3d0dbe
+runner image:    win25-vs2026
+image version:   20260818.207.1
+```
+
+Validated modes:
+
+```text
+O0:          /Od /Ob0 /Zi /GL-
+O2:          /O2 /Zi /GL-
+O2-noinline: /O2 /Ob0 /Zi /GL-
+link:        /DEBUG:FULL /INCREMENTAL:NO /LTCG:OFF
+```
+
+Per-mode artifacts:
+
+| Mode | Artifact id | SHA-256 |
+|---|---:|---|
+| O0 | `9505320922` | `dd6fadd530a765a8ab5e38c1fd31bce0d3481805272ca7acd59a40e5dabab8c5` |
+| O2 | `9505325453` | `1b1ad3fa76324aa577bb2b8f29adac27d011e3b84111b3540c0b1cd281ce5d62` |
+| O2-noinline | `9505325181` | `8448cf1c351a373d1b53f385705c7928e97eb96625ad8fff1dcb8d92cb5381c5` |
+
+The previous DirectXTex failure was **not** a build failure. The DLL and PDB were
+already produced; project ownership failed because the generic matcher was looking
+for two literal Windows backslashes before an object-name suffix.
+
+The raw artifact shows CMake/Ninja PDB module names such as:
+
+```text
+D:\a\Decbench_SampleSet\Decbench_SampleSet\msvc-evidence\directxtex\O0\build-tree\CMakeFiles\DirectXTex.dir\DirectXTex\BC.cpp.obj
+```
+
+Commit `7f227d52ea9fdc7295dd7560f3f0827417d2938c` corrected the suffix check to one
+Windows path separator. The project-ownership gate remains enabled; CRT, Windows
+SDK, and unrelated vendor modules stay outside the DirectXTex source-derived object
+set.
+
+All three modes pass:
+
+| Gate / diagnostic | O0 | O2 | O2-noinline |
+|---|---:|---:|---:|
+| AMD64 PE | PASS | PASS | PASS |
+| Project source files considered | 21 | 21 | 21 |
+| Selected project compilands | 17 | 17 | 17 |
+| Selected `S_COMPILE3` records | 17 | 17 | 17 |
+| Selected LTCG `S_COMPILE3` records | 0 | 0 | 0 |
+| Project procedure records | 766 | 221 | 746 |
+| Unique raw PDB names | 705 | 201 | 685 |
+| Collision groups | 38 | 19 | 38 |
+| Collision addresses | 99 | 39 | 99 |
+| Raw PDB-name collision diagnostic | 12.92% | 17.65% | 13.27% |
+| Leaf-name heuristic | 41.25% | 27.60% | 41.15% |
+
+Compact evidence:
+
+```text
+results/evidence/msvc/directxtex/qualification-summary.json
+```
+
+Detailed report: [`results/directxtex.md`](results/directxtex.md)
 
 ---
 
@@ -203,8 +236,7 @@ Typical causes include overloads, methods with the same name in unrelated classe
 const/non-const pairs, constructor/destructor variants, templates, and ABI-specific
 variants.
 
-A useful target therefore needs more than a successful build. For the GCC/DWARF
-track this workspace requires:
+A useful GCC/DWARF target therefore needs more than a successful build:
 
 1. all requested optimization modes build;
 2. an intended linked image is selected;
@@ -217,7 +249,7 @@ track this workspace requires:
 
 For native MSVC/PDB targets, the analogous gate is PE/PDB pairing, CodeView
 source/compiland provenance, controlled MSVC optimization flags, LTCG auditing,
-procedure extraction, and a clearly-labelled PDB identity diagnostic.
+procedure extraction, and a clearly labelled PDB identity diagnostic.
 
 ---
 
@@ -290,10 +322,6 @@ O2           79 funcs / 53.16%
 O2-noinline 152 funcs / 51.97%
 ```
 
-Its sustained ambiguity comes from real C++ overloads, repeated source/sink
-interface names, and ABI destructor variants. It is useful as a compact stress case,
-not as the cleanest baseline.
-
 Detailed report: [`results/snappy.md`](results/snappy.md)
 
 ## 2. Google double-conversion v3.3.1
@@ -310,9 +338,6 @@ O0          127 funcs /  7.87%
 O2           77 funcs / 15.58%
 O2-noinline 124 funcs /  8.06%
 ```
-
-This is the cleanest current GCC/DWARF candidate in the shortlist and provides a
-useful low-collision baseline without being a toy project.
 
 Detailed report: [`results/double-conversion.md`](results/double-conversion.md)
 
@@ -331,10 +356,6 @@ O2          210 funcs / 32.38%
 O2-noinline 265 funcs / 27.55%
 ```
 
-Ninja provides parser, dependency graph, filesystem, subprocess, log/state, and
-build-scheduling behavior in a real executable. Its upstream IPO/LTO capability is
-not active in the final qualified binaries.
-
 Detailed report: [`results/ninja.md`](results/ninja.md)
 
 ---
@@ -343,27 +364,23 @@ Detailed report: [`results/ninja.md`](results/ninja.md)
 
 ## 4. Microsoft Detours v4.0.1 — validated
 
-Detours is the first native Windows candidate in this workspace with runtime
-MSVC/PDB evidence. The selected linked image is the upstream `withdll.cpp` sample
-manually linked against the upstream Detours static library so benchmark flags stay
-explicit.
+The selected linked image is the upstream `withdll.cpp` sample manually linked
+against the upstream Detours static library so benchmark flags stay explicit.
 
-The current result is target/oracle qualification, not a claim that DecBench's
-existing DWARF scorer can consume PDBs unchanged.
+The result is target/oracle qualification, not a claim that DecBench's existing
+DWARF scorer can consume PDBs unchanged.
 
 Detailed report: [`results/detours.md`](results/detours.md)
 
-## 5. Microsoft DirectXTex may2026 — pending
+## 5. Microsoft DirectXTex may2026 — validated
 
 ```text
 commit: 4feb3e11a020f35b796fc769a74216a555d4f5ef
 role:   Windows graphics / image-processing / rich-C++ stress candidate
 ```
 
-DirectXTex remains attractive because it exercises texture formats, conversion,
-compression, WIC/DDS handling, mipmap generation, resize, and overload-heavy API
-families. It still needs the same native MSVC/PDB runtime qualification now proven
-for Detours.
+DirectXTex now has native x86_64 MSVC build, PE/PDB, project-compiland, non-LTCG,
+procedure, and PDB identity evidence for all three optimization modes.
 
 Detailed report: [`results/directxtex.md`](results/directxtex.md)
 
@@ -374,9 +391,9 @@ commit: a8986caf620262f7d4581b241436ceaa0cc9370f
 role:   Windows updater / networking / threading / UI-oriented C++
 ```
 
-WinSparkle still needs native MSBuild/MSVC validation, explicit
+WinSparkle still needs a completed native MSBuild/MSVC three-mode run with explicit
 WholeProgramOptimization/LTCG control, exact DLL/PDB pairing, vendor-compiland
-filtering, and PDB identity measurement.
+filtering, and PDB identity measurement before it can be marked validated.
 
 Detailed report: [`results/winsparkle.md`](results/winsparkle.md)
 
@@ -411,6 +428,14 @@ results/evidence/x86_64/qualification-summary.json
 results/evidence/msvc/detours/qualification-summary.json
 .github/workflows/msvc-detours-validation.yml
 scripts/validate_detours_msvc.ps1
+
+# Native MSVC/PDB DirectXTex qualification
+results/evidence/msvc/directxtex/qualification-summary.json
+.github/workflows/msvc-directxtex-validation.yml
+scripts/validate_directxtex_msvc.ps1
+
+# Shared native MSVC/PDB analyzer
+scripts/qualify_msvc_pdb.ps1
 ```
 
 Large ELF/PE/PDB/build-tree artifacts are intentionally not committed. Git keeps
@@ -435,9 +460,9 @@ both target difficulty and appropriate corpus composition.
 
 ### PDB and DWARF identity metrics are different
 
-Detours' 5.88% value is a PDB procedure-name diagnostic over Detours-owned linked
-compilands. It is deliberately **not** presented as an apples-to-apples equivalent
-of the GCC/DWARF project-source collision metric.
+Detours and DirectXTex PDB values are procedure-name diagnostics over project-owned
+linked compilands. They are deliberately **not** presented as apples-to-apples
+equivalents of the GCC/DWARF project-source collision metric.
 
 ### Detours validates one concrete linked sample
 
@@ -445,10 +470,10 @@ The core Detours library is static. `withdll.exe` pulls only the objects actuall
 needed by that sample, so unreferenced core object files are outside this linked
 PDB's measured procedure set.
 
-### Two Windows targets still lack runtime evidence
+### One Windows target still lacks completed runtime evidence
 
-DirectXTex and WinSparkle remain candidates, not validated targets, until their
-native MSVC/PDB workflows are executed and audited.
+WinSparkle remains a candidate, not a validated target, until its native MSVC/PDB
+workflow completes and the resulting artifacts are audited.
 
 ---
 
@@ -461,10 +486,12 @@ For an initial upstream discussion, the strongest evidence-backed candidates are
   architecture sensitivity;
 - **Snappy 1.2.2** — compact collision-heavy GCC/DWARF stress/control case;
 - **Microsoft Detours v4.0.1** — native Windows/MSVC/PDB systems target with actual
-  PE/PDB qualification evidence.
+  PE/PDB qualification evidence;
+- **Microsoft DirectXTex may2026** — native Windows graphics/image-processing DLL
+  with actual three-mode PE/PDB qualification evidence.
 
-DirectXTex and WinSparkle should remain a second-stage Windows shortlist until they
-receive equivalent runtime evidence.
+WinSparkle should remain a second-stage Windows shortlist item until equivalent
+runtime evidence exists.
 
 This repository is best treated as **candidate research and qualification evidence**,
 not as an implicit request to merge every target. A sensible upstream sequence is

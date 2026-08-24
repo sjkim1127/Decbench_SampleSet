@@ -39,6 +39,53 @@ Detailed aggregate report: [`results/summary.md`](results/summary.md)
 
 ---
 
+## Historical candidate funnel
+
+The repository started with a much wider, Windows-heavy candidate pool before
+converging on the current three GCC/DWARF + three native MSVC/PDB targets. The
+entries below are preserved to make that selection process reviewable.
+
+**Important:** "not in the final six" does not necessarily mean a target failed
+to build or is unsuitable for DecBench. Several candidates built successfully
+and were later **deferred, superseded, or kept as reserve/stress targets** because
+the first qualification batch was narrowed around integration cost, source/oracle
+quality, dependency contamination, and controllable optimization.
+
+Historical snapshots:
+
+- [initial four-target Windows CI probe](https://github.com/sjkim1127/Decbench_SampleSet/commit/09a91305f45157afbb7bc666ae54c4511dbfc43d);
+- [early candidate summary](https://github.com/sjkim1127/Decbench_SampleSet/commit/4152c1ad2d1317af459b447f014a3ede5cb7ad92);
+- [small / medium / large tier exploration](https://github.com/sjkim1127/Decbench_SampleSet/commit/12c28f6b56bdb01902bd3594779c2484e9802747);
+- [five-target shortlist refocus](https://github.com/sjkim1127/Decbench_SampleSet/commit/b289181406742dc8d3da2110f2988262482813de).
+
+### Probed or shortlisted, then dropped/deferred
+
+| Candidate | Earlier evidence / role | Why it did not remain in the final six | Disposition |
+|---|---|---|---|
+| **TrafficMonitor Lite** | Native MSVC x64 Release CI **PASS**; compact Win32/MFC utility; ~1.94 MB EXE, ~19.85 MB PDB, raw `PROC32` 5,297 | No build rejection is recorded. It was superseded when the workspace moved from a Windows-heavy probe list to a smaller cross-track qualification set with explicit O0/O2/O2-noinline oracle evidence. | **Superseded, not failed** |
+| **OpenLoco** | Native MSVC x64 Release CI **PASS**; substantial real-world C++ game/simulation; ~9.67 MB EXE, ~26.48 MB PDB, raw `PROC32` 10,777 | Clean build cost was about 1,656 s on the early Windows CI, making it expensive for a first-pass multi-mode corpus. | **Deferred on cost / scale** |
+| **x64dbg** | Native MSVC x64 Release CI **PASS** for core outputs such as `x64gui.dll`, `x64dbg.dll`, and `x64bridge.dll` | Explicitly classified as a stress/complexity target: heavy dependency/submodule graph, and the Release PDB set was not yet treated as a complete source-level oracle. | **Deferred stress target** |
+| **Windows Terminal / OpenConsole** | Very large Windows systems C++; early probe targeted `OpenConsole.exe` | Full-solution integration was considered too heavy for the initial corpus. The historical recommendation was to benchmark a component subset such as Host/conhost instead. | **Deferred; component subset preferred** |
+| **The Powder Toy** | C++20 physics/simulation target; promoted from candidate to a proposed medium/application slot and received an MSVC validation workflow | Explicitly removed from the initial shortlist because its dependency footprint, GUI-style inheritance, repeated method names, and optimization/build behavior made it less attractive than the selected Windows targets for the first corpus. | **Dropped from first corpus** |
+| **SpaceCadetPinball** | High-priority small dual-toolchain candidate; Visual Studio and MinGW paths made it attractive for compiler A/B comparison | No qualification failure is recorded. It remained a proposed target when the broader tier plan was retired and never advanced into the final evidence-backed six. | **Deferred / unqualified** |
+| **Explorer++** | High-priority medium native-Windows application candidate | vcpkg dependency restore/build cost still needed measurement, and no MinGW path was assumed. It was not advanced before the shortlist refocus. | **Deferred / unqualified** |
+| **Notepad++** | High-priority large Windows target with both MSVC and MinGW build paths | Static Scintilla/Lexilla code and vendored Boost regex complicate project-owned attribution; it stayed a promising but higher-integration-cost candidate. | **Deferred / unqualified** |
+
+### Reserve candidates considered but not promoted
+
+| Candidate | Historical role | Main caveat recorded during triage |
+|---|---|---|
+| **Nilesoft Shell** | Small native-Windows reserve | MSVC build path looked reproducible, but MinGW compatibility was not established. |
+| **Rainmeter** | Medium native-Windows reserve | Full solution/install tooling could add noise; a benchmark would need to isolate core runtime binaries. |
+| **nCine** | Medium dual-toolchain compatibility reserve | Broad graphics/audio/Lua/UI dependency set could increase build and source-attribution cost. |
+
+The historical candidate work was exploratory. These dispositions should not be
+read as permanent rejections: some may become better choices once DecBench's C++
+qualified-name model, PDB ingestion, component-level targeting, or corpus budget
+changes.
+
+---
+
 ## Exact target pins
 
 | Target | Stable tag/release | Resolved commit |

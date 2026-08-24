@@ -21,7 +21,7 @@ jobs:
       - name: Checkout qualification workspace
         uses: actions/checkout@v4
 
-      - name: Query latest WinSparkle qualification run
+      - name: Query recent WinSparkle qualification runs
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -35,18 +35,17 @@ jobs:
             > /tmp/runs.json
           python - <<'PY'
           import json
-          import os
           from pathlib import Path
 
           runs = json.loads(Path('/tmp/runs.json').read_text())['workflow_runs']
           if not runs:
               raise SystemExit('No WinSparkle qualification runs found')
-          run = runs[0]
           out = {
-              'schema': 'decbench-github-actions-run-status-v1',
+              'schema': 'decbench-github-actions-run-status-v2',
               'target': 'WinSparkle v0.9.4',
               'workflow': 'msvc-winsparkle-validation.yml',
-              **run,
+              'latest': runs[0],
+              'recent_runs': runs,
           }
           Path('results/evidence/msvc/winsparkle/run-status.json').write_text(
               json.dumps(out, indent=2) + '\n', encoding='utf-8'

@@ -11,7 +11,7 @@ on:
       - "targets/windows/directxtex.toml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: directxtex-msvc-${{ github.ref }}
@@ -93,3 +93,74 @@ jobs:
           path: ${{ env.EVIDENCE_ROOT }}/
           if-no-files-found: error
           retention-days: 30
+
+  publish-evidence:
+    name: Persist 3-mode qualification summary
+    needs: qualify
+    if: ${{ needs.qualify.result == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout qualification workspace
+        uses: actions/checkout@v4
+
+      - name: Download DirectXTex evidence artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: directxtex-msvc-*
+          path: collected
+
+      - name: Build compact permanent summary
+        shell: python
+        env:
+          DIRECTXTEX_REF: 4feb3e11a020f35b796fc769a74216a555d4f5ef
+        run: |
+          import json
+          import os
+          from pathlib import Path
+
+          modes = ["O0", "O2", "O2-noinline"]
+          rows = []
+          for mode in modes:
+              path = Path("collected") / f"directxtex-msvc-{mode}" / "qualification.json"
+              if not path.is_file():
+                  raise SystemExit(f"missing qualification evidence: {path}")
+              row = json.loads(path.read_text(encoding="utf-8-sig"))
+              if row.get("optimization") != mode:
+                  raise SystemExit(f"optimization mismatch in {path}: {row.get('optimization')}")
+              if row.get("architecture") != "x86_64":
+                  raise SystemExit(f"architecture mismatch in {path}: {row.get('architecture')}")
+              if row.get("pdb_ltcg_compile3_records_selected") != 0:
+                  raise SystemExit(f"LTCG evidence present in {path}")
+              rows.append(row)
+
+          out = {
+              "schema": "decbench-native-msvc-pdb-qualification-summary-v1",
+              "target": "DirectXTex",
+              "revision": os.environ["DIRECTXTEX_REF"],
+              "architecture": "x86_64",
+              "ground_truth": "native MSVC PDB / CodeView",
+              "workflow_run_id": os.environ["GITHUB_RUN_ID"],
+              "workflow_commit": os.environ["GITHUB_SHA"],
+              "modes": rows,
+              "caveats": [
+                  "All three optimization modes passed the native MSVC/PDB target-oracle qualification gates.",
+                  "PDB raw-name collision is a CodeView diagnostic and is not asserted to be numerically equivalent to DecBench DWARF DW_AT_name collision.",
+                  "This evidence is target/oracle qualification, not an end-to-end DecBench GED/type/byte benchmark run."
+              ]
+          }
+          dst = Path("results/evidence/msvc/directxtex/qualification-summary.json")
+          dst.parent.mkdir(parents=True, exist_ok=True)
+          dst.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+
+      - name: Commit permanent evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add results/evidence/msvc/directxtex/qualification-summary.json
+          if git diff --cached --quiet; then
+            echo "Permanent DirectXTex evidence is unchanged"
+            exit 0
+          fi
+          git commit -m "results: persist DirectXTex MSVC qualification evidence"
+          git push origin HEAD:main

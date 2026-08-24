@@ -25,6 +25,11 @@ function Get-NativeTool {
     return $cmd.Source
 }
 
+function Normalize-SourcePath {
+    param([Parameter(Mandatory = $true)][string]$PathValue)
+    return $PathValue.Trim().Replace('/', '\')
+}
+
 $llvmPdbutilExe = Get-NativeTool "llvm-pdbutil.exe"
 $llvmReadobjExe = Get-NativeTool "llvm-readobj.exe"
 
@@ -47,24 +52,64 @@ if ($LASTEXITCODE -ne 0) { throw "llvm-pdbutil module/file dump failed for $PdbP
 & $llvmPdbutilExe dump -symbols $PdbPath 2>&1 | Set-Content -Encoding utf8 $pdbSymbols
 if ($LASTEXITCODE -ne 0) { throw "llvm-pdbutil symbol dump failed for $PdbPath" }
 
-# Build a project-owned object-name index from the selected source roots.  This is
-# intentionally target-source based rather than "all PDB modules", so CRT/vendor
-# compilands stay outside the project metric.  CMake/Ninja commonly names objects
-# foo.cpp.obj while MSBuild commonly uses foo.obj, so retain both spellings.
+# Build exact project-source and object-name indexes from the selected roots.
+# Exact source provenance from `llvm-pdbutil dump -modules -files` is preferred:
+# basename-only object matching can otherwise admit an unrelated vendor object when
+# a dependency happens to compile a source with the same filename (for example,
+# WinSparkle src/settings.cpp vs wxWidgets src/msw/settings.cpp).
 $projectSources = [System.Collections.Generic.List[string]]::new()
+$projectSourceSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 $objectNeedles = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
 foreach ($rootInput in $ProjectSourceRoots) {
     $root = (Resolve-Path $rootInput).Path
     Get-ChildItem -Path $root -Recurse -File | Where-Object {
         $_.Extension -in @(".c", ".cc", ".cpp", ".cxx", ".c++")
     } | ForEach-Object {
+        $normalized = Normalize-SourcePath -PathValue $_.FullName
         $projectSources.Add($_.FullName)
+        [void]$projectSourceSet.Add($normalized)
         [void]$objectNeedles.Add(($_.Name + ".obj"))
         [void]$objectNeedles.Add(($_.BaseName + ".obj"))
     }
 }
 if ($projectSources.Count -eq 0) {
     throw "No project source files found under: $($ProjectSourceRoots -join ', ')"
+}
+
+# Parse the Files section, where llvm-pdbutil groups source/header paths by Mod.
+# A module is project-owned when at least one exact compiled source path from the
+# selected source roots is present in that module's file provenance.
+$provenanceModules = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$moduleLines = Get-Content $pdbModules
+$inFilesSection = $false
+$currentFileModule = ""
+foreach ($line in $moduleLines) {
+    if ($line -match '^\s*Files\s*$') {
+        $inFilesSection = $true
+        $currentFileModule = ""
+        continue
+    }
+    if (-not $inFilesSection) { continue }
+
+    if ($line -match '^\s*Mod\s+\d+\s+\|\s+`([^`]+)`') {
+        $currentFileModule = $Matches[1]
+        continue
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($currentFileModule) -and
+        $line -match '^\s*-\s+\([^)]*\)\s+(.+)$') {
+        $sourcePath = Normalize-SourcePath -PathValue $Matches[1]
+        if ($projectSourceSet.Contains($sourcePath)) {
+            [void]$provenanceModules.Add($currentFileModule)
+        }
+    }
+}
+
+$useProvenanceOwnership = $provenanceModules.Count -gt 0
+$ownershipMethod = if ($useProvenanceOwnership) {
+    "pdb-module-file-provenance"
+} else {
+    "source-derived-object-name-fallback"
 }
 
 function Test-ProjectModule {
@@ -74,6 +119,14 @@ function Test-ProjectModule {
         [string]$ModuleName
     )
     if ([string]::IsNullOrWhiteSpace($ModuleName)) { return $false }
+
+    if ($useProvenanceOwnership) {
+        return $provenanceModules.Contains($ModuleName)
+    }
+
+    # Fallback for PDBs/tool versions that do not expose usable module-file
+    # provenance. CMake/Ninja commonly uses foo.cpp.obj while MSBuild commonly
+    # uses foo.obj, so retain both spellings.
     $lower = $ModuleName.ToLowerInvariant()
     foreach ($needleValue in $objectNeedles) {
         $needle = $needleValue.ToLowerInvariant()
@@ -203,15 +256,17 @@ $rawStats = Get-CollisionStats -Rows $projectProcedures -Property "raw_name"
 $leafStats = Get-CollisionStats -Rows $projectProcedures -Property "leaf_name"
 
 $summary = [ordered]@{
-    schema = "decbench-native-msvc-pdb-qualification-v1"
+    schema = "decbench-native-msvc-pdb-qualification-v2"
     target = $TargetName
     optimization = $Mode
     architecture = "x86_64"
     linked_image = [System.IO.Path]::GetFileName($BinaryPath)
     pdb = [System.IO.Path]::GetFileName($PdbPath)
     ground_truth = "native MSVC PDB / CodeView"
+    project_ownership_method = $ownershipMethod
     project_source_file_count = $projectSources.Count
     project_object_name_candidates = @($objectNeedles | Sort-Object)
+    project_provenance_compiland_count = $provenanceModules.Count
     project_compiland_count = $selectedModules.Count
     project_compilands = @($selectedModules | Sort-Object)
     pdb_compile3_records_global = $globalCompile3Count
@@ -224,7 +279,7 @@ $summary = [ordered]@{
     leaf_name_collision_heuristic = $leafStats
     caveats = @(
         "The PDB raw-name collision metric is a CodeView diagnostic and is not asserted to be numerically equivalent to DecBench's DWARF DW_AT_name metric.",
-        "Project ownership is determined from object-module names derived from the selected project source roots; CRT and unrelated vendor modules are excluded.",
+        "Project ownership uses exact PDB module/file source provenance when available; source-derived object-name matching is only a fallback for PDBs without usable provenance.",
         "FRAMEPROC OptimizedForSpeed counts are diagnostic only and are not used as the optimization-mode oracle.",
         "This is target/oracle qualification, not an end-to-end DecBench GED/type/byte benchmark run."
     )
@@ -234,6 +289,7 @@ $summary | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 (Join-Path $Evid
 $projectProcedures | ConvertTo-Json -Depth 5 | Set-Content -Encoding utf8 (Join-Path $EvidenceRoot "project-procedures.json")
 
 Write-Host "PASS $TargetName $Mode native MSVC/PDB oracle qualification"
+Write-Host "  ownership method:          $ownershipMethod"
 Write-Host "  project source files:      $($projectSources.Count)"
 Write-Host "  project compilands:        $($selectedModules.Count)"
 Write-Host "  project procedures:        $($projectProcedures.Count)"

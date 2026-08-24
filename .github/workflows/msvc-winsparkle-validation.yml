@@ -11,7 +11,7 @@ on:
       - "targets/windows/winsparkle.toml"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: winsparkle-msvc-${{ github.ref }}
@@ -95,3 +95,117 @@ jobs:
           path: ${{ env.EVIDENCE_ROOT }}/
           if-no-files-found: error
           retention-days: 30
+
+  publish-evidence:
+    name: Persist WinSparkle run summary
+    needs: qualify
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    env:
+      QUALIFY_RESULT: ${{ needs.qualify.result }}
+      WINSPARKLE_REF: a8986caf620262f7d4581b241436ceaa0cc9370f
+    steps:
+      - name: Checkout qualification workspace
+        uses: actions/checkout@v4
+
+      - name: Download WinSparkle evidence artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: winsparkle-msvc-*
+          path: collected
+
+      - name: Build permanent or failure summary
+        shell: python
+        run: |
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          modes = ["O0", "O2", "O2-noinline"]
+          base = Path("results/evidence/msvc/winsparkle")
+          base.mkdir(parents=True, exist_ok=True)
+          success_path = base / "qualification-summary.json"
+          failure_path = base / "latest-failure.json"
+
+          if os.environ["QUALIFY_RESULT"] == "success":
+              rows = []
+              for mode in modes:
+                  path = Path("collected") / f"winsparkle-msvc-{mode}" / "qualification.json"
+                  if not path.is_file():
+                      raise SystemExit(f"missing qualification evidence: {path}")
+                  row = json.loads(path.read_text(encoding="utf-8-sig"))
+                  if row.get("optimization") != mode:
+                      raise SystemExit(f"optimization mismatch in {path}: {row.get('optimization')}")
+                  if row.get("architecture") != "x86_64":
+                      raise SystemExit(f"architecture mismatch in {path}: {row.get('architecture')}")
+                  if row.get("pdb_ltcg_compile3_records_selected") != 0:
+                      raise SystemExit(f"LTCG evidence present in {path}")
+                  rows.append(row)
+
+              out = {
+                  "schema": "decbench-native-msvc-pdb-qualification-summary-v1",
+                  "target": "WinSparkle v0.9.4",
+                  "revision": os.environ["WINSPARKLE_REF"],
+                  "architecture": "x86_64",
+                  "ground_truth": "native MSVC PDB / CodeView",
+                  "workflow_run_id": os.environ["GITHUB_RUN_ID"],
+                  "workflow_commit": os.environ["GITHUB_SHA"],
+                  "modes": rows,
+                  "caveats": [
+                      "All three optimization modes passed the native MSVC/PDB target-oracle qualification gates.",
+                      "PDB raw-name collision is a CodeView diagnostic and is not asserted to be numerically equivalent to DecBench DWARF DW_AT_name collision.",
+                      "This evidence is target/oracle qualification, not an end-to-end DecBench GED/type/byte benchmark run."
+                  ]
+              }
+              success_path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+              failure_path.unlink(missing_ok=True)
+          else:
+              diagnostics = []
+              mod_re = re.compile(r"^\s*Mod\s+\d+\s+\|\s+`([^`]+)`")
+              for mode in modes:
+                  root = Path("collected") / f"winsparkle-msvc-{mode}"
+                  qual = root / "qualification.json"
+                  modules = root / "raw" / "pdb-modules-files.txt"
+                  module_samples = []
+                  if modules.is_file():
+                      for line in modules.read_text(encoding="utf-8-sig", errors="replace").splitlines():
+                          m = mod_re.match(line)
+                          if m:
+                              module_samples.append(m.group(1))
+                              if len(module_samples) >= 30:
+                                  break
+                  diagnostics.append({
+                      "optimization": mode,
+                      "qualification_json_present": qual.is_file(),
+                      "pdb_modules_dump_present": modules.is_file(),
+                      "module_name_samples": module_samples
+                  })
+              out = {
+                  "schema": "decbench-native-msvc-pdb-qualification-failure-v1",
+                  "target": "WinSparkle v0.9.4",
+                  "revision": os.environ["WINSPARKLE_REF"],
+                  "workflow_run_id": os.environ["GITHUB_RUN_ID"],
+                  "workflow_commit": os.environ["GITHUB_SHA"],
+                  "qualify_result": os.environ["QUALIFY_RESULT"],
+                  "modes": diagnostics,
+                  "note": "Failure metadata only; this file does not mark the target as validated."
+              }
+              failure_path.write_text(json.dumps(out, indent=2) + "\n", encoding="utf-8")
+
+      - name: Commit run evidence
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A results/evidence/msvc/winsparkle
+          if git diff --cached --quiet; then
+            echo "WinSparkle run evidence is unchanged"
+            exit 0
+          fi
+          if [ "$QUALIFY_RESULT" = "success" ]; then
+            git commit -m "results: persist WinSparkle MSVC qualification evidence"
+          else
+            git commit -m "ci: record failed WinSparkle qualification run"
+          fi
+          git push origin HEAD:main

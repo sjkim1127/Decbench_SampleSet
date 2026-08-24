@@ -4,17 +4,29 @@
   "workflow": "msvc-winsparkle-validation.yml",
   "latest": {
     "conclusion": null,
-    "created_at": "2026-08-24T03:03:21Z",
+    "created_at": "2026-08-24T03:20:59Z",
     "event": "push",
-    "head_sha": "859eb03650e557c6ad5fa5f0f6b867c19ce0265e",
-    "html_url": "https://github.com/sjkim1127/Decbench_SampleSet/actions/runs/32685096118",
-    "id": 32685096118,
+    "head_sha": "1325beadad2886496b6bd7c2f69a36d8bb4aa9de",
+    "html_url": "https://github.com/sjkim1127/Decbench_SampleSet/actions/runs/32686141551",
+    "id": 32686141551,
     "run_attempt": 1,
-    "run_number": 5,
-    "status": "in_progress",
-    "updated_at": "2026-08-24T03:03:26Z"
+    "run_number": 6,
+    "status": "pending",
+    "updated_at": "2026-08-24T03:21:00Z"
   },
   "recent_runs": [
+    {
+      "conclusion": null,
+      "created_at": "2026-08-24T03:20:59Z",
+      "event": "push",
+      "head_sha": "1325beadad2886496b6bd7c2f69a36d8bb4aa9de",
+      "html_url": "https://github.com/sjkim1127/Decbench_SampleSet/actions/runs/32686141551",
+      "id": 32686141551,
+      "run_attempt": 1,
+      "run_number": 6,
+      "status": "pending",
+      "updated_at": "2026-08-24T03:21:00Z"
+    },
     {
       "conclusion": null,
       "created_at": "2026-08-24T03:03:21Z",

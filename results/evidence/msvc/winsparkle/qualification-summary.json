@@ -1,0 +1,113 @@
+{
+  "schema": "decbench-native-msvc-pdb-qualification-summary-v1",
+  "target": "WinSparkle v0.9.4",
+  "revision": "a8986caf620262f7d4581b241436ceaa0cc9370f",
+  "architecture": "x86_64",
+  "ground_truth": "native MSVC PDB / CodeView",
+  "workflow_run_id": "32686141551",
+  "workflow_commit": "1325beadad2886496b6bd7c2f69a36d8bb4aa9de",
+  "runner": {
+    "os": "Windows",
+    "arch": "X64",
+    "image_os": "win25-vs2026",
+    "image_version": "20260818.207.1"
+  },
+  "artifacts": {
+    "O0": {
+      "id": 9505927922,
+      "sha256": "46f3a77c53395821c390a3da3cbe085ec1c3d4b7d8386daef369980f02aacb93"
+    },
+    "O2": {
+      "id": 9505868200,
+      "sha256": "1e085f08a0873f0929ee5c63febcefb7d52607411f4c338c0b69557a81b9dc00"
+    },
+    "O2-noinline": {
+      "id": 9505923377,
+      "sha256": "575239975dd9001d31b71ad34306b11bd75cbf654d3353c694146f125d9a855c"
+    }
+  },
+  "ownership": {
+    "method": "pdb-module-file-provenance",
+    "project_source_file_count": 12,
+    "project_compiland_count": 12,
+    "vendor_same-basename_false_positive_excluded": "WinSparkle_wx/settings.obj"
+  },
+  "modes": [
+    {
+      "optimization": "O0",
+      "linked_image": "WinSparkle.dll",
+      "pdb": "WinSparkle.pdb",
+      "project_compiland_count": 12,
+      "pdb_compile3_records_selected": 12,
+      "pdb_ltcg_compile3_records_selected": 0,
+      "project_procedure_records": 2267,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 2267,
+        "unique_names": 1974,
+        "collision_groups": 121,
+        "collision_addresses": 414,
+        "collision_rate_pct": 18.26
+      },
+      "leaf_name_collision_heuristic": {
+        "source_function_addresses": 2267,
+        "unique_names": 1221,
+        "collision_groups": 243,
+        "collision_addresses": 1289,
+        "collision_rate_pct": 56.86
+      }
+    },
+    {
+      "optimization": "O2",
+      "linked_image": "WinSparkle.dll",
+      "pdb": "WinSparkle.pdb",
+      "project_compiland_count": 12,
+      "pdb_compile3_records_selected": 12,
+      "pdb_ltcg_compile3_records_selected": 0,
+      "project_procedure_records": 1048,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 1048,
+        "unique_names": 930,
+        "collision_groups": 37,
+        "collision_addresses": 155,
+        "collision_rate_pct": 14.79
+      },
+      "leaf_name_collision_heuristic": {
+        "source_function_addresses": 1048,
+        "unique_names": 659,
+        "collision_groups": 90,
+        "collision_addresses": 479,
+        "collision_rate_pct": 45.71
+      }
+    },
+    {
+      "optimization": "O2-noinline",
+      "linked_image": "WinSparkle.dll",
+      "pdb": "WinSparkle.pdb",
+      "project_compiland_count": 12,
+      "pdb_compile3_records_selected": 12,
+      "pdb_ltcg_compile3_records_selected": 0,
+      "project_procedure_records": 2160,
+      "raw_pdb_name_collision": {
+        "source_function_addresses": 2160,
+        "unique_names": 1871,
+        "collision_groups": 118,
+        "collision_addresses": 407,
+        "collision_rate_pct": 18.84
+      },
+      "leaf_name_collision_heuristic": {
+        "source_function_addresses": 2160,
+        "unique_names": 1177,
+        "collision_groups": 227,
+        "collision_addresses": 1210,
+        "collision_rate_pct": 56.02
+      }
+    }
+  ],
+  "caveats": [
+    "All three optimization modes passed the native MSVC/PDB target-oracle qualification gates.",
+    "Project ownership was selected from exact PDB module/file source provenance; the wxWidgets settings.obj same-basename false positive from the earlier object-name matcher is excluded.",
+    "PDB raw-name collision is a CodeView diagnostic and is not asserted to be numerically equivalent to DecBench DWARF DW_AT_name collision.",
+    "This evidence is target/oracle qualification, not an end-to-end DecBench GED/type/byte benchmark run.",
+    "The workflow's matrix qualification jobs succeeded; the original publish-evidence job failed only because a concurrent main update caused a non-fast-forward git push. This compact summary was recovered from the successful run artifacts."
+  ]
+}

@@ -11,8 +11,8 @@
     "id": 32686141551,
     "run_attempt": 1,
     "run_number": 6,
-    "status": "pending",
-    "updated_at": "2026-08-24T03:21:00Z"
+    "status": "in_progress",
+    "updated_at": "2026-08-24T03:21:37Z"
   },
   "recent_runs": [
     {
@@ -24,11 +24,11 @@
       "id": 32686141551,
       "run_attempt": 1,
       "run_number": 6,
-      "status": "pending",
-      "updated_at": "2026-08-24T03:21:00Z"
+      "status": "in_progress",
+      "updated_at": "2026-08-24T03:21:37Z"
     },
     {
-      "conclusion": null,
+      "conclusion": "cancelled",
       "created_at": "2026-08-24T03:03:21Z",
       "event": "push",
       "head_sha": "859eb03650e557c6ad5fa5f0f6b867c19ce0265e",
@@ -36,8 +36,8 @@
       "id": 32685096118,
       "run_attempt": 1,
       "run_number": 5,
-      "status": "in_progress",
-      "updated_at": "2026-08-24T03:21:23Z"
+      "status": "completed",
+      "updated_at": "2026-08-24T03:21:33Z"
     },
     {
       "conclusion": "success",

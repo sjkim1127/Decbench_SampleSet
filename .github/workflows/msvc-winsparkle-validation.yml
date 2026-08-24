@@ -107,6 +107,8 @@ jobs:
     steps:
       - name: Checkout qualification workspace
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download WinSparkle evidence artifacts
         uses: actions/download-artifact@v4
@@ -208,4 +210,15 @@ jobs:
           else
             git commit -m "ci: record failed WinSparkle qualification run"
           fi
-          git push origin HEAD:main
+
+          for attempt in 1 2 3 4 5; do
+            echo "Push attempt $attempt"
+            git fetch origin main
+            git rebase origin/main
+            if git push origin HEAD:main; then
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Failed to publish WinSparkle evidence after 5 attempts" >&2
+          exit 1

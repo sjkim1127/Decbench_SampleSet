@@ -8,6 +8,8 @@ on:
     paths:
       - .github/workflows/cpp-corpus-funnel.yml
       - scripts/corpus_pipeline.py
+      - scripts/discover_fast.py
+      - scripts/validate_probe_result.py
 
 permissions:
   contents: read
@@ -31,7 +33,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
-          python3 scripts/corpus_pipeline.py discover \
+          python3 scripts/discover_fast.py \
             --out results/corpus-funnel
 
       - id: matrix
@@ -74,9 +76,11 @@ jobs:
         run: |
           safe="${REPO//\//__}"
           mkdir -p results/probes
+          result="results/probes/${safe}.json"
           python3 scripts/corpus_pipeline.py probe \
             --repo "$REPO" \
-            --out "results/probes/${safe}.json"
+            --out "$result"
+          python3 scripts/validate_probe_result.py "$result"
 
       - name: Upload probe result
         if: always()

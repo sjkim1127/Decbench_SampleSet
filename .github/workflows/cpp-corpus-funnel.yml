@@ -1,0 +1,131 @@
+name: C++ corpus funnel
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - automation/cpp-corpus-funnel
+    paths:
+      - .github/workflows/cpp-corpus-funnel.yml
+      - scripts/corpus_pipeline.py
+      - scripts/discover_fast.py
+      - scripts/probe_linux.py
+      - scripts/validate_probe_result.py
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  discover:
+    name: Discover 500 / preflight 200
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Collect and statically preflight repositories
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/discover_fast.py \
+            --out results/corpus-funnel
+
+      - id: matrix
+        name: Export 100-repository build matrix
+        run: |
+          echo "matrix=$(cat results/corpus-funnel/build-matrix.json)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus-discovery
+          path: results/corpus-funnel/
+          if-no-files-found: error
+          retention-days: 30
+
+  probe:
+    name: "O0 probe · ${{ matrix.repo }}"
+    needs: discover
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJson(needs.discover.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Ensure generic build tools and common dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet meson
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
+            libssl-dev zlib1g-dev liblzma-dev libbz2-dev \
+            libcurl4-openssl-dev libsqlite3-dev libexpat1-dev libxml2-dev libzstd-dev
+          cmake --version
+          ninja --version
+          gcc --version | head -1
+          g++ --version | head -1
+
+      - name: Probe controlled O0 build
+        env:
+          REPO: ${{ matrix.repo }}
+        run: |
+          safe="${REPO//\//__}"
+          mkdir -p results/probes
+          python3 scripts/probe_linux.py \
+            --repo "$REPO" \
+            --out "results/probes/${safe}.json"
+
+      - name: Upload probe result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: probe-${{ strategy.job-index }}
+          path: results/probes/*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  finalize:
+    name: Select qualified targets
+    needs: [discover, probe]
+    if: always() && needs.discover.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: probe-*
+          path: results/probes
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: corpus-discovery
+          path: results/corpus-funnel
+
+      - name: Aggregate and choose up to 50
+        run: |
+          python3 scripts/corpus_pipeline.py finalize \
+            --probes results/probes \
+            --out results/corpus-funnel/final
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: corpus-funnel-final
+          path: results/corpus-funnel/
+          if-no-files-found: error
+          retention-days: 30

@@ -1,0 +1,116 @@
+name: C++ corpus second-half qualification
+
+on:
+  push:
+    branches:
+      - automation/cpp-corpus-funnel
+    paths:
+      - .github/workflows/cpp-corpus-second-half.yml
+
+permissions:
+  actions: read
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  SOURCE_RUN: "35085121652"
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: sjkim1127/Decbench_SampleSet
+          run-id: 35085121652
+          name: corpus-discovery
+          path: discovery
+      - id: matrix
+        run: |
+          python3 - <<'PY'
+          import json, os
+          rows=json.load(open('discovery/preflight-200.json'))
+          repos=[r['repo'] for r in rows[100:200]]
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f:
+              f.write('matrix='+json.dumps({'repo':repos}, separators=(',',':'))+'\n')
+          print(f'second-half matrix: {len(repos)} repos')
+          PY
+
+  probe:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Ensure generic build tools and common dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet meson
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
+            libssl-dev zlib1g-dev liblzma-dev libbz2-dev \
+            libcurl4-openssl-dev libsqlite3-dev libexpat1-dev libxml2-dev libzstd-dev
+      - name: Probe controlled O0 build
+        env:
+          REPO: ${{ matrix.repo }}
+        run: |
+          safe="${REPO//\//__}"
+          mkdir -p results/probes
+          python3 scripts/probe_linux.py \
+            --repo "$REPO" \
+            --out "results/probes/${safe}.json"
+      - name: Upload probe result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: second-probe-${{ strategy.job-index }}
+          path: results/probes/*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  finalize:
+    needs: [prepare, probe]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download first-half completed probes
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: sjkim1127/Decbench_SampleSet
+          run-id: 35085121652
+          pattern: probe-*
+          path: results/probes
+          merge-multiple: true
+      - name: Download second-half probes
+        uses: actions/download-artifact@v4
+        with:
+          pattern: second-probe-*
+          path: results/probes
+          merge-multiple: true
+      - name: Classify combined corpus
+        run: |
+          python3 scripts/classify_corpus.py \
+            --probes results/probes \
+            --out results/combined-final \
+            --limit 50
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpp-corpus-combined-final
+          path: results/combined-final/
+          if-no-files-found: error
+          retention-days: 30

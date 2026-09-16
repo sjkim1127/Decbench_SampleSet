@@ -1,0 +1,49 @@
+rank,repo,tier,selection_score,linked_elf,dwarf_elf,ii,dwarf_subprogram_sample,revision,build_system,reason
+1,chriskohlhoff/asio,A,6655,123,123,151,6935,8806a6803cde7054c3049d3666d3ec36786568c5,autotools,oracle-ready: ELF + DWARF + .ii
+2,luau-lang/luau,A,6270,9,9,312,350795,7d5f73364fdbbaa984fa545071630eba73cfea98,cmake,oracle-ready: ELF + DWARF + .ii
+3,microsoft/BitNet,A,6110,6,6,186,6311,0b341e582afbf9e1011f24744b554c96a3477eb5,cmake,oracle-ready: ELF + DWARF + .ii
+4,oatpp/oatpp,A,6070,3,3,196,824274,f83d648fd82dc222ef88aabbafb68efbd7d7bf50,cmake,oracle-ready: ELF + DWARF + .ii
+5,WebAssembly/wabt,A,5960,14,14,108,24497,e197d0b7bd3fe426f5963ae540f4426a1d49e89f,cmake,oracle-ready: ELF + DWARF + .ii
+6,trapexit/mergerfs,A,5940,3,3,170,419480,515b0549ef615418df41ed3ffd993d036bc52e1f,make,oracle-ready: ELF + DWARF + .ii
+7,harfbuzz/harfbuzz,A,5685,5,5,107,113215,d8c712f41c75fd4e407b944bf92f3ea1a0a10d52,cmake,oracle-ready: ELF + DWARF + .ii
+8,catchorg/Catch2,A,5600,2,2,108,157338,02f8b5593a15cdec8558256e6f40a0c7fb5862d6,cmake,oracle-ready: ELF + DWARF + .ii
+9,google/flatbuffers,A,5575,5,5,85,102527,b8431fbcd7a5c71817f314e18b332c0648554efa,cmake,oracle-ready: ELF + DWARF + .ii
+10,ideawu/ssdb,A,5495,11,8,51,7524,f229ba277c7f7d0ca5a441c0c6fb3d1209af68e4,make,oracle-ready: ELF + DWARF + .ii
+11,Slackadays/Clipboard,A,5350,3,3,52,231973,da607a6736605fe1e1b2aff629b913f4f342d5d8,cmake,oracle-ready: ELF + DWARF + .ii
+12,BYVoid/OpenCC,A,5330,4,4,42,13545,c363a7ba51d487950982bd8a589211ffbfd95ba1,cmake,oracle-ready: ELF + DWARF + .ii
+13,davisking/dlib,A,5330,2,2,54,156499,f28ef5001187a8742bd22ec1044e6179c00aeff2,cmake,oracle-ready: ELF + DWARF + .ii
+14,mawww/kakoune,A,5325,1,1,59,277520,f16dba30002c4a18a247968ad4d12043cce018a8,make,oracle-ready: ELF + DWARF + .ii
+15,jbeder/yaml-cpp,A,5295,4,4,35,6638,8eb618e889c003457d73f7c54777603835677ff4,cmake,oracle-ready: ELF + DWARF + .ii
+16,ninja-build/ninja,A,5245,2,2,37,89763,e4a128055f7698522da6de2821ffe0761623f298,cmake,oracle-ready: ELF + DWARF + .ii
+17,open-source-parsers/jsoncpp,A,5185,4,4,13,13135,3347a4b86bb914cb565f0cbda19c06e109513300,cmake,oracle-ready: ELF + DWARF + .ii
+18,google/googletest,A,5140,4,4,4,9356,f840327b0f76408eafde2440af3b2f0a70662ea6,cmake,oracle-ready: ELF + DWARF + .ii
+19,trojan-gfw/trojan,A,5115,1,1,17,102211,3e7bb9aecdc694f9bcae8d646fae395f773d60f8,cmake,oracle-ready: ELF + DWARF + .ii
+20,gabime/spdlog,A,5100,2,2,8,54023,57cb5fb7a8ff30079751728234623230535a5c92,cmake,oracle-ready: ELF + DWARF + .ii
+21,AGWA/git-crypt,A,5080,1,1,10,13712,8c7a90ff38fc9daf41e5f6ccb3f105ee82782231,make,oracle-ready: ELF + DWARF + .ii
+22,electronicarts/EASTL,A,5080,1,1,10,8069,e323f67e5d93fdadcd44f7998069d804697b1945,cmake,oracle-ready: ELF + DWARF + .ii
+23,ssloy/tinyrenderer,A,5080,2,2,4,6760,97eb7a480e762285899a93c5d21e70a79e60782e,cmake,oracle-ready: ELF + DWARF + .ii
+24,kelektiv/node.bcrypt.js,A,5075,2,2,3,5806,24aa3c50a990db8cea4f545cd21b8740ea0364ea,make,oracle-ready: ELF + DWARF + .ii
+25,google/snappy,A,3856,11,11,33,3361,2a6c78c781cb76ad191795449cb2267f33138150,cmake,oracle-ready: ELF + DWARF + .ii
+26,microsoft/GSL,A,3762,17,17,17,3167,a16852b79452bdfa217381c6a5eab0b2975e2076,cmake,oracle-ready: ELF + DWARF + .ii
+27,Tiiny-AI/PowerInfer,A,3665,39,39,44,2545,8bd56d69906c9d2dba4d3bf6899763401e01a9a4,cmake,oracle-ready: ELF + DWARF + .ii
+28,google/leveldb,A,3559,11,11,70,2879,7ee830d02b623e8ffe0b95d59a74db1e58da04c5,cmake,oracle-ready: ELF + DWARF + .ii
+29,Neargye/magic_enum,A,3387,29,29,29,2372,adf50a7880514138442b6ab4f31e783f42d3243a,cmake,oracle-ready: ELF + DWARF + .ii
+30,gperftools/gperftools,A,3348,10,10,96,2568,0cc73303a93b27f46df9b93ee676937514e447ad,cmake,oracle-ready: ELF + DWARF + .ii
+31,google/highway,A,2986,18,18,60,2146,993f67ca6d5e1d9d653f44976bf09afaf522afc5,cmake,oracle-ready: ELF + DWARF + .ii
+32,ShiqiYu/libfacedetection,A,2859,3,3,3,2754,acf7b254121927e7dced30e233a2e03119f28ea2,cmake,oracle-ready: ELF + DWARF + .ii
+33,doctest/doctest,A,2846,40,40,151,1191,d44d4f6e66232d716af82f00a063759e9d0e50d6,cmake,oracle-ready: ELF + DWARF + .ii
+34,fmtlib/fmt,A,2208,25,25,51,1203,5fc5c910c03b82cd92c29feb623b9112063138bf,cmake,oracle-ready: ELF + DWARF + .ii
+35,abseil/abseil-cpp,A,1716,93,93,158,26,15ea57c38713eff81d29d2d780b6a56f241a16a0,cmake,oracle-ready: ELF + DWARF + .ii
+36,react/yoga,A,1584,7,7,95,899,f42d532527974a4504e644f6836946ad108d4133,cmake,oracle-ready: ELF + DWARF + .ii
+37,zeromq/libzmq,A,1318,9,9,121,443,46493370217ac135246617fa2f6ac819d8b61bfc,cmake,oracle-ready: ELF + DWARF + .ii
+38,leethomason/tinyxml2,A,1281,1,1,1,1246,8224e427b655b83dae5e2298f1e6919523a78737,cmake,oracle-ready: ELF + DWARF + .ii
+39,ggml-org/ggml,A,1197,41,41,54,27,456172ec733a135778adcd32d00e576a58232e45,cmake,oracle-ready: ELF + DWARF + .ii
+40,ggml-org/whisper.cpp,A,1075,25,25,44,105,da54572229bcf64ba367d96c7ef15770376c4280,cmake,oracle-ready: ELF + DWARF + .ii
+41,dmlc/xgboost,A,704,2,2,128,4,3a48eba84d72de5f6f8933a2521a07e818958a97,cmake,oracle-ready: ELF + DWARF + .ii
+42,libcpr/cpr,A,658,17,17,29,3,9adb78f725a8979f3d934b52fc612e4ce7d10cb9,cmake,oracle-ready: ELF + DWARF + .ii
+43,lightgbm-org/LightGBM,A,249,2,2,37,4,6d386edf77a363750669ba622b133ca4e794e353,cmake,oracle-ready: ELF + DWARF + .ii
+44,wolfpld/tracy,A,200,1,1,1,165,dd29819f3d3e668983d974507038c08dba06479c,cmake,oracle-ready: ELF + DWARF + .ii
+45,linyacool/WebServer,B,5120,4,4,0,7504,7e18602f15c5c64e006091aa03e04b927c255983,cmake,build+DWARF ready; regenerate .ii from compile commands
+46,async-profiler/async-profiler,B,5030,2,1,0,15703,1bf8685707c8b9349e4f5bf572afcf63fbe61b3d,make,build+DWARF ready; regenerate .ii from compile commands
+47,chenshuo/muduo,B,2063,119,119,0,1163,f1fc77e0c13b80e5086ff457362c8a86d1b609d4,cmake,build+DWARF ready; regenerate .ii from compile commands
+48,tiny-dnn/tiny-dnn,B,64,2,2,0,4,c0f576f5cb7b35893f62127cb7aec18f77a3bcc5,cmake,build+DWARF ready; regenerate .ii from compile commands

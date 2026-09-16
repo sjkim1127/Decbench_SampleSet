@@ -1,0 +1,118 @@
+name: C++ identity characterization
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - analysis/cpp-identity-characterization
+    paths:
+      - .github/workflows/cpp-identity-characterization.yml
+      - scripts/characterize_cpp_identity.py
+      - scripts/make_identity_matrix.py
+      - scripts/summarize_cpp_identity.py
+      - scripts/probe_linux.py
+      - scripts/corpus_pipeline.py
+      - results/cpp-corpus-2026-09-16/final-48.csv
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+
+jobs:
+  prepare:
+    name: Prepare Tier A matrix
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - id: matrix
+        name: Export 44-target pinned matrix
+        run: |
+          python3 scripts/make_identity_matrix.py \
+            --csv results/cpp-corpus-2026-09-16/final-48.csv \
+            --out /tmp/identity-matrix.json
+          echo "matrix=$(cat /tmp/identity-matrix.json)" >> "$GITHUB_OUTPUT"
+
+  characterize:
+    name: "Identity · ${{ matrix.repo }}"
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install analysis and generic build dependencies
+        run: |
+          python3 -m pip install --disable-pip-version-check --quiet pyelftools meson
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            autoconf automake libtool pkg-config \
+            libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
+            libssl-dev zlib1g-dev liblzma-dev libbz2-dev \
+            libcurl4-openssl-dev libsqlite3-dev libexpat1-dev libxml2-dev libzstd-dev
+
+      - name: Rebuild pinned revision and characterize identity
+        env:
+          REPO: ${{ matrix.repo }}
+          REVISION: ${{ matrix.revision }}
+        run: |
+          safe="${REPO//\//__}"
+          mkdir -p results/identity
+          python3 scripts/characterize_cpp_identity.py \
+            --repo "$REPO" \
+            --revision "$REVISION" \
+            --out "results/identity/${safe}.json"
+
+      - name: Upload characterization result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: identity-${{ strategy.job-index }}
+          path: results/identity/*.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  aggregate:
+    name: Aggregate Tier A identity diagnostics
+    needs: [prepare, characterize]
+    if: always() && needs.prepare.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: identity-*
+          path: results/identity
+          merge-multiple: true
+
+      - name: Build summary and review buckets
+        run: |
+          python3 scripts/summarize_cpp_identity.py \
+            --input results/identity \
+            --source-csv results/cpp-corpus-2026-09-16/final-48.csv \
+            --out results/cpp-identity-2026-09-16
+          cat results/cpp-identity-2026-09-16/README.md >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpp-identity-characterization
+          path: results/cpp-identity-2026-09-16/
+          if-no-files-found: error
+          retention-days: 30

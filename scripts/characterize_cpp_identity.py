@@ -95,20 +95,25 @@ def die_attr_target(die: Any, attr_name: str) -> Any | None:
         return None
 
 
-def resolve_attr(die: Any, names: Iterable[str], depth: int = 0) -> Any | None:
+def resolve_attr_source(die: Any, names: Iterable[str], depth: int = 0) -> tuple[Any | None, Any | None]:
+    """Return an attribute value together with the DIE whose CU owns that attribute."""
     if depth > 5:
-        return None
+        return None, None
     for name in names:
         attr = die.attributes.get(name)
         if attr is not None:
-            return attr.value
+            return attr.value, die
     for ref_name in ("DW_AT_specification", "DW_AT_abstract_origin"):
         target = die_attr_target(die, ref_name)
         if target is not None:
-            value = resolve_attr(target, names, depth + 1)
+            value, source_die = resolve_attr_source(target, names, depth + 1)
             if value is not None:
-                return value
-    return None
+                return value, source_die
+    return None, None
+
+
+def resolve_attr(die: Any, names: Iterable[str], depth: int = 0) -> Any | None:
+    return resolve_attr_source(die, names, depth)[0]
 
 
 def walk_scopes(die: Any, scope: tuple[str, ...], scope_by_offset: dict[int, tuple[str, ...]]) -> None:
@@ -126,17 +131,25 @@ def walk_scopes(die: Any, scope: tuple[str, ...], scope_by_offset: dict[int, tup
         walk_scopes(child, current, scope_by_offset)
 
 
-def decl_path(die: Any, cu: Any, dwarf: Any, comp_dir: Path | None) -> Path | None:
-    raw_index = resolve_attr(die, ("DW_AT_decl_file",))
-    if raw_index is None:
+def decl_path(die: Any, dwarf: Any) -> Path | None:
+    raw_index, source_die = resolve_attr_source(die, ("DW_AT_decl_file",))
+    if raw_index is None or source_die is None:
         return None
     try:
+        cu = source_die.cu
+        top = cu.get_top_DIE()
+        comp_dir_s = b2s(resolve_attr(top, ("DW_AT_comp_dir",)))
+        comp_dir = Path(comp_dir_s) if comp_dir_s else None
         idx = int(raw_index)
         lp = dwarf.line_program_for_CU(cu)
         if lp is None:
             return None
         entries = lp["file_entry"]
-        entry = entries[idx - 1] if idx > 0 and idx - 1 < len(entries) else entries[idx] if idx < len(entries) else None
+        version = int(cu["version"])
+        if version >= 5:
+            entry = entries[idx] if 0 <= idx < len(entries) else None
+        else:
+            entry = entries[idx - 1] if idx > 0 and idx - 1 < len(entries) else None
         if entry is None:
             return None
         name = Path(b2s(entry.name) or "")
@@ -145,12 +158,20 @@ def decl_path(die: Any, cu: Any, dwarf: Any, comp_dir: Path | None) -> Path | No
         dir_index = int(getattr(entry, "dir_index", 0) or 0)
         include_dirs = lp["include_directory"]
         base: Path | None = None
-        if dir_index > 0 and dir_index - 1 < len(include_dirs):
-            base = Path(b2s(include_dirs[dir_index - 1]) or "")
-            if not base.is_absolute() and comp_dir is not None:
-                base = comp_dir / base
-        elif comp_dir is not None:
-            base = comp_dir
+        if version >= 5:
+            if 0 <= dir_index < len(include_dirs):
+                base = Path(b2s(include_dirs[dir_index]) or "")
+                if not base.is_absolute() and comp_dir is not None:
+                    base = comp_dir / base
+            elif comp_dir is not None:
+                base = comp_dir
+        else:
+            if dir_index > 0 and dir_index - 1 < len(include_dirs):
+                base = Path(b2s(include_dirs[dir_index - 1]) or "")
+                if not base.is_absolute() and comp_dir is not None:
+                    base = comp_dir / base
+            elif comp_dir is not None:
+                base = comp_dir
         return (base / name) if base is not None else name
     except Exception:
         return None
@@ -186,11 +207,9 @@ def inspect_binary(path: Path, root: Path) -> dict[str, Any]:
             concrete_total = 0
             project_decl_unknown = 0
             spec_or_origin = 0
+            non_project_decl_sample: set[str] = set()
 
             for cu in cus:
-                top = cu.get_top_DIE()
-                comp_dir_s = b2s(resolve_attr(top, ("DW_AT_comp_dir",)))
-                comp_dir = Path(comp_dir_s) if comp_dir_s else None
                 for die in cu.iter_DIEs():
                     if die.tag != "DW_TAG_subprogram":
                         continue
@@ -209,11 +228,13 @@ def inspect_binary(path: Path, root: Path) -> dict[str, Any]:
 
                     name = b2s(resolve_attr(die, ("DW_AT_name",)))
                     linkage = b2s(resolve_attr(die, ("DW_AT_linkage_name", "DW_AT_MIPS_linkage_name")))
-                    path_decl = decl_path(die, cu, dwarf, comp_dir)
+                    path_decl = decl_path(die, dwarf)
                     owned = is_project_path(path_decl, root)
                     if path_decl is None:
                         project_decl_unknown += 1
                     if not owned:
+                        if path_decl is not None and len(non_project_decl_sample) < 20:
+                            non_project_decl_sample.add(str(path_decl))
                         continue
 
                     scope = scope_by_offset.get(die.offset, ())
@@ -299,6 +320,7 @@ def inspect_binary(path: Path, root: Path) -> dict[str, Any]:
                 "qualified_name": collision_stats("qualified_name", qualified),
                 "linkage_name": collision_stats("linkage_name", linkage),
                 "project_file_sample": project_files[:20],
+                "non_project_decl_sample": sorted(non_project_decl_sample),
             }
     except Exception as exc:
         return {"path": str(path), "error": f"{type(exc).__name__}: {exc}"}
@@ -397,7 +419,7 @@ def main() -> int:
     result: dict[str, Any] = {
         "repo": args.repo,
         "requested_revision": args.revision,
-        "characterizer_version": 1,
+        "characterizer_version": 2,
         "status": "FAIL",
     }
 

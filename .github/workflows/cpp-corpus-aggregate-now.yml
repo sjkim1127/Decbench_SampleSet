@@ -1,0 +1,45 @@
+name: Aggregate completed C++ probes
+
+on:
+  push:
+    branches:
+      - automation/cpp-corpus-funnel
+    paths:
+      - .github/workflows/cpp-corpus-aggregate-now.yml
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Download completed probe artifacts from qualification run
+        uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          repository: sjkim1127/Decbench_SampleSet
+          run-id: 35085121652
+          pattern: probe-*
+          path: results/probes
+          merge-multiple: true
+
+      - name: Classify and select build-qualified corpus
+        run: |
+          python3 scripts/classify_corpus.py \
+            --probes results/probes \
+            --out results/corpus-funnel/classified \
+            --limit 50
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cpp-corpus-classified-now
+          path: results/corpus-funnel/classified/
+          if-no-files-found: error
+          retention-days: 30

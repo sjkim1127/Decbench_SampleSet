@@ -75,6 +75,22 @@ def clone_revision(repo: str, revision: str, root: Path) -> dict[str, Any]:
     return {"ok": actual == revision, "actual_revision": actual, "steps": steps}
 
 
+def canonical_decl_path(path: Path | None, root: Path) -> Path | None:
+    """Map build-relative DWARF source paths back to the checked-out source tree when provable."""
+    if path is None:
+        return None
+    resolved = path.resolve(strict=False)
+    build_root = (root / "_decbench_build").resolve(strict=False)
+    try:
+        rel = resolved.relative_to(build_root)
+    except (ValueError, OSError):
+        return resolved
+    source_candidate = (root / rel).resolve(strict=False)
+    if source_candidate.is_file():
+        return source_candidate
+    return resolved
+
+
 def is_project_path(path: Path | None, root: Path) -> bool:
     if path is None:
         return False
@@ -228,7 +244,7 @@ def inspect_binary(path: Path, root: Path) -> dict[str, Any]:
 
                     name = b2s(resolve_attr(die, ("DW_AT_name",)))
                     linkage = b2s(resolve_attr(die, ("DW_AT_linkage_name", "DW_AT_MIPS_linkage_name")))
-                    path_decl = decl_path(die, dwarf)
+                    path_decl = canonical_decl_path(decl_path(die, dwarf), root)
                     owned = is_project_path(path_decl, root)
                     if path_decl is None:
                         project_decl_unknown += 1
@@ -419,7 +435,7 @@ def main() -> int:
     result: dict[str, Any] = {
         "repo": args.repo,
         "requested_revision": args.revision,
-        "characterizer_version": 2,
+        "characterizer_version": 3,
         "status": "FAIL",
     }
 

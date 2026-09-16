@@ -9,7 +9,7 @@ This repository deliberately separates:
 
 - successful project builds;
 - target/oracle qualification;
-- function-identity diagnostics;
+- function-identity diagnostics and validation;
 - corpus-scale candidate discovery;
 - full end-to-end DecBench scoring.
 
@@ -19,12 +19,15 @@ already been run end-to-end on that target.
 
 ## Current status
 
-The workspace now has two complementary qualification tracks:
+The workspace now has three complementary tracks:
 
 1. an original six-target, deeply inspected reference set across GCC/DWARF and
    native MSVC/PDB;
 2. a corpus-scale Linux/GCC discovery funnel used to search hundreds of C++
-   repositories and identify a much larger source-backed candidate pool.
+   repositories and identify a much larger source-backed candidate pool;
+3. a C++ function-identity validation track in the DecBench fork, exercising the
+   collision-safe identity model across real decompilers, optimization levels,
+   ARM/Thumb, serialization, and scoring behavior.
 
 ### Corpus-scale funnel
 
@@ -80,6 +83,104 @@ including:
 
 The 44 Tier A results above are from the corrected definition, not from the
 initial loose probe.
+
+### Function-identity validation
+
+The target funnel exposed a separate benchmark correctness problem: C++ functions
+cannot be keyed globally by unqualified source name. Overloads, repeated method
+names, namespaces, templates, and ABI-generated variants can all produce distinct
+concrete functions with the same `DW_AT_name`.
+
+The current DecBench fork therefore uses a binary-global DWARF identity model:
+
+```text
+primary identity:  (binary, DWARF low_pc)
+human name:        DW_AT_name
+optional join key: DW_AT_linkage_name
+storage key:       name                  if unique in the target universe
+                   name@0x<low_pc>       if the source name is ambiguous
+```
+
+The implementation is kept in the DecBench fork on
+[`fix/cpp-function-identity`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity).
+The current clean single-commit candidate is:
+
+```text
+d76561fbb7c32a80fd52aba551d990992bb2c0da
+```
+
+Validation performed against that design includes:
+
+| Validation | Result |
+|---|---|
+| Real LevelDB 1.23 collision through **angr + Ghidra 12.0.4** | **PASS** |
+| C++ fixture at **O0 / O2 / O2-noinline** | **PASS** |
+| Real O2 inlined DWARF with `DW_TAG_inlined_subroutine` and abstract/specification references | **PASS** |
+| ARM/Thumb with a real `gcc-arm-none-eabi` CI toolchain | **PASS** |
+| JSON collision round-trip and legacy plain-name result loading | **PASS** |
+| TOML collision-safe serialization | **PASS** |
+| Partial-progress atomic pickle round-trip | **PASS** |
+| Insertion-order determinism | **PASS** |
+| GED abstention/shared-denominator regression | **PASS** |
+
+The strongest cross-decompiler fixture currently uses the two LevelDB `Next`
+functions:
+
+```text
+angr raw:      sub_4943c       sub_4e3f0
+Ghidra raw:    FUN_0014943c    FUN_0014e3f0
+
+canonical:
+Next@0x4943c
+Next@0x4e3f0
+```
+
+Both backends converge to the same canonical keys even though their recovered
+raw names differ. This is the intended invariant: backend success and backend
+naming do not define benchmark identity; the binary-global DWARF target universe
+does.
+
+A focused identity regression suite covering optimized DWARF, serialization,
+backend relabeling, metrics, and progress recovery passed **28 / 28** tests in
+CI. ARM/Thumb is exercised in a separate job with the actual cross compiler so
+those tests do not silently degrade into skip-only coverage.
+
+#### GED abstention policy
+
+C++ source-CFG recovery can be ambiguous for some overloaded functions. Simply
+removing those functions from one decompiler's denominator would make a system
+look better by evaluating fewer hard functions.
+
+The validated scoring path instead uses a shared measurable function universe for
+headline aggregation. A fixture with normal functions plus ambiguous overloads
+confirms that abstaining on the hard functions does not improve the aggregate
+perfect-function percentage.
+
+#### Same-address aliases / ICF
+
+Address is intentionally the canonical binary identity primitive. That means
+linker identical-code folding and other same-address aliases require an explicit
+policy: multiple source descriptions that resolve to one machine-code address
+cannot be treated as independent benchmark functions without introducing a
+second identity dimension.
+
+Current DWARF extraction deduplicates concrete identities by address, i.e. the
+working policy is effectively **one binary address = one benchmark function**.
+A real LLD `--icf=all` probe has been added to validate and make that policy
+deterministic. This item is still under active validation and is **not** claimed
+complete here.
+
+#### PE / PDB scope
+
+PE address normalization is also being exercised separately using real
+MinGW-produced PE + DWARF binaries, where a backend RVA must be lifted by the PE
+ImageBase to match the canonical DWARF address.
+
+Native MSVC/PDB identity is a separate integration problem. The existing Windows
+qualification data in this repository proves that native PE/PDB targets can be
+built and inspected reproducibly, but the current DWARF function-identity patch
+does not pretend to provide a PDB identity reader. That belongs in a follow-up
+PDB-aware DecBench path.
 
 ---
 
@@ -192,7 +293,7 @@ Detailed reports:
 
 ---
 
-## C++ function-identity caveat
+## C++ function-identity model and remaining corpus work
 
 C++ makes short-name function identity fundamentally unsafe for benchmarking.
 Different concrete functions can share the same unqualified `DW_AT_name` because
@@ -206,19 +307,27 @@ of:
 - ABI-generated variants.
 
 The original Snappy/double-conversion/Ninja results quantify this problem using
-project-owned DWARF. The corpus-scale Tier A set is therefore a **candidate pool**,
-not yet the final DecBench C++ benchmark set.
+project-owned DWARF, and the identity validation above demonstrates a concrete
+binary-address-based solution across real backends.
 
-The next qualification stage should characterize the 44 Tier A projects using at
-least:
+This resolves the **identity representation problem** much further than the
+initial qualification stage, but it does not automatically promote the 44 Tier A
+projects into benchmark targets. Corpus-wide selection still needs to characterize
+and balance at least:
 
 - `DW_AT_linkage_name` coverage;
-- qualified/demangled function identity;
-- translation-unit ownership;
+- qualified/demangled identity coverage;
+- translation-unit/source ownership;
 - short-name collision exposure;
 - function counts and size distributions;
+- executable/library/test/example artifact roles;
 - C++ feature diversity such as templates, STL usage, inheritance, virtual
-  dispatch, exceptions, RTTI, lambdas, and operator overloading.
+  dispatch, exceptions, RTTI, lambdas, and operator overloading;
+- same-address/ICF behavior where it appears in real targets.
+
+The goal is therefore not to reduce the 48 candidates arbitrarily. The intended
+next output is a broad validated pool plus a smaller balanced core set for
+repeatable DecBench evaluation.
 
 ---
 
@@ -251,6 +360,11 @@ results/evidence/msvc/winsparkle/qualification-summary.json
 scripts/qualify_msvc_pdb.ps1
 ```
 
+Related DecBench identity implementation and validation:
+
+- [`sjkim1127/decbench@fix/cpp-function-identity`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity)
+- clean candidate commit: `d76561fbb7c32a80fd52aba551d990992bb2c0da`
+
 Large ELF/PE/PDB/build-tree artifacts are intentionally not committed. Permanent
 Git evidence is kept compact and machine-readable; workflows regenerate the full
 artifacts when required.
@@ -265,11 +379,19 @@ This repository currently establishes that:
   source/debug oracles;
 - C++ short-name identity collisions are large enough to require a richer
   DecBench identity model;
+- a binary-address-based canonical identity can preserve same-name C++ functions
+  and converge across real angr/Ghidra output on a LevelDB collision fixture;
+- the identity model survives controlled optimization changes, real O2 inlined
+  DWARF, ARM/Thumb normalization, serialization/progress recovery, and scoring
+  abstention regressions;
 - corpus-scale candidate discovery can be automated rather than selecting every
   target manually;
 - at least **44** projects from the current search satisfy the strict generic
   Linux Tier A requirements, with another **4** near-ready Tier B projects.
 
-It does **not** yet establish that all 48 projects should become DecBench targets.
-The remaining work is to select a diverse subset after identity/oracle analysis,
-then integrate that subset into DecBench's C++-aware evaluation path.
+It does **not** yet establish that all 48 projects should become DecBench targets,
+that same-address ICF policy is fully closed, or that native MSVC/PDB identity is
+implemented in DecBench. The remaining work is to finish those boundary cases,
+characterize the broad candidate pool, select a diverse evaluation core without
+throwing away the larger corpus, and then run the C++-aware evaluation path
+end-to-end.

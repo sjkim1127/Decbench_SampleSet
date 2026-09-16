@@ -76,18 +76,35 @@ def clone_revision(repo: str, revision: str, root: Path) -> dict[str, Any]:
 
 
 def canonical_decl_path(path: Path | None, root: Path) -> Path | None:
-    """Map build-relative DWARF source paths back to the checked-out source tree when provable."""
+    """Map provable build-relative DWARF paths back into this pinned source tree."""
     if path is None:
         return None
     resolved = path.resolve(strict=False)
-    build_root = (root / "_decbench_build").resolve(strict=False)
+    root_resolved = root.resolve(strict=False)
+
+    # Normal case: the debug path points into this build tree.
     try:
-        rel = resolved.relative_to(build_root)
+        rel = resolved.relative_to(root_resolved / "_decbench_build")
     except (ValueError, OSError):
-        return resolved
-    source_candidate = (root / rel).resolve(strict=False)
-    if source_candidate.is_file():
-        return source_candidate
+        rel = None
+    if rel is not None:
+        source_candidate = (root_resolved / rel).resolve(strict=False)
+        if source_candidate.is_file():
+            return source_candidate
+
+    # Some CMake/GCC combinations retain an earlier CI/workspace prefix in
+    # DWARF while preserving the path below `_decbench_build`. Rebase only when
+    # the exact suffix exists in the pinned checkout; otherwise keep the path
+    # external. This avoids turning arbitrary dependency paths into project code.
+    parts = resolved.parts
+    for i, part in enumerate(parts):
+        if part != "_decbench_build" or i + 1 >= len(parts):
+            continue
+        suffix = Path(*parts[i + 1 :])
+        source_candidate = (root_resolved / suffix).resolve(strict=False)
+        if source_candidate.is_file():
+            return source_candidate
+
     return resolved
 
 
@@ -435,7 +452,7 @@ def main() -> int:
     result: dict[str, Any] = {
         "repo": args.repo,
         "requested_revision": args.revision,
-        "characterizer_version": 3,
+        "characterizer_version": 4,
         "status": "FAIL",
     }
 

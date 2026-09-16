@@ -13,6 +13,7 @@ def main() -> int:
     ap.add_argument("--csv", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--tier", default="A")
+    ap.add_argument("--expected", type=int)
     args = ap.parse_args()
 
     rows = []
@@ -25,6 +26,9 @@ def main() -> int:
             if not repo or not revision:
                 continue
             rows.append({"repo": repo, "revision": revision, "rank": int(row.get("rank") or 0)})
+
+    if args.expected is not None and len(rows) != args.expected:
+        raise SystemExit(f"expected {args.expected} tier-{args.tier} targets, got {len(rows)}")
 
     payload = {"include": rows}
     Path(args.out).write_text(json.dumps(payload, separators=(",", ":")) + "\n")

@@ -9,6 +9,7 @@ on:
       - .github/workflows/cpp-corpus-funnel.yml
       - scripts/corpus_pipeline.py
       - scripts/discover_fast.py
+      - scripts/probe_linux.py
       - scripts/validate_probe_result.py
 
 permissions:
@@ -62,9 +63,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Ensure generic build tools
+      - name: Ensure generic build tools and common dependencies
         run: |
           python3 -m pip install --disable-pip-version-check --quiet meson
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            libboost-system-dev libboost-program-options-dev libboost-filesystem-dev \
+            libssl-dev zlib1g-dev liblzma-dev libbz2-dev \
+            libcurl4-openssl-dev libsqlite3-dev libexpat1-dev libxml2-dev libzstd-dev
           cmake --version
           ninja --version
           gcc --version | head -1
@@ -76,11 +82,9 @@ jobs:
         run: |
           safe="${REPO//\//__}"
           mkdir -p results/probes
-          result="results/probes/${safe}.json"
-          python3 scripts/corpus_pipeline.py probe \
+          python3 scripts/probe_linux.py \
             --repo "$REPO" \
-            --out "$result"
-          python3 scripts/validate_probe_result.py "$result"
+            --out "results/probes/${safe}.json"
 
       - name: Upload probe result
         if: always()

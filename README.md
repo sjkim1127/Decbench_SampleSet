@@ -101,13 +101,21 @@ storage key:       name                  if unique in the target universe
                    name@0x<low_pc>       if the source name is ambiguous
 ```
 
-The implementation is kept in the DecBench fork on
-[`fix/cpp-function-identity`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity).
-The current clean single-commit candidate is:
+The implementation is under review as
+[Noelo-Lab/decbench#91](https://github.com/Noelo-Lab/decbench/pull/91), on branch
+[`fix/cpp-function-identity-clean`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity-clean).
+
+The validation table below was measured against an earlier single-commit
+candidate:
 
 ```text
 d76561fbb7c32a80fd52aba551d990992bb2c0da
 ```
+
+The branch under review carries roughly 990 lines more than that candidate — the
+slice-invariance, end-to-end and ICF test work landed afterwards — so these
+results describe the design, not that exact tree, and are being re-confirmed
+against the PR head.
 
 Validation performed against that design includes:
 
@@ -362,8 +370,10 @@ scripts/qualify_msvc_pdb.ps1
 
 Related DecBench identity implementation and validation:
 
-- [`sjkim1127/decbench@fix/cpp-function-identity`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity)
-- clean candidate commit: `d76561fbb7c32a80fd52aba551d990992bb2c0da`
+- under review: [`Noelo-Lab/decbench#91`](https://github.com/Noelo-Lab/decbench/pull/91)
+- branch: [`sjkim1127/decbench@fix/cpp-function-identity-clean`](https://github.com/sjkim1127/decbench/tree/fix/cpp-function-identity-clean)
+- earlier single-commit candidate the validation table was measured against:
+  `d76561fbb7c32a80fd52aba551d990992bb2c0da`
 
 Large ELF/PE/PDB/build-tree artifacts are intentionally not committed. Permanent
 Git evidence is kept compact and machine-readable; workflows regenerate the full

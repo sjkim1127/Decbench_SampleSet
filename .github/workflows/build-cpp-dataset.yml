@@ -1,0 +1,85 @@
+name: Build C++ dataset (cpp-sample)
+
+on:
+  push:
+    branches:
+      - automation/cpp-dataset-build
+  workflow_dispatch:
+    inputs:
+      decbench_ref:
+        description: DecBench fork ref to build with (PR #91 head)
+        default: fix/cpp-function-identity-clean
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_UNSAFE_CONFIGURE: "1"
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: sjkim1127/decbench
+          ref: ${{ inputs.decbench_ref || 'fix/cpp-function-identity-clean' }}
+          path: decbench
+          persist-credentials: false
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: System build dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends \
+            build-essential git cmake ninja-build pkg-config binutils g++ gcc
+
+      - name: Install DecBench (PR branch)
+        working-directory: decbench
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e .
+
+      - name: Register target definitions
+        run: |
+          cp targets/ninja.toml targets/snappy.toml targets/double-conversion.toml decbench/projects/cpp/
+          git -C decbench rev-parse HEAD | tee decbench-commit.txt
+
+      - name: Compile (O0 / O2 / O2-noinline)
+        working-directory: decbench
+        run: python scripts/compile_all.py ../build 3 ninja snappy double-conversion
+
+      - name: Assemble dataset
+        working-directory: decbench
+        run: |
+          python ../scripts/build_dataset.py ../build ../dataset \
+            --targets ../targets ninja snappy double-conversion
+          cp ../decbench-commit.txt ../dataset/metadata/decbench-commit.txt
+
+      - name: Summary
+        run: |
+          find dataset -type f | sed 's|/[^/]*$||' | sort | uniq -c | sort -rn | head -40
+          du -sh dataset
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: decbench-cpp-sample
+          path: |
+            dataset/
+            build/compile_report.json
+          if-no-files-found: error
+          retention-days: 14

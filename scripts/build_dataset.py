@@ -5,7 +5,7 @@ Input : <build_root>/<opt>/<project>/compiled/   (produced by DecBench's compile
 Output: <dest>/
     binaries/<opt>/<project>/<file>              debug binary (DWARF kept)
     binaries_stripped/<opt>/<project>/<file>     same image, ``strip --strip-all``
-    sources/<project>/<tu>.c                     header-stripped preprocessed source (dedup by content)
+    sources/<project>/<tu>.ii                    header-stripped preprocessed C++ source (dedup by content)
     pipeline_data/source_cfgs/<opt>/<project>/<stem>.json
     ground_truth/<opt>/<project>/<stem>.functions.json   DWARF function identity table
     metadata/<opt>/<project>/<stem>.json         compiler / flags / hashes
@@ -27,15 +27,36 @@ import subprocess
 import sys
 from pathlib import Path
 
+from decbench.publish import cfg_export
 from decbench.publish.cfg_export import export_project_cfgs
 from decbench.utils.cfg import strip_system_headers
 from decbench.utils.function_identity import (
     dwarf_function_identities,
     function_storage_key,
 )
+from decbench.utils.langs import preprocessed_by_stem
 from decbench.utils.results_tree import OPT_LEVELS, compiled_dir
 
+
+def _parse_tus_for_opt_cxx(root, project, opt, cache):
+    """cfg_export globs only ``*.i``; C++ units are ``*.ii`` (see langs.preprocessed_by_stem)."""
+    by_tu = {}
+    for stem, i_path in preprocessed_by_stem(cfg_export.compiled_dir(root, opt, project)).items():
+        sha = cfg_export._stripped_sha(i_path)
+        if sha not in cache:
+            try:
+                cache[sha] = cfg_export.extract_cfgs_from_source(i_path)
+            except Exception as exc:  # noqa: BLE001
+                print(f"[cfg] parse failed for {i_path}: {exc}", file=sys.stderr)
+                cache[sha] = {}
+        by_tu[stem] = cache[sha]
+    return by_tu
+
+
+cfg_export._parse_tus_for_opt = _parse_tus_for_opt_cxx
+
 SKIP_SUFFIXES = (".o", ".a", ".s", ".h", ".i", ".ii", ".c", ".cc", ".cpp", ".cxx")
+
 
 
 def sha256(path: Path) -> str:
@@ -103,9 +124,9 @@ def main() -> int:
                 digest = hashlib.sha256(stripped.encode("utf-8", "replace")).hexdigest()
                 if digest in seen_src.values():
                     continue
-                out = dest / "sources" / project / f"{i_path.stem}.c"
+                out = dest / "sources" / project / f"{i_path.stem}.ii"
                 if out.exists():  # same TU name, different content at another opt level
-                    out = out.with_name(f"{i_path.stem}.{opt}.c")
+                    out = out.with_name(f"{i_path.stem}.{opt}.ii")
                 out.parent.mkdir(parents=True, exist_ok=True)
                 out.write_text(stripped, encoding="utf-8")
                 seen_src[str(out)] = digest
@@ -166,6 +187,18 @@ def main() -> int:
     for project, stems_by_opt in stems_by_project.items():
         try:
             export_project_cfgs(args.build_root, dest, project, stems_by_opt)
+            # Record which ground-truth functions have a source CFG (project-defined bodies).
+            for opt, stems in stems_by_opt.items():
+                for stem in stems:
+                    cfg_path = dest / "pipeline_data" / "source_cfgs" / opt / project / f"{stem}.json"
+                    gt_path = dest / "ground_truth" / opt / project / f"{stem}.functions.json"
+                    if not cfg_path.exists():
+                        continue
+                    have = set(json.loads(cfg_path.read_text())["functions"])
+                    gt = json.loads(gt_path.read_text())
+                    for fn in gt["functions"]:
+                        fn["has_source_cfg"] = fn["name"] in have or fn["storage_key"] in have
+                    gt_path.write_text(json.dumps(gt, indent=2))
         except Exception as exc:  # noqa: BLE001 - keep binaries even if CFG export fails
             print(f"[cfg] {project}: FAILED ({exc})", file=sys.stderr)
 

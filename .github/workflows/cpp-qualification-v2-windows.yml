@@ -1,0 +1,30 @@
+name: C++ qualification v2 Windows pilot
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2025
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        project: [ninja, snappy, OpenCC, tracy]
+        mode: [O0, O2, O2-noinline]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Build pinned project and verify native PDB
+        shell: pwsh
+        run: ./scripts/build_qualification_windows.ps1 -Project '${{ matrix.project }}' -Mode '${{ matrix.mode }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: qualification-v2-${{ matrix.project }}-${{ matrix.mode }}
+          path: _qualification/evidence/${{ matrix.project }}/${{ matrix.mode }}/
+          if-no-files-found: error
+          retention-days: 30

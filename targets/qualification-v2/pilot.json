@@ -1,0 +1,337 @@
+{
+  "schema": "decbench-cpp-qualification-plan-v2",
+  "status": "candidate-plan-not-qualified-corpus",
+  "initial_platform_cells": {
+    "linux": 6,
+    "windows": 6,
+    "macos": 3
+  },
+  "target_platform_cells": {
+    "linux": 16,
+    "windows": 16,
+    "macos": 8
+  },
+  "initial_linked_images": 45,
+  "counting_unit": "project-platform cell; optimization variants are not distinct projects",
+  "unique_projects": 10,
+  "raw_corpus": {
+    "repo": "sjkim1127/decbench-cpp-raw-corpus",
+    "revision": "f1b7e849641baf1d35e293f400bc36aa7a1a4e2c"
+  },
+  "qualification_parent": {
+    "repo": "sjkim1127/decbench-cpp-qualification",
+    "revision": "d211137b0471b6534ccebef08677dcd947e0a6a4"
+  },
+  "cells": [
+    {
+      "id": "linux-the-powder-toy",
+      "platform": "linux",
+      "project": "the-powder-toy",
+      "target": "powder",
+      "category": "gui",
+      "source_repository": "The-Powder-Toy/The-Powder-Toy",
+      "source_revision": "c205becb1cf7ef1915293e2c99b2c7901d2887cd",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "linux-snappy",
+      "platform": "linux",
+      "project": "snappy",
+      "target": "libsnappy.so.1.2.2",
+      "category": "compression-library",
+      "source_repository": "google/snappy",
+      "source_revision": "2a6c78c781cb76ad191795449cb2267f33138150",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "linux-leveldb",
+      "platform": "linux",
+      "project": "leveldb",
+      "target": "libleveldb.so.1.23.0",
+      "category": "storage-library",
+      "source_repository": "google/leveldb",
+      "source_revision": "7ee830d02b623e8ffe0b95d59a74db1e58da04c5",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "linux-ssdb",
+      "platform": "linux",
+      "project": "ssdb",
+      "target": "ssdb-server",
+      "category": "server",
+      "source_repository": "ideawu/ssdb",
+      "source_revision": "f229ba277c7f7d0ca5a441c0c6fb3d1209af68e4",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "linux-mergerfs",
+      "platform": "linux",
+      "project": "mergerfs",
+      "target": "mergerfs",
+      "category": "userspace-filesystem",
+      "source_repository": "trapexit/mergerfs",
+      "source_revision": "515b0549ef615418df41ed3ffd993d036bc52e1f",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "linux-OpenCC",
+      "platform": "linux",
+      "project": "OpenCC",
+      "target": "opencc",
+      "category": "cli",
+      "source_repository": "BYVoid/OpenCC",
+      "source_revision": "c363a7ba51d487950982bd8a589211ffbfd95ba1",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-detours",
+      "platform": "windows",
+      "project": "detours",
+      "target": "withdll.exe",
+      "category": "userspace-instrumentation",
+      "source_repository": "microsoft/Detours",
+      "source_revision": "e4bfd6b03e50de46b47abfbd1e46b384f0c5f833",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-winsparkle",
+      "platform": "windows",
+      "project": "winsparkle",
+      "target": "WinSparkle.dll",
+      "category": "desktop-update-library",
+      "source_repository": "vslavik/winsparkle",
+      "source_revision": "a8986caf620262f7d4581b241436ceaa0cc9370f",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-ninja",
+      "platform": "windows",
+      "project": "ninja",
+      "target": "ninja.exe",
+      "category": "cli-build-tool",
+      "source_repository": "ninja-build/ninja",
+      "source_revision": "e4a128055f7698522da6de2821ffe0761623f298",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-snappy",
+      "platform": "windows",
+      "project": "snappy",
+      "target": "snappy.dll",
+      "category": "compression-library",
+      "source_repository": "google/snappy",
+      "source_revision": "2a6c78c781cb76ad191795449cb2267f33138150",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-OpenCC",
+      "platform": "windows",
+      "project": "OpenCC",
+      "target": "opencc.exe",
+      "category": "cli",
+      "source_repository": "BYVoid/OpenCC",
+      "source_revision": "c363a7ba51d487950982bd8a589211ffbfd95ba1",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "windows-tracy",
+      "platform": "windows",
+      "project": "tracy",
+      "target": "tracy-profiler.exe",
+      "category": "gui-profiler",
+      "source_repository": "wolfpld/tracy",
+      "source_revision": "dd29819f3d3e668983d974507038c08dba06479c",
+      "source_revision_verified": true,
+      "architecture": "x86_64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "PDB-CodeView",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "macos-ninja",
+      "platform": "macos",
+      "project": "ninja",
+      "target": "ninja",
+      "category": "cli-build-tool",
+      "source_repository": "ninja-build/ninja",
+      "source_revision": "e4a128055f7698522da6de2821ffe0761623f298",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF-dSYM",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "macos-snappy",
+      "platform": "macos",
+      "project": "snappy",
+      "target": "libsnappy.dylib",
+      "category": "compression-library",
+      "source_repository": "google/snappy",
+      "source_revision": "2a6c78c781cb76ad191795449cb2267f33138150",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF-dSYM",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    },
+    {
+      "id": "macos-OpenCC",
+      "platform": "macos",
+      "project": "OpenCC",
+      "target": "opencc",
+      "category": "cli",
+      "source_repository": "BYVoid/OpenCC",
+      "source_revision": "c363a7ba51d487950982bd8a589211ffbfd95ba1",
+      "source_revision_verified": true,
+      "architecture": "aarch64",
+      "optimization_modes": [
+        "O0",
+        "O2",
+        "O2-noinline"
+      ],
+      "expected_debug_format": "DWARF-dSYM",
+      "feature_claims": [],
+      "state": "candidate",
+      "note": "C++ feature tags require artifact evidence; empty means not yet demonstrated."
+    }
+  ],
+  "gates": [
+    "real linked project-owned target; no compiler probe",
+    "exact source revision and source archive",
+    "effective compile and link flags per translation unit",
+    "preprocessed translation units joined to original source",
+    "debug identity and project-owned function ranges",
+    "stripped input with code bytes preserved",
+    "file existence, size, SHA256 and no dangling manifest paths",
+    "PDB and dSYM packaging distinct from metric support"
+  ]
+}

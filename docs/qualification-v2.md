@@ -45,6 +45,7 @@ python scripts/prepare_qualification_sources.py --root /path/to/work --plan targ
 python scripts/build_qualification_macos.py --root /path/to/work --plan targets/qualification-v2/pilot.json
 python scripts/stage_qualification_v2.py --root /path/to/work --plan targets/qualification-v2/pilot.json --raw-manifest /path/to/frozen/raw/manifest.json --local-raw /path/to/raw/cpp-compiled
 python scripts/import_qualification_msvc.py --root /path/to/work --plan targets/qualification-v2/pilot.json
+python scripts/verify_qualification_inputs.py --root /path/to/work
 python scripts/inspect_qualification_dwarf.py /path/to/status.json --stage /path/to/work/staged/qualification-v2 --sources /path/to/work/sources
 python scripts/seal_qualification_v2.py --root /path/to/work --plan targets/qualification-v2/pilot.json
 ```

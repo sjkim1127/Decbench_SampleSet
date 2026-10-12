@@ -1,0 +1,115 @@
+name: Build Windows MSVC Corpus
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/build-msvc.yml'
+      - 'scripts/validate_*_msvc.ps1'
+      - 'scripts/qualify_msvc_pdb.ps1'
+      - 'targets/windows/**'
+
+jobs:
+  build-msvc:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Decbench_SampleSet
+        uses: actions/checkout@v4
+
+      - name: Set up MSVC environment (x64)
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
+      - name: Install LLVM (llvm-pdbutil, llvm-readobj)
+        run: |
+          choco install llvm -y --no-progress
+          echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
+
+      - name: Verify Tools
+        run: |
+          cl.exe 2>&1 | Select-Object -First 1
+          link.exe 2>&1 | Select-Object -First 1
+          msbuild.exe -version | Select-Object -First 1
+          cmake.exe --version | Select-Object -First 1
+          ninja.exe --version | Select-Object -First 1
+          llvm-pdbutil.exe --version
+          llvm-readobj.exe --version
+
+      - name: Clone Windows Target Repos
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path _src | Out-Null
+          
+          # 1. WinSparkle (v0.9.4)
+          git clone --recurse-submodules https://github.com/vslavik/winsparkle _src/winsparkle
+          git -C _src/winsparkle checkout a8986caf620262f7d4581b241436ceaa0cc9370f
+
+          # 2. DirectXTex (may2026)
+          git clone --recurse-submodules https://github.com/microsoft/DirectXTex _src/directxtex
+          git -C _src/directxtex checkout 4feb3e11a020f35b796fc769a74216a555d4f5ef
+
+          # 3. Detours (v4.0.1)
+          git clone --recurse-submodules https://github.com/microsoft/Detours _src/detours
+          git -C _src/detours checkout e4bfd6b03e50de46b47abfbd1e46b384f0c5f833
+
+      - name: Build & Validate WinSparkle (O0, O2, O2-noinline)
+        shell: pwsh
+        run: |
+          foreach ($mode in @("O0", "O2", "O2-noinline")) {
+            Write-Host "=== Building WinSparkle $mode ==="
+            .\scripts\validate_winsparkle_msvc.ps1 -Mode $mode -SourceRoot _src/winsparkle -EvidenceRoot _evidence/winsparkle/$mode
+          }
+
+      - name: Build & Validate DirectXTex (O0, O2, O2-noinline)
+        shell: pwsh
+        run: |
+          foreach ($mode in @("O0", "O2", "O2-noinline")) {
+            Write-Host "=== Building DirectXTex $mode ==="
+            .\scripts\validate_directxtex_msvc.ps1 -Mode $mode -SourceRoot _src/directxtex -EvidenceRoot _evidence/directxtex/$mode
+          }
+
+      - name: Build & Validate Detours (O0, O2, O2-noinline)
+        shell: pwsh
+        run: |
+          foreach ($mode in @("O0", "O2", "O2-noinline")) {
+            Write-Host "=== Building Detours $mode ==="
+            .\scripts\validate_detours_msvc.ps1 -Mode $mode -DetoursRoot _src/detours -EvidenceRoot _evidence/detours/$mode
+          }
+
+      - name: Collect & Package MSVC Artifacts
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path _staged\binaries | Out-Null
+          
+          # Structure: _staged/binaries/<opt>/<project>/
+          foreach ($mode in @("O0", "O2", "O2-noinline")) {
+            # WinSparkle
+            $wsDir = "_staged\binaries\$mode\winsparkle"
+            New-Item -ItemType Directory -Force -Path $wsDir | Out-Null
+            Copy-Item "_evidence\winsparkle\$mode\binary\*" -Destination $wsDir -Force
+
+            # DirectXTex
+            $dxDir = "_staged\binaries\$mode\directxtex"
+            New-Item -ItemType Directory -Force -Path $dxDir | Out-Null
+            Copy-Item "_evidence\directxtex\$mode\binary\*" -Destination $dxDir -Force
+
+            # Detours
+            $dtDir = "_staged\binaries\$mode\detours"
+            New-Item -ItemType Directory -Force -Path $dtDir | Out-Null
+            Copy-Item "_evidence\detours\$mode\binary\*" -Destination $dtDir -Force
+          }
+
+          Get-ChildItem -Recurse _staged\binaries | Select-Object FullName, Length
+
+      - name: Upload Evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: msvc-validation-evidence
+          path: _evidence/
+
+      - name: Upload Staged Binaries & PDBs
+        uses: actions/upload-artifact@v4
+        with:
+          name: msvc-staged-binaries
+          path: _staged/

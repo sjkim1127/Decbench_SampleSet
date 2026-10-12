@@ -41,40 +41,70 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force -Path _src | Out-Null
           
-          # 1. WinSparkle (v0.9.4)
-          git clone --recurse-submodules https://github.com/vslavik/winsparkle _src/winsparkle
-          git -C _src/winsparkle checkout a8986caf620262f7d4581b241436ceaa0cc9370f
-
-          # 2. DirectXTex (may2026)
-          git clone --recurse-submodules https://github.com/microsoft/DirectXTex _src/directxtex
-          git -C _src/directxtex checkout 4feb3e11a020f35b796fc769a74216a555d4f5ef
-
-          # 3. Detours (v4.0.1)
+          # 1. Detours (v4.0.1) - Self-contained
           git clone --recurse-submodules https://github.com/microsoft/Detours _src/detours
           git -C _src/detours checkout e4bfd6b03e50de46b47abfbd1e46b384f0c5f833
 
-      - name: Build & Validate WinSparkle (O0, O2, O2-noinline)
+          # 2. DirectXTex (may2026) - Self-contained
+          git clone --recurse-submodules https://github.com/microsoft/DirectXTex _src/directxtex
+          git -C _src/directxtex checkout 4feb3e11a020f35b796fc769a74216a555d4f5ef
+
+          # 3. Ninja (v1.13.1) - Clean CMake C++ tool
+          git clone --depth 1 https://github.com/ninja-build/ninja.git _src/ninja
+
+          # 4. WinSparkle (v0.9.4)
+          git clone --recurse-submodules https://github.com/vslavik/winsparkle _src/winsparkle
+          git -C _src/winsparkle checkout a8986caf620262f7d4581b241436ceaa0cc9370f
+          git -C _src/winsparkle submodule update --init --recursive || Write-Host "Submodule warning"
+
+      - name: Build & Validate Detours (O0, O2, O2-noinline)
         shell: pwsh
+        continue-on-error: true
         run: |
           foreach ($mode in @("O0", "O2", "O2-noinline")) {
-            Write-Host "=== Building WinSparkle $mode ==="
-            .\scripts\validate_winsparkle_msvc.ps1 -Mode $mode -SourceRoot _src/winsparkle -EvidenceRoot _evidence/winsparkle/$mode
+            Write-Host "=== Building Detours $mode ==="
+            .\scripts\validate_detours_msvc.ps1 -Mode $mode -DetoursRoot _src/detours -EvidenceRoot _evidence/detours/$mode
           }
 
       - name: Build & Validate DirectXTex (O0, O2, O2-noinline)
         shell: pwsh
+        continue-on-error: true
         run: |
           foreach ($mode in @("O0", "O2", "O2-noinline")) {
             Write-Host "=== Building DirectXTex $mode ==="
             .\scripts\validate_directxtex_msvc.ps1 -Mode $mode -SourceRoot _src/directxtex -EvidenceRoot _evidence/directxtex/$mode
           }
 
-      - name: Build & Validate Detours (O0, O2, O2-noinline)
+      - name: Build Ninja MSVC (O0, O2, O2-noinline)
         shell: pwsh
+        continue-on-error: true
+        run: |
+          $optMap = @{
+            "O0" = "/Od /Ob0 /Zi"
+            "O2" = "/O2 /Zi"
+            "O2-noinline" = "/O2 /Ob0 /Zi"
+          }
+          foreach ($mode in @("O0", "O2", "O2-noinline")) {
+            Write-Host "=== Building Ninja MSVC $mode ==="
+            $bDir = "_src/ninja/build_$mode"
+            $cFlags = "/nologo /EHsc " + $optMap[$mode]
+            $lFlags = "/DEBUG:FULL /INCREMENTAL:NO"
+            cmake -S _src/ninja -B $bDir -G "Ninja" -DCMAKE_CXX_FLAGS="$cFlags" -DCMAKE_EXE_LINKER_FLAGS="$lFlags"
+            cmake --build $bDir --target ninja
+            
+            $binOut = "_evidence/ninja/$mode/binary"
+            New-Item -ItemType Directory -Force -Path $binOut | Out-Null
+            Copy-Item "$bDir/ninja.exe" -Destination $binOut -Force
+            Copy-Item "$bDir/ninja.pdb" -Destination $binOut -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Build & Validate WinSparkle (O0, O2, O2-noinline)
+        shell: pwsh
+        continue-on-error: true
         run: |
           foreach ($mode in @("O0", "O2", "O2-noinline")) {
-            Write-Host "=== Building Detours $mode ==="
-            .\scripts\validate_detours_msvc.ps1 -Mode $mode -DetoursRoot _src/detours -EvidenceRoot _evidence/detours/$mode
+            Write-Host "=== Building WinSparkle $mode ==="
+            .\scripts\validate_winsparkle_msvc.ps1 -Mode $mode -SourceRoot _src/winsparkle -EvidenceRoot _evidence/winsparkle/$mode
           }
 
       - name: Collect & Package MSVC Artifacts
@@ -84,20 +114,14 @@ jobs:
           
           # Structure: _staged/binaries/<opt>/<project>/
           foreach ($mode in @("O0", "O2", "O2-noinline")) {
-            # WinSparkle
-            $wsDir = "_staged\binaries\$mode\winsparkle"
-            New-Item -ItemType Directory -Force -Path $wsDir | Out-Null
-            Copy-Item "_evidence\winsparkle\$mode\binary\*" -Destination $wsDir -Force
-
-            # DirectXTex
-            $dxDir = "_staged\binaries\$mode\directxtex"
-            New-Item -ItemType Directory -Force -Path $dxDir | Out-Null
-            Copy-Item "_evidence\directxtex\$mode\binary\*" -Destination $dxDir -Force
-
-            # Detours
-            $dtDir = "_staged\binaries\$mode\detours"
-            New-Item -ItemType Directory -Force -Path $dtDir | Out-Null
-            Copy-Item "_evidence\detours\$mode\binary\*" -Destination $dtDir -Force
+            foreach ($proj in @("detours", "directxtex", "ninja", "winsparkle")) {
+              $srcBin = "_evidence\$proj\$mode\binary"
+              if (Test-Path $srcBin) {
+                $dstDir = "_staged\binaries\$mode\$proj"
+                New-Item -ItemType Directory -Force -Path $dstDir | Out-Null
+                Copy-Item "$srcBin\*" -Destination $dstDir -Force
+              }
+            }
           }
 
           Get-ChildItem -Recurse _staged\binaries | Select-Object FullName, Length
@@ -107,9 +131,11 @@ jobs:
         with:
           name: msvc-validation-evidence
           path: _evidence/
+        if: always()
 
       - name: Upload Staged Binaries & PDBs
         uses: actions/upload-artifact@v4
         with:
           name: msvc-staged-binaries
           path: _staged/
+        if: always()

@@ -19,6 +19,7 @@ Following feedback from the DecBench team:
 | **Graphics / SIMD** | **Microsoft DirectXTex** (may2026) | Windows x64 | MSVC (`/Zi`, PE + PDB) | SIMD/DirectX math, pixel format conversions, deep class hierarchies |
 | **Graphics / Software**| **tinyrenderer** | Linux aarch64 | GCC 13.3 (`-g`, ELF + DWARF) | Software 3D rendering pipeline, barycentric coordinates, geometry algebra |
 | **Server / Async** | **Oat++** (1.3.0) / **Asio** | Linux aarch64 | GCC 13.3 (`-g`, ELF + DWARF) | Zero-copy DTO serialization, async coroutine networking, memory pools |
+| **GUI / Physics Engine** | **The Powder Toy** (v100.x) | Linux / Windows | Meson + GCC/MSVC (Cross-platform) | Custom UI framework, particle physics simulation, SDL2 rendering, strict No-AI policy (pure human-authored C++20) |
 | **CLI / Build Tool** | **Ninja** (v1.13.1) | Linux / Windows | GCC & MSVC (Cross-platform) | Dependency graph DAG traversal, string hashing, lexer/parser, POSIX/Win32 subprocesses |
 | **Modern C++ / Templates** | **fmt** (10.x) / **Catch2** (v3) | Linux aarch64 | GCC 13.3 (`-g`, ELF + DWARF) | Deep compile-time template metaprogramming, concepts, custom type formatters |
 

@@ -34,6 +34,7 @@ Source CU ownership in inherited raw evidence is weaker than full per-declaratio
 - Ninja upstream enables Release LTO after a global IPO setting. An initially empty dSYM passed `dwarfdump --verify`; a native source function count exposed the problem. The macOS recipe uses a custom Qualification build configuration, preserving the upstream source tree.
 - Inherited SSDB O0 DWARF described optimized LevelDB dependency code, with no confirmed SSDB core functions. The SSDB recipe controls its actual CFLAGS and builds only the selected server and required libraries.
 - Windows PE/PDB imports match CodeView GUID and Age, and preserve executable section bytes in isolated inputs. Native PDB coordinates retain section/offset evidence; they are not borrowed from DWARF names.
+- Tracy also overrides a global IPO setting in its own configuration. The Windows recipe passes its explicit `NO_LTO=ON` option. The qualifier rejects project compilands marked LTCG.
 
 ## Reproduce
 
@@ -50,8 +51,20 @@ python scripts/inspect_qualification_dwarf.py /path/to/status.json --stage /path
 python scripts/seal_qualification_v2.py --root /path/to/work --plan targets/qualification-v2/pilot.json
 ```
 
-The existing Windows evidence importer expects the artifact layout of GitHub Actions run `38208011147`. The new Windows workflow is dispatch-only and was prepared for the four missing projects; it has not been executed in this staging request.
-`build_qualification_windows.ps1` and `preprocess_qualification_msvc.py` require native Windows/MSVC. Preparing them on macOS is not an execution gate.
+The existing Windows evidence importer defaults to the Detours/WinSparkle layout of GitHub Actions run `38208011147`. New builds use the same `PROJECT/MODE/` evidence layout and explicit run provenance:
+
+```sh
+gh workflow run cpp-qualification-v2-windows.yml --repo sjkim1127/Decbench_SampleSet --ref codex/cpp-qualification-v2 \
+  -f 'projects=["ninja","snappy","OpenCC","tracy"]' -f 'modes=["O0","O2","O2-noinline"]'
+# Download each successful job's artifact into evidence/PROJECT/MODE before importing.
+gh run download RUN_ID --repo sjkim1127/Decbench_SampleSet --name qualification-v2-ninja-O0 --dir evidence/ninja/O0
+python scripts/import_qualification_msvc.py --root /path/to/work --plan targets/qualification-v2/pilot.json \
+  --projects ninja snappy OpenCC tracy --evidence-root /path/to/evidence --github-run RUN_ID
+```
+
+The dedicated branch push trigger starts the full matrix; dispatch inputs support focused rebuilds. Jobs do not use `continue-on-error`. A failed build, missing PDB, failed preprocessing replay or failed PDB gate cannot become a passing artifact.
+`build_qualification_windows.ps1` and `preprocess_qualification_msvc.py` require native Windows/MSVC. Their execution evidence is retained separately from preparation on macOS.
+New evidence includes pinned tracked sources, effective compile commands, `/P` replay outputs and the hosted runner image version. PDB source ownership is compiland-based; template/header definitions still require per-procedure ownership before complete qualification.
 Docker recipes `build_qualification_tpt.sh` and `build_qualification_ssdb.sh` require the pinned revisions through environment variables and the workspace mounted at `/work`.
 
 ## Independent claims

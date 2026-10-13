@@ -93,8 +93,27 @@ def main():
                 for record in mappings:
                     path = src / "preprocessed" / record["preprocessed"]
                     assert path.is_file() and path.stat().st_size > 0
+                    flags = [flag.lower() for flag in record["preprocess_argv"]]
+                    optimization_flags = [
+                        flag for flag in flags if re.fullmatch(r"[-/]o[d012sx]", flag)
+                    ]
+                    expected = "/od" if mode == "O0" else "/o2"
+                    assert (
+                        optimization_flags and optimization_flags[-1] == expected
+                    ), record["source"]
+                    if mode in ["O0", "O2-noinline"]:
+                        inline_flags = [
+                            flag
+                            for flag in flags
+                            if re.fullmatch(r"[-/]ob[0123]", flag)
+                        ]
+                        assert inline_flags and inline_flags[-1] == "/ob0", record[
+                            "source"
+                        ]
+                    assert "/gl" not in flags, "Unexpected LTCG compilation"
             binary = src / "binary" / q["linked_image"]
             pdb = src / "binary" / q["pdb"]
+            binary_digest = sha(binary)
             out = base / "windows/x86_64" / mode / name
             out.mkdir(parents=True, exist_ok=True)
             native_guid, native_age = codeview(binary)[1]
@@ -133,6 +152,9 @@ def main():
                     shutil.copy2(src / file, out / file)
                 with tarfile.open(out / "preprocessed.tar.gz", "w:gz") as archive:
                     archive.add(src / "preprocessed", arcname="preprocessed")
+                for file in ["CMakeCache.txt", "target-commands.txt"]:
+                    if (src / file).is_file():
+                        shutil.copy2(src / file, out / file)
             procedures = json.loads(
                 (src / "project-procedures.json").read_text(encoding="utf-8-sig")
             )
@@ -153,10 +175,10 @@ def main():
                 identities.append(
                     {
                         **proc,
-                        "binary_sha256": sha(binary),
+                        "binary_sha256": binary_digest,
                         "rva": rva,
                         "va": pe.optional_header.imagebase + rva,
-                        "identity": [sha(binary), rva],
+                        "identity": [binary_digest, rva],
                     }
                 )
             assert identities
@@ -182,6 +204,7 @@ def main():
                 "debug_directory_removed": True,
                 "project_owned_function_count": len(identities),
                 "project_ownership_method": q["project_ownership_method"],
+                "ownership_scope": "procedures in source-matched compilands; header-origin and dependency ownership need per-procedure verification",
                 "evidence_github_run": a.github_run,
                 "preprocessed_tu_count": len(mappings) if replay.exists() else 0,
                 "scoring_ready": False,
@@ -192,6 +215,14 @@ def main():
                 ],
             }
             if replay.exists():
+                status["effective_optimization_profile_verified"] = True
+                status["build_environment"] = provenance["environment"]
+                status["preprocessed_archive"] = str(
+                    (out / "preprocessed.tar.gz").relative_to(base)
+                )
+                status["build_provenance"] = str(
+                    (out / "build-provenance.json").relative_to(base)
+                )
                 status["remaining_gates"].remove(
                     "original source archive and preprocessed TU replay"
                 )

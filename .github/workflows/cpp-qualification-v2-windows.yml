@@ -1,5 +1,12 @@
 name: C++ qualification v2 Windows pilot
 on:
+  push:
+    branches: [codex/cpp-qualification-v2]
+    paths:
+      - .github/workflows/cpp-qualification-v2-windows.yml
+      - scripts/*qualification*
+      - scripts/qualify_msvc_pdb.ps1
+      - targets/qualification-v2/pilot.json
   workflow_dispatch:
 permissions:
   contents: read

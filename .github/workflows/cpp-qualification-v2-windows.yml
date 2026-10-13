@@ -8,6 +8,15 @@ on:
       - scripts/qualify_msvc_pdb.ps1
       - targets/qualification-v2/pilot.json
   workflow_dispatch:
+    inputs:
+      projects:
+        description: JSON array of planned projects to build
+        default: '["ninja", "snappy", "OpenCC", "tracy"]'
+        required: true
+      modes:
+        description: JSON array of optimization modes
+        default: '["O0", "O2", "O2-noinline"]'
+        required: true
 permissions:
   contents: read
 jobs:
@@ -18,8 +27,8 @@ jobs:
       fail-fast: false
       max-parallel: 2
       matrix:
-        project: [ninja, snappy, OpenCC, tracy]
-        mode: [O0, O2, O2-noinline]
+        project: ${{ fromJSON(inputs.projects || '["ninja", "snappy", "OpenCC", "tracy"]') }}
+        mode: ${{ fromJSON(inputs.modes || '["O0", "O2", "O2-noinline"]') }}
     steps:
       - uses: actions/checkout@v4
       - uses: ilammy/msvc-dev-cmd@v1

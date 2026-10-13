@@ -28,9 +28,13 @@ if ($Project -eq 'tracy') { $source=Join-Path $src 'profiler';$target='tracy-pro
 $configure=@('-S',$source,'-B',$build,'-G','Ninja','-DCMAKE_BUILD_TYPE=Qualification',"-DCMAKE_C_FLAGS=$flags","-DCMAKE_CXX_FLAGS=$flags",'-DCMAKE_C_FLAGS_QUALIFICATION=/DNDEBUG','-DCMAKE_CXX_FLAGS_QUALIFICATION=/DNDEBUG','-DCMAKE_INTERPROCEDURAL_OPTIMIZATION=OFF','-DCMAKE_EXPORT_COMPILE_COMMANDS=ON','-DCMAKE_EXE_LINKER_FLAGS=/DEBUG:FULL /INCREMENTAL:NO /OPT:REF /OPT:NOICF','-DCMAKE_SHARED_LINKER_FLAGS=/DEBUG:FULL /INCREMENTAL:NO /OPT:REF /OPT:NOICF','-DBUILD_TESTING=OFF')
 if ($Project -eq 'snappy') { $configure+=@('-DBUILD_SHARED_LIBS=ON','-DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=ON','-DSNAPPY_BUILD_TESTS=OFF','-DSNAPPY_BUILD_BENCHMARKS=OFF') }
 if ($Project -eq 'OpenCC') { $configure+=@('-DBUILD_SHARED_LIBS=OFF','-DENABLE_GTEST=OFF','-DENABLE_BENCHMARK=OFF','-DBUILD_PYTHON=OFF','-DBUILD_OPENCC_JIEBA_PLUGIN=OFF');$target='opencc' }
+if ($Project -eq 'tracy') { $configure+=@('-DNO_LTO=ON','-DNO_ISA_EXTENSIONS=ON','-DNO_CCACHE=ON') }
 @{ source_revision=$cell.source_revision;source_repository=$cell.source_repository;cmake_argv=$configure;optimization=$Mode;environment=@{runner=$env:ImageOS;image_version=$env:ImageVersion} } | ConvertTo-Json -Depth 8 | Set-Content "$out/build-provenance.json"
 & cmake @configure 2>&1 | Tee-Object "$out/build.log"
 if ($LASTEXITCODE -ne 0) { throw 'CMake configure failed' }
+Copy-Item "$build/CMakeCache.txt" "$out/CMakeCache.txt"
+& ninja -C $build -t commands $target 2>&1 | Set-Content "$out/target-commands.txt"
+if ($LASTEXITCODE -ne 0) { throw 'Target command evidence failed' }
 & cmake --build $build --target $target --parallel 2 2>&1 | Tee-Object -Append "$out/build.log"
 if ($LASTEXITCODE -ne 0) { throw 'CMake build failed' }
 $extension=if ($Project -eq 'snappy') {'.dll'} else {'.exe'}

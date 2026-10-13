@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Import artifact-backed native MSVC evidence with PE/PDB identity checks."""
 
-import argparse, hashlib, json, re, shutil, struct, subprocess, uuid
+import argparse, hashlib, json, re, shutil, struct, subprocess, tarfile, uuid
 from pathlib import Path
 import lief
 
@@ -60,18 +60,39 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", type=Path, required=True)
     ap.add_argument("--plan", type=Path, required=True)
+    ap.add_argument("--projects", nargs="+", default=["detours", "winsparkle"])
+    ap.add_argument("--evidence-root", type=Path)
+    ap.add_argument("--github-run", type=int, default=38208011147)
     a = ap.parse_args()
     r = a.root.resolve()
     base = r / "staged/qualification-v2"
     plan = json.loads(a.plan.read_text())
+    evidence_root = a.evidence_root or r / "msvc-existing-evidence"
+    available = {c["project"] for c in plan["cells"] if c["platform"] == "windows"}
+    assert set(a.projects) <= available, "Unplanned Windows project"
     audit = []
     for cell in plan["cells"]:
         name = cell["project"]
-        if cell["platform"] != "windows" or name not in ["detours", "winsparkle"]:
+        if cell["platform"] != "windows" or name not in a.projects:
             continue
         for mode in cell["optimization_modes"]:
-            src = r / "msvc-existing-evidence" / name / mode
+            src = evidence_root / name / mode
             q = json.loads((src / "qualification.json").read_text(encoding="utf-8-sig"))
+            assert q["target"] == name and q["optimization"] == mode
+            assert q["project_procedure_records"] > 0
+            replay = src / "preprocessed/source-map.json"
+            if replay.exists():
+                provenance = json.loads(
+                    (src / "build-provenance.json").read_text(encoding="utf-8-sig")
+                )
+                assert provenance["source_revision"] == cell["source_revision"]
+                assert provenance["source_repository"] == cell["source_repository"]
+                assert provenance["optimization"] == mode
+                mappings = json.loads(replay.read_text(encoding="utf-8-sig"))
+                assert mappings and (src / "original.tar.gz").is_file()
+                for record in mappings:
+                    path = src / "preprocessed" / record["preprocessed"]
+                    assert path.is_file() and path.stat().st_size > 0
             binary = src / "binary" / q["linked_image"]
             pdb = src / "binary" / q["pdb"]
             out = base / "windows/x86_64" / mode / name
@@ -103,18 +124,32 @@ def main():
             )
             shutil.copy2(src / "build.log", out / "build.log")
             (out / "pdb-summary.txt").write_text(summary)
+            if replay.exists():
+                for file in [
+                    "build-provenance.json",
+                    "compile_commands.json",
+                    "original.tar.gz",
+                ]:
+                    shutil.copy2(src / file, out / file)
+                with tarfile.open(out / "preprocessed.tar.gz", "w:gz") as archive:
+                    archive.add(src / "preprocessed", arcname="preprocessed")
             procedures = json.loads(
                 (src / "project-procedures.json").read_text(encoding="utf-8-sig")
             )
             pe = lief.PE.parse(str(binary))
             identities = []
             for proc in procedures:
-                if not proc.get("project_owned"):
+                if not proc.get("project_owned") or proc["code_size"] <= 0:
                     continue
                 section, offset = proc["address"].split(":")
                 section_index = int(section, 16) - 1
                 assert 0 <= section_index < len(pe.sections)
                 rva = pe.sections[section_index].virtual_address + int(offset)
+                section = pe.sections[section_index]
+                assert int(section.characteristics) & 0x20000000
+                assert int(offset) + proc["code_size"] <= len(
+                    section.content
+                ), "Unmapped PDB procedure"
                 identities.append(
                     {
                         **proc,
@@ -146,7 +181,9 @@ def main():
                 "code_sections_equal": True,
                 "debug_directory_removed": True,
                 "project_owned_function_count": len(identities),
-                "evidence_github_run": 38208011147,
+                "project_ownership_method": q["project_ownership_method"],
+                "evidence_github_run": a.github_run,
+                "preprocessed_tu_count": len(mappings) if replay.exists() else 0,
                 "scoring_ready": False,
                 "remaining_gates": [
                     "original source archive and preprocessed TU replay",
@@ -154,10 +191,16 @@ def main():
                     "MSVC source/ABI type evaluation adapter",
                 ],
             }
+            if replay.exists():
+                status["remaining_gates"].remove(
+                    "original source archive and preprocessed TU replay"
+                )
             (out / "status.json").write_text(json.dumps(status, indent=2))
             audit.append(status)
             print(json.dumps(status), flush=True)
-    (r / "audit/msvc-import.json").write_text(json.dumps(audit, indent=2))
+    (r / f"audit/msvc-import-{a.github_run}.json").write_text(
+        json.dumps(audit, indent=2)
+    )
 
 
 if __name__ == "__main__":

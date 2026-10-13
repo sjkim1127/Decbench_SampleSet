@@ -61,6 +61,7 @@ def main():
     ap.add_argument("--root", type=Path, required=True)
     ap.add_argument("--plan", type=Path, required=True)
     ap.add_argument("--projects", nargs="+", default=["detours", "winsparkle"])
+    ap.add_argument("--modes", nargs="+", choices=["O0", "O2", "O2-noinline"])
     ap.add_argument("--evidence-root", type=Path)
     ap.add_argument("--github-run", type=int, default=38208011147)
     a = ap.parse_args()
@@ -76,6 +77,8 @@ def main():
         if cell["platform"] != "windows" or name not in a.projects:
             continue
         for mode in cell["optimization_modes"]:
+            if a.modes and mode not in a.modes:
+                continue
             src = evidence_root / name / mode
             q = json.loads((src / "qualification.json").read_text(encoding="utf-8-sig"))
             assert q["target"] == name and q["optimization"] == mode
@@ -216,6 +219,19 @@ def main():
             }
             if replay.exists():
                 status["effective_optimization_profile_verified"] = True
+                dependency_tus = [
+                    record
+                    for record in mappings
+                    if any(
+                        marker in record["source"].replace("\\", "/").lower()
+                        for marker in ["/.cpm-cache/", "/_deps/"]
+                    )
+                ]
+                status["external_dependency_preprocessed_tus"] = len(dependency_tus)
+                if dependency_tus:
+                    status["remaining_gates"].append(
+                        "fetched dependency source revisions, licenses and original archives"
+                    )
                 status["build_environment"] = provenance["environment"]
                 status["preprocessed_archive"] = str(
                     (out / "preprocessed.tar.gz").relative_to(base)

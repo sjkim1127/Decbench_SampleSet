@@ -65,6 +65,7 @@ python scripts/import_qualification_msvc.py --root /path/to/work --plan targets/
 The dedicated branch push trigger starts the full matrix; dispatch inputs support focused rebuilds. Jobs do not use `continue-on-error`. A failed build, missing PDB, failed preprocessing replay or failed PDB gate cannot become a passing artifact.
 `build_qualification_windows.ps1` and `preprocess_qualification_msvc.py` require native Windows/MSVC. Their execution evidence is retained separately from preparation on macOS.
 New evidence includes pinned tracked sources, effective compile commands, `/P` replay outputs and the hosted runner image version. PDB source ownership is compiland-based; template/header definitions still require per-procedure ownership before complete qualification.
+Tracy's fetched dependency TUs retain preprocessed expansions, but dependency commit resolution, original archives and license files remain a separate provenance gate. A tracked main-tree source archive does not contain CPM's fetched source trees.
 Docker recipes `build_qualification_tpt.sh` and `build_qualification_ssdb.sh` require the pinned revisions through environment variables and the workspace mounted at `/work`.
 
 ## Independent claims

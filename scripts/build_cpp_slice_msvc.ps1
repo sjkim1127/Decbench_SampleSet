@@ -4,8 +4,11 @@ Set-StrictMode -Version Latest
 $out=Join-Path $PWD "_qualification/cpp-slice/$Mode"
 New-Item -ItemType Directory -Force $out | Out-Null
 $source=(Resolve-Path targets/qualification-controls/reference_fields.cpp).Path
-$compiler=(Get-Command cl.exe -CommandType Application).Source
-$linker=(Get-Command link.exe -CommandType Application).Source
+$compiler=(Get-Command cl.exe -CommandType Application | Select-Object -First 1).Source
+$linker=Join-Path (Split-Path -Parent $compiler) 'link.exe'
+if (-not (Test-Path -LiteralPath $linker -PathType Leaf)) {
+  throw 'Matching native MSVC linker is missing beside cl.exe'
+}
 $flags=@('/nologo','/std:c++17','/c','/Z7','/GS-','/GR-','/EHsc','/GL-','/Gy','/Zo')
 switch($Mode) {
   'O0' { $flags+=@('/Od','/Ob0') }

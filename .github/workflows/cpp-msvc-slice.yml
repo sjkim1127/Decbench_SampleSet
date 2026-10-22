@@ -5,10 +5,13 @@ on:
     paths:
       - .github/workflows/cpp-msvc-slice.yml
       - scripts/build_cpp_slice_msvc.ps1
+      - scripts/recompile_cpp_slice_msvc.ps1
       - targets/qualification-controls/reference_fields.cpp
+      - targets/qualification-controls/recovered-msvc.json
   workflow_dispatch:
 permissions:
   contents: read
+  actions: read
 jobs:
   original:
     runs-on: windows-2025
@@ -32,5 +35,35 @@ jobs:
         with:
           name: cpp-slice-${{ matrix.mode }}
           path: _qualification/cpp-slice/${{ matrix.mode }}/
+          if-no-files-found: error
+          retention-days: 30
+  recompile:
+    runs-on: windows-2025
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [O0, O2, O2-noinline]
+    env:
+      SLICE_MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - uses: actions/download-artifact@v4
+        with:
+          name: cpp-slice-${{ matrix.mode }}
+          path: _qualification/frozen-original/${{ matrix.mode }}
+          run-id: 39818175807
+          github-token: ${{ github.token }}
+      - name: Recompile every requested producer output with native MSVC
+        shell: pwsh
+        run: ./scripts/recompile_cpp_slice_msvc.ps1 -Mode $env:SLICE_MODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recompiled-cpp-slice-${{ matrix.mode }}
+          path: _qualification/recompiled-slice/${{ matrix.mode }}/
           if-no-files-found: error
           retention-days: 30

@@ -1,0 +1,42 @@
+name: C++ native source evidence recollection
+on:
+  push:
+    branches: [codex/cpp-evidence-recovery]
+    paths:
+      - .github/workflows/cpp-evidence-recollection.yml
+      - scripts/*recollection*
+      - scripts/recollect_qualification_windows.ps1
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recollect:
+    runs-on: windows-2025
+    timeout-minutes: 50
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        project: [detours, winsparkle]
+        mode: [O0, O2, O2-noinline]
+    env:
+      RECOLLECT_PROJECT: ${{ matrix.project }}
+      RECOLLECT_MODE: ${{ matrix.mode }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Check command transport helpers
+        shell: pwsh
+        run: python -m unittest discover -s tests -p test_msvc_recollection.py -v
+      - name: Rebuild pinned native target and retain actual TU evidence
+        shell: pwsh
+        run: ./scripts/recollect_qualification_windows.ps1 -Project $env:RECOLLECT_PROJECT -Mode $env:RECOLLECT_MODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: recollection-${{ matrix.project }}-${{ matrix.mode }}
+          path: _qualification/recollection/${{ matrix.project }}/${{ matrix.mode }}/
+          if-no-files-found: error
+          retention-days: 30

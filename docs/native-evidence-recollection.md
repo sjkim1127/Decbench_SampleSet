@@ -23,3 +23,15 @@ or addresses for an earlier frozen binary merely because project/mode or symbol
 names agree. Compare binary/code/debug identities explicitly, then publish any
 changed images as a new immutable dataset revision with a new address plan.
 Keep the existing 45-image pilot and its frozen requests intact.
+### Compiler working directories
+
+WinSparkle and its dependency projects use different compiler working directories.
+An imported observation-only MSBuild target records `MSBuildProjectFullPath` and
+`MSBuildProjectDirectory` beside each CL tracking log. The collector requires this
+record and uses that project's directory for relative compiler options. It does
+not infer a directory from the source basename or reuse the top-level project
+directory for dependencies. Missing or inconsistent records fail collection.
+
+The first Windows collection attempt built WinSparkle successfully but failed to
+preprocess wxWidgets because the collector used the top-level directory. Those
+failed artifacts are retained as diagnostic evidence, not complete TU bundles.

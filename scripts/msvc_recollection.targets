@@ -1,0 +1,9 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="DecbenchRecordCompilerProject" AfterTargets="ClCompile">
+    <Error Condition="'$(TLogLocation)' == ''" Text="Missing compiler tracking directory" />
+    <MakeDir Directories="$(TLogLocation)" />
+    <WriteLinesToFile File="$(TLogLocation)decbench-project.txt"
+                      Lines="$(MSBuildProjectFullPath)|$(MSBuildProjectDirectory)"
+                      Overwrite="true" Encoding="UTF-8" />
+  </Target>
+</Project>

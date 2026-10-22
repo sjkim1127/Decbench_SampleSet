@@ -38,6 +38,20 @@ class CommandEvidenceTests(unittest.TestCase):
         self.assertFalse(module.within(r'D:\source-other\a.cpp', r'D:\source'))
         self.assertFalse(module.within(r'E:\source\a.cpp', r'D:\source'))
 
+    def test_each_tracking_log_uses_its_proven_project_directory(self):
+        root = module.project_directory(r'D:\src\main.vcxproj|D:\src')
+        sub = module.project_directory(r'D:\src\3rdparty\wx.vcxproj|D:\src\3rdparty')
+        self.assertEqual(root[1], r'D:\src')
+        self.assertEqual(sub[1], r'D:\src\3rdparty')
+        self.assertNotEqual(root[1], sub[1])
+
+    def test_missing_or_inconsistent_project_directory_is_rejected(self):
+        for text in ['', r'D:\src\main.vcxproj', r'main.vcxproj|D:\src',
+                     r'D:\src\3rdparty\wx.vcxproj|D:\src',
+                     r'D:\src\main.vcxproj|D:\src|other']:
+            with self.subTest(text=text), self.assertRaises(ValueError):
+                module.project_directory(text)
+
 
 if __name__ == '__main__':
     unittest.main()

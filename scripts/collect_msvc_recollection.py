@@ -63,6 +63,19 @@ def tlog_records(text):
     return records
 
 
+def project_directory(text):
+    """Require the project identity emitted beside this compiler tracking log."""
+    fields = text.strip().split('|')
+    if len(fields) != 2:
+        raise ValueError('Missing or malformed MSBuild project directory evidence')
+    project, directory = fields
+    if (not ntpath.isabs(project) or not ntpath.isabs(directory)
+            or ntpath.normcase(ntpath.normpath(ntpath.dirname(project)))
+            != ntpath.normcase(ntpath.normpath(directory))):
+        raise ValueError('Inconsistent MSBuild project directory evidence')
+    return project, directory
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--project', choices=['detours', 'winsparkle'], required=True)
@@ -80,16 +93,24 @@ def main():
         for index, path in enumerate(logs):
             raw = path.read_bytes()
             (evidence/'tracking'/f'{index:04d}.tlog').write_bytes(raw)
+            marker = path.parent/'decbench-project.txt'
+            marker_raw = marker.read_bytes()
+            project, directory = project_directory(marker_raw.decode('utf-8-sig'))
+            if not within(project, str(source_root)) or not Path(project).is_file():
+                raise ValueError('Compiler tracking project is outside the source checkout')
+            (evidence/'tracking'/f'{index:04d}-project.txt').write_bytes(marker_raw)
             for sources, command in tlog_records(raw.decode('utf-16')):
                 argv = windows_argv(command)
                 if argv and ntpath.basename(argv[0]).lower() in {'cl', 'cl.exe'}:
                     argv = argv[1:]
                 for source in sources:
                     if within(source, str(source_root)):
-                        records.append({'directory': str(source_root), 'file': source,
+                        records.append({'directory': directory, 'file': source,
                             'arguments': [args.compiler] + single_source_argv(argv, source),
                             'evidence': {'kind': 'msbuild-cl-tlog', 'path': str(path),
-                                         'sha256': hashlib.sha256(raw).hexdigest(), 'batch_command': command}})
+                                         'sha256': hashlib.sha256(raw).hexdigest(), 'batch_command': command,
+                                         'project': project,
+                                         'project_marker_sha256': hashlib.sha256(marker_raw).hexdigest()}})
     else:
         text = (evidence/'build.log').read_text(encoding='utf-8-sig', errors='strict')
         for line in text.splitlines():

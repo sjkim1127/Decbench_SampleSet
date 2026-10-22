@@ -6,6 +6,7 @@ on:
       - .github/workflows/cpp-evidence-recollection.yml
       - scripts/*recollection*
       - scripts/recollect_qualification_windows.ps1
+      - scripts/validate_winsparkle_msvc.ps1
   workflow_dispatch:
 permissions:
   contents: read

@@ -3,7 +3,8 @@ param(
     [ValidateSet("O0", "O2", "O2-noinline")]
     [string]$Mode,
     [Parameter(Mandatory = $true)][string]$SourceRoot,
-    [Parameter(Mandatory = $true)][string]$EvidenceRoot
+    [Parameter(Mandatory = $true)][string]$EvidenceRoot,
+    [string]$EvidenceTargets = ""
 )
 
 $ErrorActionPreference = "Stop"
@@ -146,7 +147,7 @@ Copy-Item -Force $projectPath (Join-Path $EvidenceRoot "WinSparkle.decbench.vcxp
 ) | Set-Content -Encoding utf8 $commandLog
 
 Invoke-Logged -Exe $nugetExe -Arguments @("restore", $solutionPath, "-NonInteractive") -Label "Restore WinSparkle NuGet packages" -LogPath $buildLog
-Invoke-Logged -Exe $msbuildExe -Arguments @(
+$msbuildArguments = @(
     $projectPath,
     "/m",
     "/t:Rebuild",
@@ -155,7 +156,11 @@ Invoke-Logged -Exe $msbuildExe -Arguments @(
     "/p:WholeProgramOptimization=false",
     "/v:detailed",
     "/clp:ShowCommandLine;Summary"
-) -Label "Build WinSparkle" -LogPath $buildLog
+)
+if ($EvidenceTargets) {
+    $msbuildArguments += "/p:ForceImportAfterCppTargets=$EvidenceTargets"
+}
+Invoke-Logged -Exe $msbuildExe -Arguments $msbuildArguments -Label "Build WinSparkle" -LogPath $buildLog
 
 $buildText = Get-Content -Raw $buildLog
 switch ($Mode) {

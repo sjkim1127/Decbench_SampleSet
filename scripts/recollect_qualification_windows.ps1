@@ -37,7 +37,9 @@ if ($LASTEXITCODE -ne 0) { throw 'Original source archive failed' }
 if ($Project -eq 'detours') {
   & ./scripts/validate_detours_msvc.ps1 -Mode $Mode -DetoursRoot $src -EvidenceRoot $out
 } else {
-  & ./scripts/validate_winsparkle_msvc.ps1 -Mode $Mode -SourceRoot $src -EvidenceRoot $out
+  $hook=(Resolve-Path scripts/msvc_recollection.targets).Path
+  Copy-Item $hook "$out/msvc_recollection.targets"
+  & ./scripts/validate_winsparkle_msvc.ps1 -Mode $Mode -SourceRoot $src -EvidenceRoot $out -EvidenceTargets $hook
 }
 if (-not (Test-Path "$out/qualification.json")) { throw 'Native PE/PDB build validation did not complete' }
 $compiler=(Get-Command cl.exe -CommandType Application -ErrorAction Stop | Select-Object -First 1).Source

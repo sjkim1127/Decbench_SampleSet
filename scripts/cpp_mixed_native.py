@@ -39,13 +39,20 @@ version_run = subprocess.run([compiler], capture_output=True)
 version_text = (version_run.stdout + version_run.stderr).decode("utf-8", "replace")
 (output / "compiler-version.log").write_text(version_text)
 version_match = re.search(r"Version\s+([\d.]+)", version_text)
-version = version_match[1] if version_match else None
+header_version = version_match[1] if version_match else None
+os.environ["CPP_MIXED_COMPILER"] = compiler
+file_version = subprocess.run(
+    ["powershell", "-NoProfile", "-Command", "(Get-Item -LiteralPath $env:CPP_MIXED_COMPILER).VersionInfo.FileVersion"],
+    capture_output=True, text=True, check=True,
+).stdout.strip()
+version = file_version
 sdk = os.environ.get("WindowsSDKVersion", "").rstrip("\\/")
 supported = version == plan["compiler_version"] and sdk == plan["sdk_version"]
 report = {
     "schema": plan["schema"], "bundle_sha256": digest(bundle),
     "workflow_commit": os.environ.get("GITHUB_SHA"),
     "compiler": compiler, "compiler_version": version,
+    "compiler_header_version": header_version,
     "compiler_sha256": digest(Path(compiler)), "linker_sha256": digest(Path(linker)),
     "sdk_version": sdk,
     "runner_image": {key: os.environ.get(key) for key in ("ImageOS", "ImageVersion", "RUNNER_OS", "RUNNER_ARCH")},

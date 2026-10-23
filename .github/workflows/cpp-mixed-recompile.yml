@@ -1,0 +1,30 @@
+name: Mixed corpus native MSVC recompilation
+on:
+  push:
+    branches: [codex/cpp-evidence-recovery]
+    paths:
+      - .github/workflows/cpp-mixed-recompile.yml
+      - scripts/cpp_mixed_native.py
+      - targets/qualification-controls/mixed-msvc.json.gz
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-2025
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+      - name: Compile original TUs and frozen four-tool outputs
+        shell: pwsh
+        run: python scripts/cpp_mixed_native.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mixed-msvc-recompilation
+          path: _qualification/mixed-msvc/
+          if-no-files-found: error
+          retention-days: 30

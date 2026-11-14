@@ -1,0 +1,149 @@
+{
+  "version": "cpp-source-type-context-v1",
+  "dataset_revision": "07dd95dbe6214b8a78fc1e4a55961ab515986489",
+  "records": [
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 4408,
+      "tu_member": "CMakeFiles/snappy.dir/snappy-c.ii",
+      "tu_sha256": "84786745d430785f2996d73004c1cb7c429fed68aebcc5c62e68760d66e18c2e",
+      "qualified_name": "snappy_compress_with_level",
+      "definition_sha256": "edf3aba6b5016e623f82d4fb944f08e94b95042fe470ab20599c4adcba71f64b",
+      "type_names": [
+        "snappy::CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 16184,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "aaa5b37119b719cec2689a239345958774b0e960f37397eef539034b216cfbc4",
+      "qualified_name": "snappy::Compress",
+      "definition_sha256": "458389394d14d7ec7ecef623dd1cd7a8104e629d7f6c92ca211fe57787be2fb7",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 19844,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "aaa5b37119b719cec2689a239345958774b0e960f37397eef539034b216cfbc4",
+      "qualified_name": "snappy::RawCompress",
+      "definition_sha256": "092f3a173202fb48e9d1338d51859b7ccfe37863b7e7cfa654de0229559a2f3c",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 20188,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "aaa5b37119b719cec2689a239345958774b0e960f37397eef539034b216cfbc4",
+      "qualified_name": "snappy::RawCompressFromIOVec",
+      "definition_sha256": "c67dee05ca66c691d97526df1cd76b69c3f91a947d905bb92e97f722560bc734",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 20724,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "aaa5b37119b719cec2689a239345958774b0e960f37397eef539034b216cfbc4",
+      "qualified_name": "snappy::Compress",
+      "definition_sha256": "d159e216cc1d48fa75700ef42f2b6c1805924cb9e61e139ce8ce30ce97f04cce",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "0895f1938fd0175b8c367c9f36a26cd5b09b1f29f7f40d16e137a32f7beb7463",
+      "address": 20972,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "aaa5b37119b719cec2689a239345958774b0e960f37397eef539034b216cfbc4",
+      "qualified_name": "snappy::CompressFromIOVec",
+      "definition_sha256": "6e21182592f933b76da8adbc39e1d14fb7d8e78193381f3856defa10cad668ac",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "290f83b127c2772cafdd2098c76341e224bff558c4639ebe09b39a3dd16f0454",
+      "address": 16172,
+      "tu_member": "CMakeFiles/snappy.dir/snappy.ii",
+      "tu_sha256": "c1df84bb4c798cb24cbd4470b0aa946328925d9ccabc6a205c3f9e72594e70c2",
+      "qualified_name": "snappy::Compress",
+      "definition_sha256": "d159e216cc1d48fa75700ef42f2b6c1805924cb9e61e139ce8ce30ce97f04cce",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 51632,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy-c.cc.ii",
+      "tu_sha256": "22b9099013fe2d4a041e8994fc3c3a9b4163a09dbf6536bb4d011e0a77757270",
+      "qualified_name": "snappy_compress_with_level",
+      "definition_sha256": "edf3aba6b5016e623f82d4fb944f08e94b95042fe470ab20599c4adcba71f64b",
+      "type_names": [
+        "snappy::CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 64988,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy.cc.ii",
+      "tu_sha256": "96554d60775a25687416dc5d32da49280437b803879a4f9ec17199cbf2253358",
+      "qualified_name": "snappy::Compress",
+      "definition_sha256": "458389394d14d7ec7ecef623dd1cd7a8104e629d7f6c92ca211fe57787be2fb7",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 68388,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy.cc.ii",
+      "tu_sha256": "96554d60775a25687416dc5d32da49280437b803879a4f9ec17199cbf2253358",
+      "qualified_name": "snappy::RawCompress",
+      "definition_sha256": "092f3a173202fb48e9d1338d51859b7ccfe37863b7e7cfa654de0229559a2f3c",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 68708,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy.cc.ii",
+      "tu_sha256": "96554d60775a25687416dc5d32da49280437b803879a4f9ec17199cbf2253358",
+      "qualified_name": "snappy::RawCompressFromIOVec",
+      "definition_sha256": "c67dee05ca66c691d97526df1cd76b69c3f91a947d905bb92e97f722560bc734",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 69224,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy.cc.ii",
+      "tu_sha256": "96554d60775a25687416dc5d32da49280437b803879a4f9ec17199cbf2253358",
+      "qualified_name": "snappy::Compress",
+      "definition_sha256": "d159e216cc1d48fa75700ef42f2b6c1805924cb9e61e139ce8ce30ce97f04cce",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    },
+    {
+      "binary_sha256": "d58a0fbe8d916cd64df6da9d6d1bbf17996a04af277148a6a44da2352f928592",
+      "address": 69536,
+      "tu_member": "O0/CMakeFiles/snappy.dir/snappy.cc.ii",
+      "tu_sha256": "96554d60775a25687416dc5d32da49280437b803879a4f9ec17199cbf2253358",
+      "qualified_name": "snappy::CompressFromIOVec",
+      "definition_sha256": "6e21182592f933b76da8adbc39e1d14fb7d8e78193381f3856defa10cad668ac",
+      "type_names": [
+        "CompressionOptions"
+      ]
+    }
+  ]
+}
